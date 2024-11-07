@@ -1,50 +1,55 @@
 "use client";
 
-import React, { useState } from 'react';
-import { Menu } from 'antd';
-import { UserOutlined, LockOutlined, BellOutlined, ApiOutlined } from '@ant-design/icons';
-import Profile from '@/components/settings/Profile';
-import Security from '@/components/settings/Security';
-import Notifications from '@/components/settings/Notifications';
-import Integration from '@/components/settings/Integration';
+import React, { useState } from "react";
+import { Menu } from "antd";
+import {
+  UserOutlined,
+  LockOutlined,
+  BellOutlined,
+  ApiOutlined,
+} from "@ant-design/icons";
+import Profile from "@/components/settings/Profile";
+import Security from "@/components/settings/Security";
+import Notifications from "@/components/settings/Notifications";
+import Integration from "@/components/settings/Integration";
 
-type MenuKey = 'profile' | 'security' | 'notifications' | 'integration';
+type MenuKey = "profile" | "security" | "notifications" | "integration";
 
 export default function SettingsPage() {
-  const [selectedKey, setSelectedKey] = useState<MenuKey>('profile');
+  const [selectedKey, setSelectedKey] = useState<MenuKey>("profile");
 
   const menuItems = [
     {
-      key: 'profile',
+      key: "profile",
       icon: <UserOutlined />,
-      label: 'Profile',
+      label: "Profile",
     },
     {
-      key: 'security',
+      key: "security",
       icon: <LockOutlined />,
-      label: 'Security',
+      label: "Security",
     },
     {
-      key: 'notifications',
+      key: "notifications",
       icon: <BellOutlined />,
-      label: 'Notifications',
+      label: "Notifications",
     },
     {
-      key: 'integration',
+      key: "integration",
       icon: <ApiOutlined />,
-      label: 'Integration',
+      label: "Integration",
     },
   ];
 
   const renderContent = () => {
     switch (selectedKey) {
-      case 'profile':
+      case "profile":
         return <Profile />;
-      case 'security':
+      case "security":
         return <Security />;
-      case 'notifications':
+      case "notifications":
         return <Notifications />;
-      case 'integration':
+      case "integration":
         return <Integration />;
       default:
         return <Profile />;

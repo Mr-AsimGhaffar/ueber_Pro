@@ -29,6 +29,7 @@ interface User {
   name: string;
   username: string;
   email: string;
+  image: string;
   address: {
     street: string;
     suite: string;
@@ -231,7 +232,7 @@ export default function ListingsPage() {
                 >
                   <img
                     alt={user.name}
-                    src="https://via.placeholder.com/150"
+                    src="https://images.unsplash.com/photo-1542362567-b07e54358753?ixlib=rb-1.2.1&auto=format&fit=crop&w=334&q=80"
                     className="h-48 w-full object-cover"
                   />
                   {/* {car.featured && (

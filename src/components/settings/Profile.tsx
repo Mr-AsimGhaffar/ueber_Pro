@@ -1,25 +1,23 @@
 "use client";
 
-import React from 'react';
-import { Form, Input, Upload, Button, Card } from 'antd';
-import { UploadOutlined } from '@ant-design/icons';
-import type { UploadFile } from 'antd/es/upload/interface';
+import React from "react";
+import { Form, Input, Upload, Button, Card } from "antd";
+import { UploadOutlined } from "@ant-design/icons";
+import type { UploadFile } from "antd/es/upload/interface";
 
 const fileList: UploadFile[] = [
   {
-    uid: '-1',
-    name: 'profile.png',
-    status: 'done',
-    url: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e',
+    uid: "-1",
+    name: "profile.png",
+    status: "done",
+    url: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e",
   },
 ];
 
 export default function Profile() {
   const [form] = Form.useForm();
 
-  const onFinish = (values: any) => {
-    console.log('Success:', values);
-  };
+  const onFinish = (values: any) => {};
 
   return (
     <div className="max-w-3xl">
@@ -30,11 +28,11 @@ export default function Profile() {
           layout="vertical"
           onFinish={onFinish}
           initialValues={{
-            firstName: 'John',
-            lastName: 'Doe',
-            username: 'johndoe',
-            email: 'john.doe@example.com',
-            phone: '+1 234 567 890',
+            firstName: "John",
+            lastName: "Doe",
+            username: "johndoe",
+            email: "john.doe@example.com",
+            phone: "+1 234 567 890",
           }}
         >
           <div className="mb-6">
@@ -50,7 +48,9 @@ export default function Profile() {
               label="First Name"
               name="firstName"
               required
-              rules={[{ required: true, message: 'Please input your first name!' }]}
+              rules={[
+                { required: true, message: "Please input your first name!" },
+              ]}
             >
               <Input placeholder="Enter First Name" />
             </Form.Item>
@@ -59,7 +59,9 @@ export default function Profile() {
               label="Last Name"
               name="lastName"
               required
-              rules={[{ required: true, message: 'Please input your last name!' }]}
+              rules={[
+                { required: true, message: "Please input your last name!" },
+              ]}
             >
               <Input placeholder="Enter Last Name" />
             </Form.Item>
@@ -68,7 +70,9 @@ export default function Profile() {
               label="Username"
               name="username"
               required
-              rules={[{ required: true, message: 'Please input your username!' }]}
+              rules={[
+                { required: true, message: "Please input your username!" },
+              ]}
             >
               <Input placeholder="Enter Username" />
             </Form.Item>
@@ -78,8 +82,8 @@ export default function Profile() {
               name="email"
               required
               rules={[
-                { required: true, message: 'Please input your email!' },
-                { type: 'email', message: 'Please enter a valid email!' },
+                { required: true, message: "Please input your email!" },
+                { type: "email", message: "Please enter a valid email!" },
               ]}
             >
               <Input placeholder="Enter Email" />
@@ -89,7 +93,9 @@ export default function Profile() {
               label="Phone Number"
               name="phone"
               required
-              rules={[{ required: true, message: 'Please input your phone number!' }]}
+              rules={[
+                { required: true, message: "Please input your phone number!" },
+              ]}
             >
               <Input placeholder="Enter Phone Number" />
             </Form.Item>
@@ -104,18 +110,18 @@ export default function Profile() {
           layout="vertical"
           onFinish={onFinish}
           initialValues={{
-            address: '123 Main St',
-            country: 'United States',
-            state: 'California',
-            city: 'San Francisco',
-            pincode: '94105',
+            address: "123 Main St",
+            country: "United States",
+            state: "California",
+            city: "San Francisco",
+            pincode: "94105",
           }}
         >
           <Form.Item
             label="Address"
             name="address"
             required
-            rules={[{ required: true, message: 'Please input your address!' }]}
+            rules={[{ required: true, message: "Please input your address!" }]}
           >
             <Input.TextArea rows={4} placeholder="Enter Address" />
           </Form.Item>
@@ -125,7 +131,9 @@ export default function Profile() {
               label="Country"
               name="country"
               required
-              rules={[{ required: true, message: 'Please input your country!' }]}
+              rules={[
+                { required: true, message: "Please input your country!" },
+              ]}
             >
               <Input placeholder="Enter Country" />
             </Form.Item>
@@ -134,7 +142,7 @@ export default function Profile() {
               label="State"
               name="state"
               required
-              rules={[{ required: true, message: 'Please input your state!' }]}
+              rules={[{ required: true, message: "Please input your state!" }]}
             >
               <Input placeholder="Enter State" />
             </Form.Item>
@@ -143,7 +151,7 @@ export default function Profile() {
               label="City"
               name="city"
               required
-              rules={[{ required: true, message: 'Please input your city!' }]}
+              rules={[{ required: true, message: "Please input your city!" }]}
             >
               <Input placeholder="Enter City" />
             </Form.Item>
@@ -152,7 +160,9 @@ export default function Profile() {
               label="Pincode"
               name="pincode"
               required
-              rules={[{ required: true, message: 'Please input your pincode!' }]}
+              rules={[
+                { required: true, message: "Please input your pincode!" },
+              ]}
             >
               <Input placeholder="Enter Pincode" />
             </Form.Item>

@@ -77,14 +77,11 @@ export default function CarDetailPage() {
     form
       .validateFields()
       .then((values: BookingFormData) => {
-        console.log("Form values:", values);
         message.success("Booking added successfully");
         setIsModalOpen(false);
         form.resetFields();
       })
-      .catch((info) => {
-        console.log("Validate Failed:", info);
-      });
+      .catch((info) => {});
   };
 
   const handleModalCancel = () => {

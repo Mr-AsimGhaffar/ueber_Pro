@@ -1,15 +1,20 @@
 "use client";
 
-import React, { useState } from 'react';
-import { Input, Badge, Avatar, List, Card, Button } from 'antd';
-import { SearchOutlined, PhoneOutlined, VideoCameraOutlined, EllipsisOutlined } from '@ant-design/icons';
-import Image from 'next/image';
+import React, { useState } from "react";
+import { Input, Badge, Avatar, List, Card, Button } from "antd";
+import {
+  SearchOutlined,
+  PhoneOutlined,
+  VideoCameraOutlined,
+  EllipsisOutlined,
+} from "@ant-design/icons";
+import Image from "next/image";
 
 interface ChatMessage {
   id: string;
   content: string;
   timestamp: string;
-  sender: 'user' | 'other';
+  sender: "user" | "other";
   images?: string[];
 }
 
@@ -25,62 +30,63 @@ interface Chat {
 
 const chats: Chat[] = [
   {
-    id: '1',
-    name: 'Mark Williams',
-    avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
-    lastMessage: 'Have you called them?',
-    timestamp: '2 min',
+    id: "1",
+    name: "Mark Williams",
+    avatar:
+      "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
+    lastMessage: "Have you called them?",
+    timestamp: "2 min",
     online: true,
     messages: [
       {
-        id: '1',
-        content: 'Hello. What can I do for you?',
-        timestamp: '8:30 AM',
-        sender: 'other'
+        id: "1",
+        content: "Hello. What can I do for you?",
+        timestamp: "8:30 AM",
+        sender: "other",
       },
       {
-        id: '2',
-        content: "I'm just looking around.\nWill you tell me something about yourself?",
-        timestamp: '8:35 AM',
-        sender: 'user'
+        id: "2",
+        content:
+          "I'm just looking around.\nWill you tell me something about yourself?",
+        timestamp: "8:35 AM",
+        sender: "user",
       },
       {
-        id: '3',
-        content: 'Are you there? That time!',
-        timestamp: '8:40 AM',
-        sender: 'user',
-        images: [
-          '/images/car1.jpg',
-          '/images/car2.jpg'
-        ]
-      }
-    ]
+        id: "3",
+        content: "Are you there? That time!",
+        timestamp: "8:40 AM",
+        sender: "user",
+        images: ["/images/car1.jpg", "/images/car2.jpg"],
+      },
+    ],
   },
   {
-    id: '2',
-    name: 'Elizabeth Sosa',
-    avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
+    id: "2",
+    name: "Elizabeth Sosa",
+    avatar:
+      "https://images.unsplash.com/photo-1517841905240-472988babdf9?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
     lastMessage: "I'll call you later",
-    timestamp: '8:01 PM',
+    timestamp: "8:01 PM",
     online: true,
-    messages: []
+    messages: [],
   },
   {
-    id: '3',
-    name: 'Michael Howard',
-    avatar: 'https://images.unsplash.com/photo-1519345182560-3f2917c472ef?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
-    lastMessage: 'Thank you',
-    timestamp: '7:30 PM',
+    id: "3",
+    name: "Michael Howard",
+    avatar:
+      "https://images.unsplash.com/photo-1519345182560-3f2917c472ef?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
+    lastMessage: "Thank you",
+    timestamp: "7:30 PM",
     online: true,
-    messages: []
-  }
+    messages: [],
+  },
 ];
 
 export default function MessagesPage() {
   const [selectedChat, setSelectedChat] = useState<Chat>(chats[0]);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
 
-  const filteredChats = chats.filter(chat => 
+  const filteredChats = chats.filter((chat) =>
     chat.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -94,16 +100,16 @@ export default function MessagesPage() {
             placeholder="Search"
             prefix={<SearchOutlined className="text-gray-400" />}
             value={searchQuery}
-            onChange={e => setSearchQuery(e.target.value)}
+            onChange={(e) => setSearchQuery(e.target.value)}
             className="mb-4"
           />
           <List
             dataSource={filteredChats}
-            renderItem={chat => (
+            renderItem={(chat) => (
               <div
                 key={chat.id}
                 className={`flex items-center p-3 cursor-pointer hover:bg-gray-50 ${
-                  selectedChat.id === chat.id ? 'bg-gray-50' : ''
+                  selectedChat.id === chat.id ? "bg-gray-50" : ""
                 }`}
                 onClick={() => setSelectedChat(chat)}
               >
@@ -113,9 +119,13 @@ export default function MessagesPage() {
                 <div className="ml-3 flex-1">
                   <div className="flex justify-between">
                     <span className="font-medium">{chat.name}</span>
-                    <span className="text-xs text-gray-500">{chat.timestamp}</span>
+                    <span className="text-xs text-gray-500">
+                      {chat.timestamp}
+                    </span>
                   </div>
-                  <p className="text-sm text-gray-500 truncate">{chat.lastMessage}</p>
+                  <p className="text-sm text-gray-500 truncate">
+                    {chat.lastMessage}
+                  </p>
                 </div>
               </div>
             )}
@@ -134,7 +144,7 @@ export default function MessagesPage() {
             <div className="ml-3">
               <h3 className="font-medium">{selectedChat.name}</h3>
               <span className="text-sm text-gray-500">
-                {selectedChat.online ? 'online' : 'offline'}
+                {selectedChat.online ? "online" : "offline"}
               </span>
             </div>
           </div>
@@ -147,18 +157,18 @@ export default function MessagesPage() {
 
         {/* Messages */}
         <div className="flex-1 overflow-y-auto p-4">
-          {selectedChat.messages.map(message => (
+          {selectedChat.messages.map((message) => (
             <div
               key={message.id}
               className={`mb-4 ${
-                message.sender === 'user' ? 'flex flex-row-reverse' : 'flex'
+                message.sender === "user" ? "flex flex-row-reverse" : "flex"
               }`}
             >
               <div
                 className={`max-w-[70%] ${
-                  message.sender === 'user'
-                    ? 'bg-blue-500 text-white rounded-l-lg rounded-br-lg'
-                    : 'bg-white rounded-r-lg rounded-bl-lg'
+                  message.sender === "user"
+                    ? "bg-blue-500 text-white rounded-l-lg rounded-br-lg"
+                    : "bg-white rounded-r-lg rounded-bl-lg"
                 } p-3 shadow-sm`}
               >
                 <p className="whitespace-pre-line">{message.content}</p>

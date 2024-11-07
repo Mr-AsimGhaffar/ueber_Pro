@@ -10,6 +10,7 @@ import { getIntl } from "@/lib/intl";
 import { Locale } from "@/lib/definitions";
 import { getActivities, getTeamMembers } from "@/lib/data";
 import DashboardTable from "../../components/DashboardTable";
+import Spinner from "@/components/Spinner";
 
 interface StatCardProps {
   title: string;
@@ -33,7 +34,7 @@ interface TransactionItemProps {
   car: string;
   carImage: string;
   rentType: string;
-  status: string;
+  status: "Upcoming" | "Inprogress" | "Completed" | "Cancelled" | string;
   date: string;
 }
 
@@ -55,7 +56,7 @@ interface Props {
 
 export default function Page({ params: { lang: locale } }: Props) {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<Spinner />}>
       <PageContent locale={locale} />
     </Suspense>
   );
@@ -83,7 +84,7 @@ async function PageContent({ locale }: PageContentProps) {
           iconBg="bg-teal-600 "
         />
         <StatCard
-          title="Wallet Balance"
+          title="In Progress Transactions"
           value="$24,665"
           link="View Balance"
           href="#"
@@ -157,12 +158,12 @@ function StatCard({ title, value, link, href, icon, iconBg }: StatCardProps) {
         <div>
           <h3 className="text-gray-600 mb-2">{title}</h3>
           <p className="text-3xl font-bold">{value}</p>
-          <a
+          {/* <a
             href={href}
             className="text-blue-600 hover:underline text-sm mt-2 block"
           >
             {link} →
-          </a>
+          </a> */}
         </div>
         <div className={`rounded-full p-4 ${iconBg}`}>{icon}</div>
       </div>
@@ -213,6 +214,12 @@ function TransactionItem({
   status,
   date,
 }: TransactionItemProps) {
+  const statusClasses: Record<TransactionItemProps["status"], string> = {
+    Upcoming: "text-yellow-600 bg-yellow-100 font-bold p-1 rounded-lg",
+    Inprogress: "text-blue-600 bg-blue-100 font-bold p-1 rounded-lg",
+    Completed: "text-green-600 bg-green-100 font-bold p-1 rounded-lg",
+    Cancelled: "text-red-600 bg-red-100 font-bold p-1 rounded-lg",
+  };
   return (
     <div className="flex items-center justify-between p-4 border rounded-lg">
       <div className="flex items-center gap-4">
@@ -224,31 +231,13 @@ function TransactionItem({
           />
         </div>
         <div>
-          <h4 className="font-semibold">{car}</h4>
+          <h4 className="text-sm md:text-base font-semibold">{car}</h4>
           <p className="text-sm text-gray-600">Rent Type: {rentType}</p>
-          <p className="text-sm text-gray-600">Status: {status}</p>
         </div>
       </div>
-      <Badge color={getBadgeColor(status)} className="whitespace-nowrap">
-        {status}
-      </Badge>
+      <div className={`${statusClasses[status]}`}>{status}</div>
     </div>
   );
-}
-
-function getBadgeColor(status: string) {
-  switch (status.toLowerCase()) {
-    case "upcoming":
-      return "geekblue";
-    case "completed":
-      return "green";
-    case "cancelled":
-      return "red";
-    case "inprogress":
-      return "orange";
-    default:
-      return "default";
-  }
 }
 
 // const bookings = [
@@ -366,7 +355,7 @@ const transactions = [
     car: "Audi A3 2019 new",
     carImage: "https://images.unsplash.com/photo-1549317661-bd32c8ce0db2",
     rentType: "Weekly",
-    status: "Completed",
+    status: "Cancelled",
     date: "On 10 Oct 2023, 10:30 AM",
   },
   {

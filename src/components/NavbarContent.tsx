@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback, useRef } from "react";
+import React, { useState, useRef } from "react";
 import { IntlProvider, FormattedMessage } from "react-intl";
 import clsx from "clsx";
 import Link from "next/link";
@@ -8,6 +8,7 @@ import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import useOutsideClick from "@/hooks/useOutsideClick";
 import { User, Locale } from "@/lib/definitions";
+import { Spin } from "antd";
 
 interface Props {
   user: User;
@@ -19,6 +20,9 @@ export default function NavbarContent({ user, locale, messages }: Props) {
   const pathname = usePathname();
   const router = useRouter();
 
+  const [loading, setLoading] = useState(false);
+  const [percent, setPercent] = useState(0);
+
   const appMenuRef = useRef(null);
   const userMenuRef = useRef(null);
   const langSwitcherMenuRef = useRef(null);
@@ -27,15 +31,41 @@ export default function NavbarContent({ user, locale, messages }: Props) {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [langSwitcherMenuOpen, setLangSwitcherMenuOpen] = useState(false);
 
+  const showLoader = () => {
+    setLoading(true);
+    let ptg = -10;
+
+    const interval = setInterval(() => {
+      ptg += 5;
+      setPercent(ptg);
+
+      if (ptg > 120) {
+        clearInterval(interval);
+        setLoading(false);
+        setPercent(0);
+      }
+    }, 100);
+  };
+
   const handleSignOut = async () => {
-    const response = await fetch("/api/auth/logout", {
-      method: "POST",
-      credentials: "include",
-    });
-    if (response.ok) {
-      router.push(`/auth/login`);
-    } else {
-      console.error("Failed to log out");
+    showLoader();
+
+    try {
+      const response = await fetch("/api/auth/logout", {
+        method: "POST",
+        credentials: "include",
+      });
+
+      if (response.ok) {
+        router.push(`/auth/login`);
+      } else {
+        console.error("Failed to log out");
+      }
+    } catch (error) {
+      console.error("An error occurred during logout:", error);
+    } finally {
+      setLoading(false);
+      setPercent(0);
     }
   };
 
@@ -56,51 +86,61 @@ export default function NavbarContent({ user, locale, messages }: Props) {
       <nav className="sticky top-0 left-0 z-50 w-full bg-white border-b border-gray-200">
         <div className="h-16 flex items-center justify-between">
           <div className="flex items-center mx-2">
-            <div className="relative mx-1 lg:hidden">
-              <button
-                type="button"
-                className="rounded-full p-1 text-gray-500 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-600"
-                onClick={() => setAppMenuOpen(!appMenuOpen)}
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={1.5}
-                  stroke="currentColor"
-                  className="size-6"
+            <Spin spinning={loading} percent={percent} fullscreen>
+              <div className="relative mx-1 lg:hidden">
+                <button
+                  type="button"
+                  className="rounded-full p-1 text-gray-500 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-600"
+                  onClick={() => setAppMenuOpen(!appMenuOpen)}
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
-                  />
-                </svg>
-              </button>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={1.5}
+                    stroke="currentColor"
+                    className="size-6"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
+                    />
+                  </svg>
+                </button>
 
-              {appMenuOpen && (
-                <Menu ref={appMenuRef} align="left">
-                  <MenuItem href={`/${locale}/index/home`}>Dashboard</MenuItem>
-                  <MenuItem href={`/${locale}/index/company`}>Company</MenuItem>
-                  <MenuItem href={`/${locale}/index/users`}>Users</MenuItem>
-                  <MenuItem href={`/${locale}/index/drivers`}>Drivers</MenuItem>
-                  <MenuItem href={`/${locale}/index/bookings`}>
-                    Bookings
-                  </MenuItem>
-                  <MenuItem href={`/${locale}/index/listings`}>Cars</MenuItem>
-                  <MenuItem href={`/${locale}/index/listings/map`}>
-                    Map View
-                  </MenuItem>
-                  <MenuItem href={`/${locale}/index/settings`}>
-                    Settings
-                  </MenuItem>
-                  <MenuItem href={`/${locale}/index/messages`}>
-                    Messages
-                  </MenuItem>
-                  <MenuItem href={`/${locale}/index/reports`}>Reports</MenuItem>
-                </Menu>
-              )}
-            </div>
+                {appMenuOpen && (
+                  <Menu ref={appMenuRef} align="left">
+                    <MenuItem href={`/${locale}/index/home`}>
+                      Dashboard
+                    </MenuItem>
+                    <MenuItem href={`/${locale}/index/company`}>
+                      Company
+                    </MenuItem>
+                    <MenuItem href={`/${locale}/index/users`}>Users</MenuItem>
+                    <MenuItem href={`/${locale}/index/drivers`}>
+                      Drivers
+                    </MenuItem>
+                    <MenuItem href={`/${locale}/index/bookings`}>
+                      Bookings
+                    </MenuItem>
+                    <MenuItem href={`/${locale}/index/listings`}>Cars</MenuItem>
+                    <MenuItem href={`/${locale}/index/listings/map`}>
+                      Map View
+                    </MenuItem>
+                    <MenuItem href={`/${locale}/index/settings`}>
+                      Settings
+                    </MenuItem>
+                    <MenuItem href={`/${locale}/index/messages`}>
+                      Messages
+                    </MenuItem>
+                    <MenuItem href={`/${locale}/index/reports`}>
+                      Reports
+                    </MenuItem>
+                  </Menu>
+                )}
+              </div>
+            </Spin>
           </div>
 
           <div className="flex items-center mx-2">
@@ -130,7 +170,11 @@ export default function NavbarContent({ user, locale, messages }: Props) {
               {langSwitcherMenuOpen && (
                 <Menu ref={langSwitcherMenuRef}>
                   <MenuItem
-                    href={`/de/${pathname.split("/").slice(2).join("/")}`}
+                    href={
+                      pathname
+                        ? `/de/${pathname.split("/").slice(2).join("/")}`
+                        : `/${locale}/index/home`
+                    }
                     active={locale === "de"}
                   >
                     <FormattedMessage
@@ -139,7 +183,11 @@ export default function NavbarContent({ user, locale, messages }: Props) {
                     />
                   </MenuItem>
                   <MenuItem
-                    href={`/en/${pathname.split("/").slice(2).join("/")}`}
+                    href={
+                      pathname
+                        ? `/en/${pathname.split("/").slice(2).join("/")}`
+                        : `/${locale}/index/home`
+                    }
                     active={locale === "en"}
                   >
                     <FormattedMessage
@@ -148,7 +196,11 @@ export default function NavbarContent({ user, locale, messages }: Props) {
                     />
                   </MenuItem>
                   <MenuItem
-                    href={`/fr/${pathname.split("/").slice(2).join("/")}`}
+                    href={
+                      pathname
+                        ? `/fr/${pathname.split("/").slice(2).join("/")}`
+                        : `/${locale}/index/home`
+                    }
                     active={locale === "fr"}
                   >
                     <FormattedMessage

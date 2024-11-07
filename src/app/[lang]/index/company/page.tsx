@@ -108,7 +108,6 @@ export default function CompanyPage() {
 
   const handleEdit = (company: Company) => {
     // Implement edit functionality
-    console.log("Edit company:", company);
   };
 
   const handleModalOk = (values: any) => {
@@ -141,7 +140,11 @@ export default function CompanyPage() {
         </Button>
       </div>
 
-      <Table columns={columns} dataSource={company} />
+      <Table
+        columns={columns}
+        dataSource={company}
+        scroll={{ x: "max-content" }}
+      />
 
       <Modal
         title="Add New Company"

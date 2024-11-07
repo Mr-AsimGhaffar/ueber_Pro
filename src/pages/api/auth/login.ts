@@ -5,7 +5,6 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  console.log(process.env.NEXT_PUBLIC_API_BASE_URL);
   if (req.method === "POST") {
     const { email, password } = req.body;
 

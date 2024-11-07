@@ -10,13 +10,17 @@ interface Booking {
   startDate: string;
   endDate: string;
   price: string; // Price as a string
-  status: "upcoming" | "inprogress" | "completed";
+  status: "upcoming" | "inprogress" | "completed" | "Cancelled";
 }
 
 const DashboardTable = () => {
   return (
     <div>
-      <Table dataSource={bookings} columns={columns} />
+      <Table
+        dataSource={bookings}
+        columns={columns}
+        scroll={{ x: "max-content" }}
+      />
     </div>
   );
 };
@@ -60,7 +64,7 @@ const bookings = [
     startDate: "10 Oct 2023, 10:30 AM",
     endDate: "16 Oct 2023, 10:30 AM",
     price: "800",
-    status: "Completed",
+    status: "Cancelled",
   },
   {
     key: "5",
@@ -80,7 +84,6 @@ const columns = [
     // dataIndex: "car",
     key: "car",
     render: (record: Booking) => {
-      console.log(record);
       return (
         <div className="flex items-center gap-4">
           <img
@@ -89,8 +92,8 @@ const columns = [
             className="w-12 h-12 object-cover"
           />
           <div>
-            <p className="font-semibold">{record.car}</p>
-            <p className="text-sm text-gray-500">{record.rentType}</p>
+            <p className="text-sm md:text-base font-semibold">{record.car}</p>
+            <p className="text-gray-500">Rent Type : {record.rentType}</p>
           </div>
         </div>
       );
@@ -116,6 +119,21 @@ const columns = [
     title: "Status",
     dataIndex: "status",
     key: "status",
+    render: (text: String) => (
+      <span
+        className={`p-1 rounded-lg font-bold ${
+          text === "Upcoming"
+            ? "bg-yellow-100 text-yellow-600"
+            : text === "Inprogress"
+            ? "bg-blue-100 text-blue-600"
+            : text === "Cancelled"
+            ? "bg-red-100 text-red-600"
+            : "bg-green-100 text-green-600"
+        }`}
+      >
+        {text}
+      </span>
+    ),
   },
 ];
 

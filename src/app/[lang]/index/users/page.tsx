@@ -108,7 +108,6 @@ export default function UserPage() {
 
   const handleEdit = (company: User) => {
     // Implement edit functionality
-    console.log("Edit user:", user);
   };
 
   const handleModalOk = (values: any) => {
@@ -141,7 +140,11 @@ export default function UserPage() {
         </Button>
       </div>
 
-      <Table columns={columns} dataSource={user} />
+      <Table
+        columns={columns}
+        dataSource={user}
+        scroll={{ x: "max-content" }}
+      />
 
       <Modal
         title="Add New User"

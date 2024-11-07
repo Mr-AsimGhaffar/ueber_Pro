@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
-import { Table, Button, Input, Space, Modal, Form, message } from "antd";
+import React from "react";
+import { Table, Button, Input, Space, Form } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { SearchOutlined } from "@ant-design/icons";
 import { useRouter } from "next/navigation";
@@ -51,7 +51,6 @@ const data: DataType[] = [
 ];
 
 export default function BookingsPage() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [form] = Form.useForm();
   const router = useRouter();
 
@@ -154,7 +153,11 @@ export default function BookingsPage() {
         </Button>
       </div>
 
-      <Table columns={columns} dataSource={data} />
+      <Table
+        columns={columns}
+        dataSource={data}
+        scroll={{ x: "max-content" }}
+      />
     </div>
   );
 }

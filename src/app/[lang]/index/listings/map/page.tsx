@@ -114,20 +114,20 @@ export default function ListingsMapPage() {
   };
 
   return (
-    <div className="h-[calc(100vh-4rem)] flex">
+    <div className="grid grid-cols-1 lg:grid-cols-3">
       {/* Left Sidebar */}
-      <div className="w-96 bg-white overflow-y-auto border-r border-gray-200">
+      <div className="col-span-2 bg-white overflow-y-auto border-r border-gray-200">
         {/* Search Form */}
         <div className="p-4 border-b border-gray-200">
           <Row gutter={[16, 16]}>
-            <Col span={24}>
+            <Col span={8}>
               <Input
                 placeholder="Enter City, Airport, or Address"
                 prefix={<EnvironmentOutlined />}
                 size="large"
               />
             </Col>
-            <Col span={24}>
+            <Col span={8}>
               <Space.Compact block>
                 <DatePicker
                   size="large"
@@ -142,7 +142,7 @@ export default function ListingsMapPage() {
                 />
               </Space.Compact>
             </Col>
-            <Col span={24}>
+            <Col span={8}>
               <Space.Compact block>
                 <DatePicker
                   size="large"
@@ -157,7 +157,7 @@ export default function ListingsMapPage() {
                 />
               </Space.Compact>
             </Col>
-            <Col span={24}>
+            <Col span={8}>
               <Button
                 type="primary"
                 icon={<SearchOutlined />}
@@ -211,7 +211,7 @@ export default function ListingsMapPage() {
       </div>
 
       {/* Map */}
-      <div className="flex-1 relative">
+      <div className="col-span-1 h-96 lg:h-auto">
         <LoadScript googleMapsApiKey="AIzaSyBpkAMvFJ8K9K1AEMA2UXTcWC-Gy17bd78">
           <GoogleMap
             mapContainerStyle={mapContainerStyle}
