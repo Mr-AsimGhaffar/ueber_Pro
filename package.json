@@ -1,0 +1,36 @@
+{
+  "name": "nextjs-i18n-dashboard-template",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@formatjs/intl-localematcher": "^0.5.4",
+    "@react-google-maps/api": "^2.19.3",
+    "antd": "^5.15.1",
+    "clsx": "^2.1.1",
+    "cookie": "^1.0.1",
+    "js-cookie": "^3.0.5",
+    "negotiator": "^0.6.3",
+    "next": "^14.2.0-canary.27",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-intl": "^6.7.0"
+  },
+  "devDependencies": {
+    "@types/js-cookie": "^3.0.6",
+    "@types/negotiator": "^0.6.3",
+    "@types/node": "^20.16.10",
+    "@types/react": "^18.3.10",
+    "@types/react-dom": "^18.3.0",
+    "eslint": "^8.57.1",
+    "eslint-config-next": "^14.2.14",
+    "postcss": "^8.4.47",
+    "tailwindcss": "^3.4.13",
+    "typescript": "^5.6.2"
+  }
+}
