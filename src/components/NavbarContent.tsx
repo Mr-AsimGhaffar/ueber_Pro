@@ -266,16 +266,24 @@ export default function NavbarContent({ user, locale, messages }: Props) {
                 onClick={() => setUserMenuOpen(!userMenuOpen)}
               >
                 <Image
-                  src={user.profileImage}
+                  src={user.profilePicture}
                   alt="Profile image"
                   className="rounded-full"
-                  width={24}
+                  width={40}
                   height={24}
                 />
               </button>
 
               {userMenuOpen && (
                 <Menu ref={userMenuRef}>
+                  <MenuItem href="">
+                    <p className="font-semibold text-gray-800">
+                      {user?.name
+                        ? user.name.charAt(0).toUpperCase() + user.name.slice(1)
+                        : "Guest"}
+                    </p>
+                  </MenuItem>
+
                   <MenuItem href={`/${locale}/index/settings`}>
                     <FormattedMessage id="common.user-menu.your-profile" />
                   </MenuItem>

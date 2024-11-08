@@ -1,10 +1,11 @@
 import { i18n } from "@/config/i18n";
 
 export type User = {
-  firstName: string;
-  lastName: string;
-  email: string;
-  profileImage: string;
+  name: string;
+  role: string;
+  status: string;
+  contacts: string[];
+  profilePicture: string;
 };
 
 export type Report = {

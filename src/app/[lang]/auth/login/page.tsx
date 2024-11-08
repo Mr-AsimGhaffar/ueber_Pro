@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Form, Input, Button, Checkbox, Card, message, Spin } from "antd";
 import { UserOutlined, LockOutlined } from "@ant-design/icons";
 import { useRouter } from "next/navigation";
+import Cookies from "js-cookie";
 
 export default function LoginPage({
   params: { lang },
@@ -27,8 +28,11 @@ export default function LoginPage({
 
       if (response.ok) {
         const data = await response.json();
-        const role = data.data.user.role;
-        sessionStorage.setItem("role", role);
+        const { token, refreshToken } = data.data;
+
+        Cookies.set("accessToken", token.token, { expires: 1 });
+        Cookies.set("refreshToken", refreshToken.token, { expires: 7 });
+
         message.success("Successfully logged in!");
         router.push(`/${lang}/index/home`);
       } else {

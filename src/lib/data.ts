@@ -1,17 +1,33 @@
 import { User, Report, TeamMember, Activity } from "@/lib/definitions";
+import { cookies } from "next/headers";
 
 export async function getUser(): Promise<User> {
-  return new Promise((resolve) => {
-    const user = {
-      firstName: "John",
-      lastName: "Doe",
-      email: "john.doe@example.com",
-      profileImage:
-        "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
-    };
+  const accessToken = cookies().get("accessToken")?.value;
 
-    setTimeout(() => resolve(user), 500);
-  });
+  if (!accessToken) {
+    throw new Error("Token not found. Please log in.");
+  }
+
+  const response = await fetch(
+    "https://5512-2407-d000-1a-9b0-c00d-5dbf-ce58-d541.ngrok-free.app/api/v1/users/me",
+    {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+      // body: JSON.stringify({ clientType: "web" }),
+    }
+  );
+
+  if (!response.ok) {
+    if (response.status === 401) {
+      throw new Error("Unauthorized. Please log in again.");
+    }
+    throw new Error("Failed to fetch user data");
+  }
+
+  const user = await response.json();
+  return user.data;
 }
 
 export async function getReports(): Promise<Report[]> {
