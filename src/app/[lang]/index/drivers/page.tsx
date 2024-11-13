@@ -1,96 +1,260 @@
 "use client";
 
-import React, { useState } from "react";
-import { Button, Table, Tag, Modal, message } from "antd";
-import { UserAddOutlined } from "@ant-design/icons";
+import React, { useEffect, useState } from "react";
+import {
+  Button,
+  Table,
+  Tag,
+  Modal,
+  message,
+  Input,
+  Checkbox,
+  Space,
+  Tooltip,
+} from "antd";
+import { FilterOutlined, UserAddOutlined } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 import DriverForm from "@/components/DriverForm";
 
 interface Driver {
+  user: object;
   key: string;
-  name: string;
+  id: number;
+  firstName: string;
+  lastName: string;
   email: string;
-  phone: string;
-  licenseNumber: string;
-  expiryDate: string;
-  status: "active" | "inactive";
-  verified: boolean;
+  password: string;
+  confirmPassword: string;
+  dateOfBirth: string;
+  contacts: string;
+  status: string;
+  licenseExpiryDate: string;
+  nic: string;
 }
 
-const initialDrivers: Driver[] = [
-  {
-    key: "1",
-    name: "John Doe",
-    email: "john@example.com",
-    phone: "+1 234-567-8900",
-    licenseNumber: "DL123456",
-    expiryDate: "2025-12-31",
-    status: "active",
-    verified: true,
-  },
-  {
-    key: "2",
-    name: "Jane Smith",
-    email: "jane@example.com",
-    phone: "+1 234-567-8901",
-    licenseNumber: "DL789012",
-    expiryDate: "2024-10-15",
-    status: "inactive",
-    verified: false,
-  },
-];
-
-export default function DriversPage() {
+export default function DriverPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [drivers, setDrivers] = useState<Driver[]>(initialDrivers);
+  const [drivers, setDrivers] = useState<Driver[]>([]);
+  const [showFilters, setShowFilters] = useState(false);
+  const [selectedDriver, setSelectedDriver] = useState<Driver | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [filters, setFilters] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+    dateOfBirth: "",
+    contacts: "",
+    status: [] as string[],
+    createdBy: "",
+    licenseExpiryDate: "",
+    nic: "",
+  });
+  const [pagination, setPagination] = useState({
+    total: 0,
+    current: 1,
+    pageSize: 10,
+  });
+  useEffect(() => {
+    const fetchDrivers = async () => {
+      setLoading(true);
+      try {
+        const response = await fetch(
+          `/api/listDrivers?page=${pagination.current}&limit=${pagination.pageSize}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              "ngrok-skip-browser-warning": "skipBrowserWarning",
+            },
+          }
+        );
+        if (response.ok) {
+          const data = await response.json();
+          setDrivers(
+            data.data.map((item: Driver) => ({
+              ...item,
+              key: item.id.toString(),
+            }))
+          );
+          setPagination((prev) => ({
+            ...prev,
+            total: data.meta.total,
+          }));
+        } else {
+          const error = await response.json();
+          message.error(error.message || "Failed to fetch users");
+        }
+      } catch (error) {
+        console.error("Error fetching users:", error);
+        message.error("An error occurred while fetching users");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDrivers();
+  }, [pagination.current, pagination.pageSize]);
+
+  const handleFilterChange = (
+    key: keyof typeof filters,
+    value: string | string[]
+  ) => {
+    setFilters((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const filteredData = drivers.filter((driver) => {
+    const {
+      firstName,
+      lastName,
+      email,
+      password,
+      confirmPassword,
+      dateOfBirth,
+      contacts,
+      status,
+      licenseExpiryDate,
+      nic,
+    } = filters;
+    return (
+      (!firstName ||
+        driver.firstName.toLowerCase().includes(firstName.toLowerCase())) &&
+      (!lastName ||
+        driver.lastName.toLowerCase().includes(lastName.toLowerCase())) &&
+      (!email || driver.email.toLowerCase().includes(email.toLowerCase())) &&
+      (!password ||
+        driver.password.toLowerCase().includes(password.toLowerCase())) &&
+      (!confirmPassword ||
+        driver.confirmPassword
+          .toLowerCase()
+          .includes(confirmPassword.toLowerCase())) &&
+      (!dateOfBirth ||
+        driver.dateOfBirth.toLowerCase().includes(dateOfBirth.toLowerCase())) &&
+      (!contacts ||
+        driver.contacts.toLowerCase().includes(contacts.toLowerCase())) &&
+      (!status.length || status.includes(driver.status)) &&
+      (!licenseExpiryDate ||
+        driver.licenseExpiryDate.includes(licenseExpiryDate.toLowerCase())) &&
+      (!nic || driver.nic.includes(nic.toLowerCase()))
+    );
+  });
 
   const columns: ColumnsType<Driver> = [
+    { title: "ID", dataIndex: "id", key: "id" },
     {
-      title: "Name",
-      dataIndex: "name",
-      key: "name",
-      render: (text) => <a>{text}</a>,
+      title: "First Name",
+      dataIndex: "user",
+      key: "firstName",
+      render: ({ firstName }) => <a>{firstName}</a>,
+      filterDropdown: showFilters ? (
+        <Input
+          placeholder="Search First Name"
+          onChange={(e) => handleFilterChange("firstName", e.target.value)}
+        />
+      ) : null,
+    },
+    {
+      title: "Last Name",
+      dataIndex: "user",
+      key: "lastName",
+      render: ({ lastName }) => <a>{lastName}</a>,
+      filterDropdown: showFilters ? (
+        <Input
+          placeholder="Search Last Name"
+          onChange={(e) => handleFilterChange("lastName", e.target.value)}
+        />
+      ) : null,
     },
     {
       title: "Email",
-      dataIndex: "email",
+      dataIndex: "user",
       key: "email",
+      render: ({ email }) => <p>{email}</p>,
+      filterDropdown: showFilters ? (
+        <Input
+          placeholder="Search Email"
+          onChange={(e) => handleFilterChange("email", e.target.value)}
+        />
+      ) : null,
     },
     {
-      title: "Phone",
-      dataIndex: "phone",
-      key: "phone",
+      title: "Date of Birth",
+      dataIndex: "user",
+      key: "dateOfBirth",
+      render: ({ dateOfBirth }) => <p>{dateOfBirth}</p>,
+      filterDropdown: showFilters ? (
+        <Input
+          placeholder="Search date of bIrth"
+          onChange={(e) => handleFilterChange("dateOfBirth", e.target.value)}
+        />
+      ) : null,
+    },
+    // {
+    //   title: "Status",
+    //   dataIndex: "status",
+    //   key: "status",
+    //   filterDropdown: showFilters ? (
+    //     <Checkbox.Group
+    //       options={[
+    //         { label: "Active", value: "ACTIVE" },
+    //         { label: "Inactive", value: "IN_ACTIVE" },
+    //       ]}
+    //       onChange={(checkedValues) =>
+    //         handleFilterChange("status", checkedValues)
+    //       }
+    //     />
+    //   ) : null,
+    //   render: (status: string) => (
+    //     <Tag color={status === "ACTIVE" ? "green" : "red"}>
+    //       {status.toUpperCase()}
+    //     </Tag>
+    //   ),
+    // },
+    {
+      title: "Contact",
+      dataIndex: "user",
+      key: "contacts",
+      render: ({ contacts }) => <p>{contacts}</p>,
+      filterDropdown: showFilters ? (
+        <Input
+          placeholder="Search contact"
+          onChange={(e) => handleFilterChange("contacts", e.target.value)}
+        />
+      ) : null,
     },
     {
-      title: "License Number",
-      dataIndex: "licenseNumber",
-      key: "licenseNumber",
+      title: "license Expiry Date",
+      dataIndex: "licenseExpiryDate",
+      key: "licenseExpiryDate",
+      filterDropdown: showFilters ? (
+        <Input
+          placeholder="Search licenseExpiryDate"
+          onChange={(e) =>
+            handleFilterChange("licenseExpiryDate", e.target.value)
+          }
+        />
+      ) : null,
     },
     {
-      title: "Expiry Date",
-      dataIndex: "expiryDate",
-      key: "expiryDate",
+      title: "CNIC Number",
+      dataIndex: "nic",
+      key: "nic",
+      filterDropdown: showFilters ? (
+        <Input
+          placeholder="Search Cnic"
+          onChange={(e) => handleFilterChange("nic", e.target.value)}
+        />
+      ) : null,
     },
-    {
-      title: "Status",
-      dataIndex: "status",
-      key: "status",
-      render: (status: string) => (
-        <Tag color={status === "active" ? "green" : "red"}>
-          {status.toUpperCase()}
-        </Tag>
-      ),
-    },
-    {
-      title: "Verified",
-      dataIndex: "verified",
-      key: "verified",
-      render: (verified: boolean) => (
-        <Tag color={verified ? "blue" : "orange"}>
-          {verified ? "VERIFIED" : "PENDING"}
-        </Tag>
-      ),
-    },
+    // {
+    //   title: "Profile Picture",
+    //   dataIndex: "companyLogo",
+    //   key: "companyLogo",
+    //   render: (logo: string) => (
+    //     <img src={logo} alt="Company Logo" style={{ objectFit: "cover" }} />
+    //   ),
+    // },
     {
       title: "Action",
       key: "action",
@@ -102,58 +266,151 @@ export default function DriversPage() {
     },
   ];
 
-  const handleAddDriver = () => {
+  const handleAddCompany = () => {
+    setSelectedDriver(null);
     setIsModalOpen(true);
   };
 
-  const handleEdit = (driver: Driver) => {
-    // Implement edit functionality
+  // Handle edit button click
+  const handleEdit = async (company: Driver) => {
+    try {
+      const response = await fetch(`/api/getDriverById?id=${company.id}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setSelectedDriver(data.data);
+        setIsModalOpen(true);
+      } else {
+        const error = await response.json();
+        message.error(error.message || "Failed to fetch driver details");
+      }
+    } catch (error) {
+      console.error("Error fetching driver data:", error);
+      message.error("An error occurred while fetching driver details");
+    }
   };
 
-  const handleModalOk = (values: any) => {
-    const newDriver: Driver = {
-      key: String(drivers.length + 1),
-      ...values,
-      status: "active",
-      verified: false,
-    };
-    setDrivers([...drivers, newDriver]);
-    message.success("Driver added successfully");
-    setIsModalOpen(false);
+  const handleModalOk = async (values: any) => {
+    if (selectedDriver) {
+      // Update driver
+      try {
+        const response = await fetch("/api/updateDriver", {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            id: selectedDriver.id,
+            ...values,
+          }),
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          setDrivers((prevDrivers) =>
+            prevDrivers.map((driver) =>
+              driver.id === result.data.id ? result.data : driver
+            )
+          );
+          message.success(result.message);
+          setIsModalOpen(false);
+        } else {
+          const error = await response.json();
+          message.error(error.message || "Failed to update driver");
+        }
+      } catch (error) {
+        console.error("Error updating driver:", error);
+        message.error("An error occurred while updating the driver");
+      }
+    } else {
+      // Add driver
+      try {
+        const response = await fetch("/api/createDriver", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(values),
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          setDrivers((prevDrivers) => [result.data, ...prevDrivers]);
+          message.success("Successfully added driver");
+          setIsModalOpen(false);
+        } else {
+          const error = await response.json();
+          message.error(error.message || "Failed to add driver");
+        }
+      } catch (error) {
+        console.error("Error adding driver:", error);
+        message.error("An error occurred while adding the driver");
+      }
+    }
   };
 
   const handleModalCancel = () => {
     setIsModalOpen(false);
   };
 
+  const handlePaginationChange = (page: number, pageSize: number) => {
+    setPagination({ ...pagination, current: page, pageSize });
+  };
+
   return (
     <div className="p-6">
       <div className="mb-6 flex justify-between items-center">
-        <h1 className="text-2xl font-semibold">Drivers Management</h1>
+        <h1 className="text-2xl font-semibold">Driver Management</h1>
         <Button
           type="primary"
           size="large"
           icon={<UserAddOutlined />}
-          onClick={handleAddDriver}
+          onClick={handleAddCompany}
         >
           Add Driver
         </Button>
       </div>
+      <Space>
+        Search Filters{" "}
+        <Tooltip title="Toggle Filter">
+          <FilterOutlined
+            onClick={() =>
+              setShowFilters((prevShowFilters) => !prevShowFilters)
+            }
+            style={{ cursor: "pointer" }}
+          />
+        </Tooltip>
+      </Space>
 
       <Table
         columns={columns}
-        dataSource={drivers}
+        dataSource={filteredData}
+        loading={loading}
         scroll={{ x: "max-content" }}
+        pagination={{
+          current: pagination.current,
+          pageSize: pagination.pageSize,
+          total: pagination.total,
+          onChange: handlePaginationChange,
+        }}
       />
 
       <Modal
-        title="Add New Driver"
         open={isModalOpen}
         onCancel={handleModalCancel}
         footer={null}
         width={720}
       >
-        <DriverForm onSubmit={handleModalOk} onCancel={handleModalCancel} />
+        <DriverForm
+          initialValues={{ ...selectedDriver, ...selectedDriver?.user }}
+          onSubmit={handleModalOk}
+          onCancel={handleModalCancel}
+        />
       </Modal>
     </div>
   );
