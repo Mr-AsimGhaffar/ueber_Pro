@@ -23,7 +23,6 @@ export default async function handler(
 
       if (response.ok) {
         const data = await response.json();
-
         // Set auth cookie
         const cookie = serialize("authToken", data.token, {
           httpOnly: true,

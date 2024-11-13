@@ -9,7 +9,7 @@ export async function getUser(): Promise<User> {
   }
 
   const response = await fetch(
-    "https://5512-2407-d000-1a-9b0-c00d-5dbf-ce58-d541.ngrok-free.app/api/v1/users/me",
+    `${process.env.NEXT_PUBLIC_API_BASE_URL}/users/me`,
     {
       method: "GET",
       headers: {
