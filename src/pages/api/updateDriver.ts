@@ -7,6 +7,7 @@ export default async function handler(
   if (req.method === "PUT") {
     const {
       id,
+      userId,
       firstName,
       lastName,
       email,
@@ -36,6 +37,7 @@ export default async function handler(
           },
           body: JSON.stringify({
             id,
+            userId,
             firstName,
             lastName,
             email,

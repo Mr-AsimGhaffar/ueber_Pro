@@ -1,5 +1,5 @@
-import React, { useEffect, useRef } from "react";
-import { Form, Input, Upload, Button, Switch } from "antd";
+import React, { useEffect, useRef, useState } from "react";
+import { Form, Input, Upload, Button, Switch, Select } from "antd";
 import { LockOutlined, UploadOutlined } from "@ant-design/icons";
 import type { UploadFile } from "antd/es/upload/interface";
 
@@ -8,6 +8,10 @@ interface DriverFormProps {
   onCancel: () => void;
   initialValues?: any;
 }
+interface Driver {
+  id: number;
+  name: string;
+}
 
 export default function DriverForm({
   onSubmit,
@@ -15,23 +19,53 @@ export default function DriverForm({
   initialValues,
 }: DriverFormProps) {
   const [form] = Form.useForm();
-  const statusRef = useRef<HTMLSpanElement>(null);
+  const [driverName, setDriverName] = useState<Driver[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchCompanies = async () => {
+      setLoading(true);
+      try {
+        const response = await fetch("/api/listCompanies", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setDriverName(data.data); // Assuming API response has `data` with company list
+        } else {
+          console.error("Failed to fetch companies");
+        }
+      } catch (error) {
+        console.error("Error fetching companies:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCompanies();
+  }, []);
 
   // Set the form's fields to initialValues when editing
   useEffect(() => {
     if (initialValues) {
+      const { user, status } = initialValues;
       form.setFieldsValue({
-        ...initialValues,
-        dateOfBirth: initialValues.dateOfBirth
-          ? new Date(initialValues.dateOfBirth).toISOString().split("T")[0]
+        ...user,
+        status: status || "AVAILABLE",
+        nic: user?.nic || initialValues.nic || "",
+        dateOfBirth: user.dateOfBirth
+          ? new Date(user.dateOfBirth).toISOString().split("T")[0]
           : undefined,
         licenseExpiryDate: initialValues.licenseExpiryDate
           ? new Date(initialValues.licenseExpiryDate)
               .toISOString()
               .split("T")[0]
           : undefined,
-        profilePictureId: initialValues?.profilePictureId || "",
-        status: initialValues?.status == "ACTIVE",
+        contacts: user.contacts ? String(user.contacts) : "",
       });
     } else {
       form.resetFields();
@@ -48,20 +82,11 @@ export default function DriverForm({
       values.licenseExpiryDate = values.licenseExpiryDate
         ? new Date(values.licenseExpiryDate).toISOString()
         : undefined;
-      if (values.profilePictureId?.file) {
-        values.profilePictureId =
-          values.profilePictureId.file.response?.url || ""; // Adjust based on your file upload API response
-      }
+      values.userId = initialValues?.userId;
+
       onSubmit(values);
-      form.resetFields();
     } catch (error) {
       console.error("Validation failed:", error);
-    }
-  };
-
-  const onChange = (checked: boolean) => {
-    if (statusRef.current) {
-      statusRef.current.textContent = checked ? "Active" : "Inactive";
     }
   };
 
@@ -71,13 +96,14 @@ export default function DriverForm({
       layout="vertical"
       initialValues={initialValues}
       onFinish={handleSubmit}
+      preserve={true}
     >
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Company Information */}
         <div className="md:col-span-2 text-center">
           <h1 className="font-medium text-base">
             {" "}
-            {initialValues ? "Edit Driver" : "Add New Driver"}
+            {initialValues?.id ? "Edit Driver" : "Add New Driver"}
           </h1>
           <h3 className="font-medium mb-4">Driver Information</h3>
         </div>
@@ -85,48 +111,111 @@ export default function DriverForm({
         <Form.Item
           name="firstName"
           label="First Name"
-          rules={[{ required: true, message: "Please enter first name" }]}
+          rules={[
+            { required: true, message: "Please enter first name" },
+            {
+              min: 2,
+              message: "First name must be at least 2 characters long",
+            },
+            {
+              max: 50,
+              message: "First name must be at most 50 characters long",
+            },
+            {
+              pattern: /^[a-zA-Z ]+$/,
+              message: "First name must contain only letters",
+            },
+          ]}
         >
-          <Input placeholder="Enter first Name name" />
+          <Input placeholder="Enter first name" />
         </Form.Item>
         <Form.Item
           name="lastName"
           label="Last Name"
-          rules={[{ required: true, message: "Please enter last name" }]}
+          rules={[
+            { required: true, message: "Please enter last name" },
+            { min: 2, message: "Last name must be at least 2 characters long" },
+            {
+              max: 50,
+              message: "Last name must be at most 50 characters long",
+            },
+            {
+              pattern: /^[a-zA-Z ]+$/,
+              message: "Last name must contain only letters",
+            },
+          ]}
         >
-          <Input placeholder="Enter last Name name" />
+          <Input placeholder="Enter last name" />
         </Form.Item>
         <Form.Item
           name="email"
           label="Email"
-          rules={[{ required: true, message: "Please enter email" }]}
+          rules={[
+            { required: true, message: "Please enter email" },
+            {
+              type: "email",
+              message: "Please enter a valid email address",
+            },
+          ]}
         >
           <Input placeholder="Enter email" />
         </Form.Item>
-        <Form.Item
-          name="password"
-          label="Password"
-          rules={[{ required: true, message: "Please input your Password!" }]}
-        >
-          <Input.Password prefix={<LockOutlined />} placeholder="Password" />
-        </Form.Item>
-        <Form.Item
-          name="confirmPassword"
-          label="Confirm Password"
-          rules={[
-            { required: true, message: "Please input your Confirm Password!" },
-          ]}
-        >
-          <Input.Password
-            prefix={<LockOutlined />}
-            placeholder="Confirm Password"
-          />
-        </Form.Item>
+        {!initialValues && (
+          <>
+            <Form.Item
+              name="password"
+              label="Password"
+              rules={[
+                { required: true, message: "Please input your Password!" },
+                {
+                  pattern: /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}$/,
+                  message:
+                    "Password must be at least 8 characters long and include upper and lower case letters and a number",
+                },
+              ]}
+            >
+              <Input.Password
+                prefix={<LockOutlined />}
+                placeholder="Password"
+              />
+            </Form.Item>
+            <Form.Item
+              name="confirmPassword"
+              label="Confirm Password"
+              dependencies={["password"]}
+              rules={[
+                {
+                  required: true,
+                  message: "Please input your Confirm Password!",
+                },
+                ({ getFieldValue }) => ({
+                  validator(_, value) {
+                    if (!value || getFieldValue("password") === value) {
+                      return Promise.resolve();
+                    }
+                    return Promise.reject(new Error("Passwords do not match!"));
+                  },
+                }),
+              ]}
+            >
+              <Input.Password
+                prefix={<LockOutlined />}
+                placeholder="Confirm Password"
+              />
+            </Form.Item>
+          </>
+        )}
 
         <Form.Item
           name="contacts"
           label="Contact Number"
-          rules={[{ required: true, message: "Please enter contact number" }]}
+          rules={[
+            { required: true, message: "Please enter contact number" },
+            {
+              pattern: /^[0-9]{10,15}$/,
+              message: "Please enter a valid contact number (10-15 digits)",
+            },
+          ]}
         >
           <Input placeholder="Enter contact number" />
         </Form.Item>
@@ -134,7 +223,6 @@ export default function DriverForm({
           name="dateOfBirth"
           label="Date of Birth"
           rules={[
-            { required: true, message: "Please enter date of birth" },
             {
               validator: (_, value) =>
                 value && new Date(value) > new Date()
@@ -148,32 +236,44 @@ export default function DriverForm({
           <Input type="date" />
         </Form.Item>
         <Form.Item
-          name="createdBy"
-          label="Created By"
-          //   rules={[{ required: true, message: "Please enter your name" }]}
-        >
-          <Input placeholder="Enter your name" />
-        </Form.Item>
-        <Form.Item
           name="companyId"
           label="Company Name"
-          rules={[{ required: true }]}
+          rules={[{ required: true, message: "Please select a company" }]}
         >
-          <Input placeholder="Enter Company Id" />
+          <Select
+            placeholder="Select a company"
+            loading={loading}
+            options={driverName.map((user) => ({
+              value: user.id,
+              label: user.name,
+            }))}
+          />
         </Form.Item>
-        <Form.Item name="nic" label="Cnic Name" rules={[{ required: true }]}>
-          <Input placeholder="Enter Cnic Id" />
+        <Form.Item
+          name="nic"
+          label="CNIC"
+          rules={[
+            { required: true, message: "Please enter CNIC" },
+            {
+              pattern: /^[0-9]{13}$/,
+              message: "Please enter a valid CNIC (13 digits)",
+            },
+          ]}
+        >
+          <Input placeholder="Enter CNIC" />
         </Form.Item>
         <Form.Item
           name="status"
-          label={
-            <div>
-              Status: <span ref={statusRef}>Active</span>
-            </div>
-          }
-          rules={[{ required: true, message: "Please enter driver status" }]}
+          label="Status"
+          rules={[{ required: true, message: "Please select a status" }]}
         >
-          <Switch defaultChecked onChange={onChange} />
+          <Select placeholder="Select Status">
+            <Select.Option value="AVAILABLE">Available</Select.Option>
+            <Select.Option value="ON_LEAVE">On Leave</Select.Option>
+            <Select.Option value="SUSPENDED">Suspended</Select.Option>
+            <Select.Option value="OFF_DUTY">Off Duty</Select.Option>
+            <Select.Option value="ON_TRIP">On Trip</Select.Option>
+          </Select>
         </Form.Item>
 
         {/* Document Upload */}
@@ -220,7 +320,7 @@ export default function DriverForm({
       <div className="flex justify-end gap-4 mt-6">
         <Button onClick={onCancel}>Cancel</Button>
         <Button type="primary" onClick={handleSubmit}>
-          {initialValues ? "Update Driver" : "Add Driver"}
+          {initialValues?.id ? "Update Driver" : "Add Driver"}
         </Button>
       </div>
     </Form>

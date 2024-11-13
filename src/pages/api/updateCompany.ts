@@ -5,8 +5,7 @@ export default async function handler(
   res: NextApiResponse
 ) {
   if (req.method === "PUT") {
-    const { id, name, type, address, status, email, contact, companyLogo } =
-      req.body;
+    const { id, name, type, address, status, email, contact, logo } = req.body;
 
     try {
       const accessToken = req.cookies.accessToken;
@@ -32,7 +31,7 @@ export default async function handler(
             status,
             email,
             contact,
-            companyLogo,
+            logo,
           }),
         }
       );

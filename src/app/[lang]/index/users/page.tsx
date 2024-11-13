@@ -134,7 +134,6 @@ export default function UserPage() {
   });
 
   const columns: ColumnsType<User> = [
-    { title: "ID", dataIndex: "id", key: "id" },
     {
       title: "First Name",
       dataIndex: "firstName",
@@ -171,9 +170,49 @@ export default function UserPage() {
       ) : null,
     },
     {
+      title: "Company Name",
+      dataIndex: "company",
+      key: "company",
+      render: (company) => {
+        if (company && company.company) {
+          const { name } = company.company;
+          return <p>{name}</p>;
+        }
+        return <p>Company not available</p>;
+      },
+      filterDropdown: showFilters ? (
+        <Input
+          placeholder="Search Created By"
+          onChange={(e) => handleFilterChange("createdBy", e.target.value)}
+        />
+      ) : null,
+    },
+    {
+      title: "Role",
+      dataIndex: "role",
+      key: "role",
+      render: (role) => {
+        if (role) {
+          const { name } = role;
+          return <p>{name}</p>;
+        }
+        return null;
+      },
+      filterDropdown: showFilters ? (
+        <Input
+          placeholder="Search Created By"
+          onChange={(e) => handleFilterChange("createdBy", e.target.value)}
+        />
+      ) : null,
+    },
+    {
       title: "Date of BIrth",
       dataIndex: "dateOfBirth",
       key: "dateOfBirth",
+      render: (text: string) => {
+        const date = new Date(text);
+        return text ? date.toLocaleDateString("en-GB") : "";
+      },
       filterDropdown: showFilters ? (
         <Input
           placeholder="Search date of bIrth"
@@ -181,27 +220,23 @@ export default function UserPage() {
         />
       ) : null,
     },
-    // {
-    //   title: "Status",
-    //   dataIndex: "status",
-    //   key: "status",
-    //   filterDropdown: showFilters ? (
-    //     <Checkbox.Group
-    //       options={[
-    //         { label: "Active", value: "ACTIVE" },
-    //         { label: "Inactive", value: "IN_ACTIVE" },
-    //       ]}
-    //       onChange={(checkedValues) =>
-    //         handleFilterChange("status", checkedValues)
-    //       }
-    //     />
-    //   ) : null,
-    //   render: (status: string) => (
-    //     <Tag color={status === "ACTIVE" ? "green" : "red"}>
-    //       {status.toUpperCase()}
-    //     </Tag>
-    //   ),
-    // },
+    {
+      title: "Status",
+      dataIndex: "status",
+      key: "status",
+      render: (status: string) => {
+        const statusColors: { [key: string]: string } = {
+          ACTIVE: "green",
+          IN_ACTIVE: "gray",
+          SUSPENDED: "red",
+        };
+        return (
+          <Tag color={statusColors[status] || "default"}>
+            {status.replace("_", " ")}
+          </Tag>
+        );
+      },
+    },
     {
       title: "Contact",
       dataIndex: "contacts",
@@ -215,8 +250,15 @@ export default function UserPage() {
     },
     {
       title: "Created By",
-      dataIndex: "createdBy",
+      dataIndex: "createdByUser",
       key: "createdBy",
+      render: (createdByUser) => {
+        if (createdByUser) {
+          const { firstName, lastName } = createdByUser;
+          return <p>{firstName + " " + lastName}</p>;
+        }
+        return null;
+      },
       filterDropdown: showFilters ? (
         <Input
           placeholder="Search Created By"
@@ -243,7 +285,7 @@ export default function UserPage() {
     },
   ];
 
-  const handleAddCompany = () => {
+  const handleAddUser = () => {
     setSelectedUser(null);
     setIsModalOpen(true);
   };
@@ -336,7 +378,7 @@ export default function UserPage() {
   };
 
   const handlePaginationChange = (page: number, pageSize: number) => {
-    setPagination({ ...pagination, current: page, pageSize });
+    setPagination({ current: page, pageSize, total: pagination.total });
   };
 
   return (
@@ -347,7 +389,7 @@ export default function UserPage() {
           type="primary"
           size="large"
           icon={<UserAddOutlined />}
-          onClick={handleAddCompany}
+          onClick={handleAddUser}
         >
           Add User
         </Button>
@@ -373,7 +415,11 @@ export default function UserPage() {
           current: pagination.current,
           pageSize: pagination.pageSize,
           total: pagination.total,
+          showSizeChanger: true,
+          pageSizeOptions: ["10", "20", "50", "100"],
           onChange: handlePaginationChange,
+          showTotal: (total, range) =>
+            `${range[0]}-${range[1]} of ${total} items`,
         }}
       />
 

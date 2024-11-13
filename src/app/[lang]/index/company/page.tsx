@@ -26,6 +26,7 @@ interface Company {
   email: string;
   contact: string;
   createdBy: number;
+  logo: string;
 }
 
 export default function CompanyPage() {
@@ -42,6 +43,7 @@ export default function CompanyPage() {
     email: "",
     contact: "",
     createdBy: "",
+    logo: "",
   });
   const [pagination, setPagination] = useState({
     total: 0,
@@ -97,7 +99,8 @@ export default function CompanyPage() {
   };
 
   const filteredData = companies.filter((company) => {
-    const { name, type, address, status, email, contact, createdBy } = filters;
+    const { name, type, address, status, email, contact, createdBy, logo } =
+      filters;
     return (
       (!name || company.name.toLowerCase().includes(name.toLowerCase())) &&
       (!type || company.type.toLowerCase().includes(type.toLowerCase())) &&
@@ -107,12 +110,12 @@ export default function CompanyPage() {
       (!email || company.email.toLowerCase().includes(email.toLowerCase())) &&
       (!contact || company.contact.includes(contact)) &&
       (!createdBy ||
-        String(company.createdBy).includes(createdBy.toLowerCase()))
+        String(company.createdBy).includes(createdBy.toLowerCase())) &&
+      (!logo || company.logo.includes(logo))
     );
   });
 
   const columns: ColumnsType<Company> = [
-    { title: "ID", dataIndex: "id", key: "id" },
     {
       title: "Name",
       dataIndex: "name",
@@ -130,9 +133,15 @@ export default function CompanyPage() {
       dataIndex: "type",
       key: "type",
       filterDropdown: showFilters ? (
-        <Input
-          placeholder="Search Type"
-          onChange={(e) => handleFilterChange("type", e.target.value)}
+        <Checkbox.Group
+          options={[
+            { label: "Any", value: "ANY" },
+            { label: "Cars", value: "CARS" },
+            { label: "Driver", value: "DRIVER" },
+          ]}
+          onChange={(checkedValues) =>
+            handleFilterChange("type", checkedValues)
+          }
         />
       ) : null,
     },
@@ -162,11 +171,17 @@ export default function CompanyPage() {
           }
         />
       ) : null,
-      render: (status: string) => (
-        <Tag color={status === "ACTIVE" ? "green" : "red"}>
-          {status.toUpperCase()}
-        </Tag>
-      ),
+      render: (status: string) => {
+        const statusColors: { [key: string]: string } = {
+          ACTIVE: "green",
+          IN_ACTIVE: "gray",
+        };
+        return (
+          <Tag color={statusColors[status] || "default"}>
+            {status.replace("_", " ")}
+          </Tag>
+        );
+      },
     },
     {
       title: "Email",
@@ -192,8 +207,15 @@ export default function CompanyPage() {
     },
     {
       title: "Created By",
-      dataIndex: "createdBy",
+      dataIndex: "createdByUser",
       key: "createdBy",
+      render: (createdByUser) => {
+        if (createdByUser) {
+          const { firstName, lastName } = createdByUser;
+          return <p>{firstName + " " + lastName}</p>;
+        }
+        return null;
+      },
       filterDropdown: showFilters ? (
         <Input
           placeholder="Search Created By"
@@ -201,14 +223,14 @@ export default function CompanyPage() {
         />
       ) : null,
     },
-    {
-      title: "Logo",
-      dataIndex: "companyLogo",
-      key: "companyLogo",
-      render: (logo: string) => (
-        <img src={logo} alt="Company Logo" style={{ objectFit: "cover" }} />
-      ),
-    },
+    // {
+    //   title: "Logo",
+    //   dataIndex: "logo",
+    //   key: "logo",
+    //   render: (logo: string) => (
+    //     <img src={logo} alt="Company Logo" style={{ objectFit: "cover" }} />
+    //   ),
+    // },
     {
       title: "Action",
       key: "action",
@@ -313,7 +335,7 @@ export default function CompanyPage() {
   };
 
   const handlePaginationChange = (page: number, pageSize: number) => {
-    setPagination({ ...pagination, current: page, pageSize });
+    setPagination({ current: page, pageSize, total: pagination.total });
   };
 
   return (
@@ -350,7 +372,11 @@ export default function CompanyPage() {
           current: pagination.current,
           pageSize: pagination.pageSize,
           total: pagination.total,
+          showSizeChanger: true,
+          pageSizeOptions: ["10", "20", "50", "100"],
           onChange: handlePaginationChange,
+          showTotal: (total, range) =>
+            `${range[0]}-${range[1]} of ${total} items`,
         }}
       />
 

@@ -15,7 +15,7 @@ export default async function handler(
 
       // Send credentials to external API
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/admin/?page=${page}&limit=${limit}`,
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/users/?page=${page}&limit=${limit}`,
         {
           method: "GET",
           headers: {
