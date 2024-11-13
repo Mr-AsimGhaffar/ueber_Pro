@@ -266,10 +266,10 @@ export default function NavbarContent({ user, locale, messages }: Props) {
                 onClick={() => setUserMenuOpen(!userMenuOpen)}
               >
                 <Image
-                  src={user.profilePicture}
+                  src="https://images.unsplash.com/photo-1550355291-bbee04a92027"
                   alt="Profile image"
                   className="rounded-full"
-                  width={40}
+                  width={24}
                   height={24}
                 />
               </button>
@@ -278,8 +278,9 @@ export default function NavbarContent({ user, locale, messages }: Props) {
                 <Menu ref={userMenuRef}>
                   <MenuItem href="">
                     <p className="font-semibold text-gray-800">
-                      {user?.name
-                        ? user.name.charAt(0).toUpperCase() + user.name.slice(1)
+                      {user?.firstName
+                        ? user.firstName.charAt(0).toUpperCase() +
+                          user.firstName.slice(1)
                         : "Guest"}
                     </p>
                   </MenuItem>

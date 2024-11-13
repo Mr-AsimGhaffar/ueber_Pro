@@ -3,17 +3,17 @@ import { Form, Input, Upload, Button, Switch } from "antd";
 import { LockOutlined, UploadOutlined } from "@ant-design/icons";
 import type { UploadFile } from "antd/es/upload/interface";
 
-interface DriverFormProps {
+interface UserFormProps {
   onSubmit: (values: any) => void;
   onCancel: () => void;
   initialValues?: any;
 }
 
-export default function DriverForm({
+export default function UserForm({
   onSubmit,
   onCancel,
   initialValues,
-}: DriverFormProps) {
+}: UserFormProps) {
   const [form] = Form.useForm();
   const statusRef = useRef<HTMLSpanElement>(null);
 
@@ -25,28 +25,19 @@ export default function DriverForm({
         dateOfBirth: initialValues.dateOfBirth
           ? new Date(initialValues.dateOfBirth).toISOString().split("T")[0]
           : undefined,
-        licenseExpiryDate: initialValues.licenseExpiryDate
-          ? new Date(initialValues.licenseExpiryDate)
-              .toISOString()
-              .split("T")[0]
-          : undefined,
         profilePictureId: initialValues?.profilePictureId || "",
         status: initialValues?.status == "ACTIVE",
       });
     } else {
-      form.resetFields();
+      form.resetFields(); // Reset the form when initialValues is null (add new company)
     }
   }, [initialValues, form]);
 
   const handleSubmit = async () => {
     try {
       const values = await form.validateFields();
-      // Format dates for backend
       values.dateOfBirth = values.dateOfBirth
         ? new Date(values.dateOfBirth).toISOString()
-        : undefined;
-      values.licenseExpiryDate = values.licenseExpiryDate
-        ? new Date(values.licenseExpiryDate).toISOString()
         : undefined;
       if (values.profilePictureId?.file) {
         values.profilePictureId =
@@ -77,24 +68,24 @@ export default function DriverForm({
         <div className="md:col-span-2 text-center">
           <h1 className="font-medium text-base">
             {" "}
-            {initialValues ? "Edit Driver" : "Add New Driver"}
+            {initialValues ? "Edit User" : "Add New User"}
           </h1>
-          <h3 className="font-medium mb-4">Driver Information</h3>
+          <h3 className="font-medium mb-4">User Information</h3>
         </div>
 
         <Form.Item
           name="firstName"
           label="First Name"
-          rules={[{ required: true, message: "Please enter first name" }]}
+          rules={[{ required: true, message: "Please enter firstName name" }]}
         >
-          <Input placeholder="Enter first Name name" />
+          <Input placeholder="Enter firstName name" />
         </Form.Item>
         <Form.Item
           name="lastName"
           label="Last Name"
-          rules={[{ required: true, message: "Please enter last name" }]}
+          rules={[{ required: true, message: "Please enter lastName name" }]}
         >
-          <Input placeholder="Enter last Name name" />
+          <Input placeholder="Enter lastName name" />
         </Form.Item>
         <Form.Item
           name="email"
@@ -161,20 +152,17 @@ export default function DriverForm({
         >
           <Input placeholder="Enter Company Id" />
         </Form.Item>
-        <Form.Item name="nic" label="Cnic Name" rules={[{ required: true }]}>
-          <Input placeholder="Enter Cnic Id" />
-        </Form.Item>
-        <Form.Item
+        {/* <Form.Item
           name="status"
           label={
             <div>
               Status: <span ref={statusRef}>Active</span>
             </div>
           }
-          rules={[{ required: true, message: "Please enter driver status" }]}
+          rules={[{ required: true, message: "Please enter company status" }]}
         >
           <Switch defaultChecked onChange={onChange} />
-        </Form.Item>
+        </Form.Item> */}
 
         {/* Document Upload */}
         <div className="md:col-span-2">
@@ -197,30 +185,13 @@ export default function DriverForm({
             <Button icon={<UploadOutlined />}>Upload Company Logo</Button>
           </Upload>
         </Form.Item> */}
-        <Form.Item
-          name="licenseExpiryDate"
-          label="License Expiry Date"
-          rules={[
-            { required: true, message: "Please enter license expiry date" },
-            {
-              validator: (_, value) =>
-                value && new Date(value) >= new Date()
-                  ? Promise.resolve()
-                  : Promise.reject(
-                      new Error("License expiry date must be in the future")
-                    ),
-            },
-          ]}
-        >
-          <Input type="date" />
-        </Form.Item>
       </div>
 
       {/* Form Actions */}
       <div className="flex justify-end gap-4 mt-6">
         <Button onClick={onCancel}>Cancel</Button>
         <Button type="primary" onClick={handleSubmit}>
-          {initialValues ? "Update Driver" : "Add Driver"}
+          {initialValues ? "Update User" : "Add User"}
         </Button>
       </div>
     </Form>

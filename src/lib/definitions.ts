@@ -1,7 +1,7 @@
 import { i18n } from "@/config/i18n";
 
 export type User = {
-  name: string;
+  firstName: string;
   role: string;
   status: string;
   contacts: string[];
