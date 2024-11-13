@@ -5,16 +5,8 @@ export default async function handler(
   res: NextApiResponse
 ) {
   if (req.method === "POST") {
-    const {
-      name,
-      type,
-      address,
-      status,
-      email,
-      contact,
-      createdBy,
-      companyLogo,
-    } = req.body;
+    const { name, type, address, status, email, contact, createdBy, logo } =
+      req.body;
 
     try {
       const accessToken = req.cookies.accessToken;
@@ -39,7 +31,7 @@ export default async function handler(
             email,
             contact,
             createdBy,
-            companyLogo,
+            logo,
             clientType: "web",
           }),
         }

@@ -1,15 +1,56 @@
 import { User, Report, TeamMember, Activity } from "@/lib/definitions";
 import { cookies } from "next/headers";
+import Cookies from "js-cookie";
+
+const refreshAccessToken = async (refreshToken: string): Promise<string> => {
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/refresh-token`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ refreshToken }),
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error("Refresh token expired. Please log in again.");
+  }
+
+  const data = await response.json();
+  const newAccessToken = data.data.token.token;
+  Cookies.set("accessToken", newAccessToken, { expires: 1 }); // Save new access token in cookies
+  return newAccessToken;
+};
+
+const getAccessToken = async (): Promise<string> => {
+  let accessToken = cookies().get("accessToken")?.value;
+
+  // If the access token is expired, attempt to refresh it using the refresh token
+  if (!accessToken) {
+    const refreshToken = cookies().get("refreshToken")?.value;
+    if (!refreshToken) {
+      throw new Error(
+        "Both access token and refresh token are missing. Please log in."
+      );
+    }
+    accessToken = await refreshAccessToken(refreshToken); // Refresh the access token
+  }
+
+  return accessToken;
+};
 
 export async function getUser(): Promise<User> {
-  const accessToken = cookies().get("accessToken")?.value;
+  const accessToken = await getAccessToken();
+  const id = cookies().get("id")?.value;
 
-  if (!accessToken) {
-    throw new Error("Token not found. Please log in.");
+  if (!id) {
+    throw new Error("User ID not found. Please log in.");
   }
 
   const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_BASE_URL}/users/me`,
+    `${process.env.NEXT_PUBLIC_API_BASE_URL}/users/${id}`,
     {
       method: "GET",
       headers: {

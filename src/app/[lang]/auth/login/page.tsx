@@ -28,10 +28,11 @@ export default function LoginPage({
 
       if (response.ok) {
         const data = await response.json();
-        const { token, refreshToken } = data.data;
+        const { token, refreshToken, user } = data.data;
 
         Cookies.set("accessToken", token.token, { expires: 1 });
         Cookies.set("refreshToken", refreshToken.token, { expires: 7 });
+        Cookies.set("id", user.id, { expires: 1 });
 
         message.success("Successfully logged in!");
         router.push(`/${lang}/index/home`);

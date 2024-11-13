@@ -20,6 +20,7 @@ interface Driver {
   user: object;
   key: string;
   id: number;
+  userId: number;
   firstName: string;
   lastName: string;
   email: string;
@@ -141,7 +142,6 @@ export default function DriverPage() {
   });
 
   const columns: ColumnsType<Driver> = [
-    { title: "ID", dataIndex: "id", key: "id" },
     {
       title: "First Name",
       dataIndex: "user",
@@ -179,10 +179,34 @@ export default function DriverPage() {
       ) : null,
     },
     {
+      title: "Company Name",
+      dataIndex: "user",
+      key: "company",
+      render: (company) => {
+        if (company && company.company) {
+          const { name } = company.company;
+          return <p>{name}</p>;
+        }
+        return <p>Company not available</p>;
+      },
+      filterDropdown: showFilters ? (
+        <Input
+          placeholder="Search Created By"
+          onChange={(e) => handleFilterChange("createdBy", e.target.value)}
+        />
+      ) : null,
+    },
+    {
       title: "Date of Birth",
       dataIndex: "user",
       key: "dateOfBirth",
-      render: ({ dateOfBirth }) => <p>{dateOfBirth}</p>,
+      render: (user: any) => {
+        // Safely access and format the dateOfBirth field
+        const dateOfBirth = user?.dateOfBirth;
+        return dateOfBirth
+          ? new Date(dateOfBirth).toLocaleDateString("en-GB")
+          : "";
+      },
       filterDropdown: showFilters ? (
         <Input
           placeholder="Search date of bIrth"
@@ -190,27 +214,25 @@ export default function DriverPage() {
         />
       ) : null,
     },
-    // {
-    //   title: "Status",
-    //   dataIndex: "status",
-    //   key: "status",
-    //   filterDropdown: showFilters ? (
-    //     <Checkbox.Group
-    //       options={[
-    //         { label: "Active", value: "ACTIVE" },
-    //         { label: "Inactive", value: "IN_ACTIVE" },
-    //       ]}
-    //       onChange={(checkedValues) =>
-    //         handleFilterChange("status", checkedValues)
-    //       }
-    //     />
-    //   ) : null,
-    //   render: (status: string) => (
-    //     <Tag color={status === "ACTIVE" ? "green" : "red"}>
-    //       {status.toUpperCase()}
-    //     </Tag>
-    //   ),
-    // },
+    {
+      title: "Status",
+      dataIndex: "status",
+      key: "status",
+      render: (status: string) => {
+        const statusColors: { [key: string]: string } = {
+          AVAILABLE: "green",
+          ON_LEAVE: "blue",
+          SUSPENDED: "red",
+          OFF_DUTY: "orange",
+          ON_TRIP: "purple",
+        };
+        return (
+          <Tag color={statusColors[status] || "default"}>
+            {status.replace("_", " ")}
+          </Tag>
+        );
+      },
+    },
     {
       title: "Contact",
       dataIndex: "user",
@@ -227,6 +249,10 @@ export default function DriverPage() {
       title: "license Expiry Date",
       dataIndex: "licenseExpiryDate",
       key: "licenseExpiryDate",
+      render: (text: string) => {
+        const date = new Date(text);
+        return text ? date.toLocaleDateString("en-GB") : ""; // "en-GB" is for "dd/mm/yyyy"
+      },
       filterDropdown: showFilters ? (
         <Input
           placeholder="Search licenseExpiryDate"
@@ -266,7 +292,7 @@ export default function DriverPage() {
     },
   ];
 
-  const handleAddCompany = () => {
+  const handleAddDriver = () => {
     setSelectedDriver(null);
     setIsModalOpen(true);
   };
@@ -359,7 +385,7 @@ export default function DriverPage() {
   };
 
   const handlePaginationChange = (page: number, pageSize: number) => {
-    setPagination({ ...pagination, current: page, pageSize });
+    setPagination({ current: page, pageSize, total: pagination.total });
   };
 
   return (
@@ -370,7 +396,7 @@ export default function DriverPage() {
           type="primary"
           size="large"
           icon={<UserAddOutlined />}
-          onClick={handleAddCompany}
+          onClick={handleAddDriver}
         >
           Add Driver
         </Button>
@@ -396,7 +422,11 @@ export default function DriverPage() {
           current: pagination.current,
           pageSize: pagination.pageSize,
           total: pagination.total,
+          showSizeChanger: true,
+          pageSizeOptions: ["10", "20", "50", "100"],
           onChange: handlePaginationChange,
+          showTotal: (total, range) =>
+            `${range[0]}-${range[1]} of ${total} items`,
         }}
       />
 
@@ -407,7 +437,7 @@ export default function DriverPage() {
         width={720}
       >
         <DriverForm
-          initialValues={{ ...selectedDriver, ...selectedDriver?.user }}
+          initialValues={selectedDriver}
           onSubmit={handleModalOk}
           onCancel={handleModalCancel}
         />
