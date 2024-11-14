@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Button,
   Table,
@@ -12,9 +12,15 @@ import {
   Space,
   Tooltip,
 } from "antd";
-import { FilterOutlined, UserAddOutlined } from "@ant-design/icons";
+import {
+  FilterOutlined,
+  ReloadOutlined,
+  SearchOutlined,
+  UserAddOutlined,
+} from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 import DriverForm from "@/components/DriverForm";
+import debounce from "lodash.debounce";
 
 interface Driver {
   user: object;
@@ -36,13 +42,23 @@ interface Driver {
 export default function DriverPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [drivers, setDrivers] = useState<Driver[]>([]);
-  const [showFilters, setShowFilters] = useState(false);
   const [selectedDriver, setSelectedDriver] = useState<Driver | null>(null);
   const [loading, setLoading] = useState(false);
+  const [searchFirstName, setSearchFirstName] = useState("");
+  const [searchLastName, setSearchLastName] = useState("");
+  const [searchEmail, setSearchEmail] = useState("");
+  const [searchCompanyName, setSearchCompanyName] = useState("");
+  const [searchDob, setSearchDob] = useState("");
+  const [searchContact, setSearchContact] = useState("");
+  const [searchLicenseExpiryDate, setSearchLicenseExpiryDate] = useState("");
+  const [searchNic, setNic] = useState("");
+  const [searchStatus, setSearchStatus] = useState<string[]>([]);
+  const searchRef = useRef<string[]>([]);
   const [filters, setFilters] = useState({
     firstName: "",
     lastName: "",
     email: "",
+    companyName: "",
     password: "",
     confirmPassword: "",
     dateOfBirth: "",
@@ -57,89 +73,96 @@ export default function DriverPage() {
     current: 1,
     pageSize: 10,
   });
-  useEffect(() => {
-    const fetchDrivers = async () => {
-      setLoading(true);
-      try {
-        const response = await fetch(
-          `/api/listDrivers?page=${pagination.current}&limit=${pagination.pageSize}`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              "ngrok-skip-browser-warning": "skipBrowserWarning",
-            },
-          }
-        );
-        if (response.ok) {
-          const data = await response.json();
-          setDrivers(
-            data.data.map((item: Driver) => ({
-              ...item,
-              key: item.id.toString(),
-            }))
-          );
-          setPagination((prev) => ({
-            ...prev,
-            total: data.meta.total,
-          }));
-        } else {
-          const error = await response.json();
-          message.error(error.message || "Failed to fetch users");
-        }
-      } catch (error) {
-        console.error("Error fetching users:", error);
-        message.error("An error occurred while fetching users");
-      } finally {
-        setLoading(false);
-      }
-    };
 
-    fetchDrivers();
-  }, [pagination.current, pagination.pageSize]);
+  const fetchDrivers = async (currentFilters = filters) => {
+    setLoading(true);
+    try {
+      const filtersObject = {
+        ...(currentFilters.createdBy
+          ? {
+              createdBy: {
+                firstName: currentFilters.createdBy.search,
+                lastName: currentFilters.createdBy.search,
+              },
+            }
+          : {}),
+        ...(currentFilters.status ? { status: currentFilters.status } : {}),
+        ...(currentFilters.firstName
+          ? { "user.firstName": currentFilters.firstName }
+          : {}),
+        ...(currentFilters.lastName
+          ? { "user.lastName": currentFilters.lastName }
+          : {}),
+        ...(currentFilters.email ? { "user.email": currentFilters.email } : {}),
+        ...(currentFilters.companyName
+          ? { "user.company.name": currentFilters.companyName }
+          : {}),
+        ...(currentFilters.dateOfBirth
+          ? { "user.dateOfBirth": currentFilters.dateOfBirth }
+          : {}),
+        ...(currentFilters.contacts
+          ? { "user.contacts": currentFilters.contacts }
+          : {}),
+        ...(currentFilters.licenseExpiryDate
+          ? { licenseExpiryDate: currentFilters.licenseExpiryDate }
+          : {}),
+        ...(currentFilters.nic ? { nic: currentFilters.nic } : {}),
+      };
+      const query = new URLSearchParams({
+        page: String(pagination.current),
+        limit: String(pagination.pageSize),
+        filters: JSON.stringify(filtersObject),
+      }).toString();
+      const response = await fetch(`/api/listDrivers?${query}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "ngrok-skip-browser-warning": "skipBrowserWarning",
+        },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setDrivers(
+          data.data.map((item: Driver) => ({
+            ...item,
+            key: item.id.toString(),
+          }))
+        );
+        setPagination((prev) => ({
+          ...prev,
+          total: data.meta.total,
+        }));
+      } else {
+        const error = await response.json();
+        message.error(error.message || "Failed to fetch users");
+      }
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      message.error("An error occurred while fetching users");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const debouncedFetchCompanies = debounce(
+    (currentFilters) => fetchDrivers(currentFilters),
+    500,
+    { leading: true, trailing: false } // Leading ensures the first call executes immediately
+  );
 
   const handleFilterChange = (
     key: keyof typeof filters,
     value: string | string[]
   ) => {
-    setFilters((prev) => ({ ...prev, [key]: value }));
+    const updatedFilters = { ...filters, [key]: value };
+    setFilters(updatedFilters);
+    setPagination((prev) => ({ ...prev, current: 1 })); // Reset to first page
+    debouncedFetchCompanies(updatedFilters);
   };
 
-  const filteredData = drivers.filter((driver) => {
-    const {
-      firstName,
-      lastName,
-      email,
-      password,
-      confirmPassword,
-      dateOfBirth,
-      contacts,
-      status,
-      licenseExpiryDate,
-      nic,
-    } = filters;
-    return (
-      (!firstName ||
-        driver.firstName.toLowerCase().includes(firstName.toLowerCase())) &&
-      (!lastName ||
-        driver.lastName.toLowerCase().includes(lastName.toLowerCase())) &&
-      (!email || driver.email.toLowerCase().includes(email.toLowerCase())) &&
-      (!password ||
-        driver.password.toLowerCase().includes(password.toLowerCase())) &&
-      (!confirmPassword ||
-        driver.confirmPassword
-          .toLowerCase()
-          .includes(confirmPassword.toLowerCase())) &&
-      (!dateOfBirth ||
-        driver.dateOfBirth.toLowerCase().includes(dateOfBirth.toLowerCase())) &&
-      (!contacts ||
-        driver.contacts.toLowerCase().includes(contacts.toLowerCase())) &&
-      (!status.length || status.includes(driver.status)) &&
-      (!licenseExpiryDate ||
-        driver.licenseExpiryDate.includes(licenseExpiryDate.toLowerCase())) &&
-      (!nic || driver.nic.includes(nic.toLowerCase()))
-    );
-  });
+  useEffect(() => {
+    fetchDrivers();
+  }, [pagination.current, pagination.pageSize]);
 
   const columns: ColumnsType<Driver> = [
     {
@@ -147,36 +170,147 @@ export default function DriverPage() {
       dataIndex: "user",
       key: "firstName",
       render: ({ firstName }) => <a>{firstName}</a>,
-      filterDropdown: showFilters ? (
-        <Input
-          placeholder="Search First Name"
-          onChange={(e) => handleFilterChange("firstName", e.target.value)}
-        />
-      ) : null,
+      filterDropdown: (
+        <div style={{ padding: 8 }}>
+          <Input
+            placeholder="Search First Name"
+            value={searchFirstName}
+            suffix={
+              <SearchOutlined
+                style={{ color: searchFirstName ? "blue" : "gray" }}
+              />
+            }
+            onChange={(e) => {
+              const newSearchValue = "firstName";
+              setSearchFirstName(e.target.value);
+              if (!searchRef.current.includes(newSearchValue)) {
+                searchRef.current.push(newSearchValue);
+              }
+              handleFilterChange("firstName", e.target.value);
+            }}
+          />
+          <div style={{ marginTop: 8 }}>
+            <Button
+              type="primary"
+              icon={<SearchOutlined />}
+              onClick={() => handleFilterChange("firstName", searchFirstName)}
+              style={{ marginRight: 8 }}
+            >
+              Search
+            </Button>
+            <Button
+              icon={<ReloadOutlined />}
+              onClick={() => {
+                setSearchFirstName(""); // Reset the search field
+                handleFilterChange("firstName", ""); // Reset filter
+              }}
+            >
+              Reset
+            </Button>
+          </div>
+        </div>
+      ),
+      filterIcon: () => (
+        <SearchOutlined style={{ color: searchFirstName ? "blue" : "gray" }} />
+      ),
     },
     {
       title: "Last Name",
       dataIndex: "user",
       key: "lastName",
       render: ({ lastName }) => <a>{lastName}</a>,
-      filterDropdown: showFilters ? (
-        <Input
-          placeholder="Search Last Name"
-          onChange={(e) => handleFilterChange("lastName", e.target.value)}
-        />
-      ) : null,
+      filterDropdown: (
+        <div style={{ padding: 8 }}>
+          <Input
+            placeholder="Search Last Name"
+            value={searchLastName}
+            suffix={
+              <SearchOutlined
+                style={{ color: searchLastName ? "blue" : "gray" }}
+              />
+            }
+            onChange={(e) => {
+              const newSearchValue = "lastName";
+              setSearchLastName(e.target.value);
+              if (!searchRef.current.includes(newSearchValue)) {
+                searchRef.current.push(newSearchValue);
+              }
+              handleFilterChange("lastName", e.target.value);
+            }}
+          />
+          <div style={{ marginTop: 8 }}>
+            <Button
+              type="primary"
+              icon={<SearchOutlined />}
+              onClick={() => handleFilterChange("lastName", searchLastName)}
+              style={{ marginRight: 8 }}
+            >
+              Search
+            </Button>
+            <Button
+              icon={<ReloadOutlined />}
+              onClick={() => {
+                setSearchLastName(""); // Reset the search field
+                handleFilterChange("lastName", ""); // Reset filter
+              }}
+            >
+              Reset
+            </Button>
+          </div>
+        </div>
+      ),
+      filterIcon: () => (
+        <SearchOutlined style={{ color: searchLastName ? "blue" : "gray" }} />
+      ),
     },
     {
       title: "Email",
       dataIndex: "user",
       key: "email",
-      render: ({ email }) => <p>{email}</p>,
-      filterDropdown: showFilters ? (
-        <Input
-          placeholder="Search Email"
-          onChange={(e) => handleFilterChange("email", e.target.value)}
-        />
-      ) : null,
+      render: ({ email }) => <a>{email}</a>,
+      filterDropdown: (
+        <div style={{ padding: 8 }}>
+          <Input
+            placeholder="Search Email"
+            value={searchEmail}
+            suffix={
+              <SearchOutlined
+                style={{ color: searchEmail ? "blue" : "gray" }}
+              />
+            }
+            onChange={(e) => {
+              const searchValue = "email";
+              setSearchEmail(e.target.value);
+              if (!searchRef.current.includes(searchValue)) {
+                searchRef.current.push(searchValue);
+              }
+              handleFilterChange("email", e.target.value);
+            }}
+          />
+          <div style={{ marginTop: 8 }}>
+            <Button
+              type="primary"
+              icon={<SearchOutlined />}
+              onClick={() => handleFilterChange("email", searchEmail)}
+              style={{ marginRight: 8 }}
+            >
+              Search
+            </Button>
+            <Button
+              icon={<ReloadOutlined />}
+              onClick={() => {
+                setSearchEmail(""); // Reset the search field
+                handleFilterChange("email", ""); // Reset filter
+              }}
+            >
+              Reset
+            </Button>
+          </div>
+        </div>
+      ),
+      filterIcon: () => (
+        <SearchOutlined style={{ color: searchEmail ? "blue" : "gray" }} />
+      ),
     },
     {
       title: "Company Name",
@@ -189,42 +323,139 @@ export default function DriverPage() {
         }
         return <p>Company not available</p>;
       },
-      filterDropdown: showFilters ? (
-        <Input
-          placeholder="Search Created By"
-          onChange={(e) => handleFilterChange("createdBy", e.target.value)}
+      filterDropdown: (
+        <div style={{ padding: 8 }}>
+          <Input
+            placeholder="Search Company Name"
+            value={searchCompanyName}
+            suffix={
+              <SearchOutlined
+                style={{ color: searchCompanyName ? "blue" : "gray" }}
+              />
+            }
+            onChange={(e) => {
+              const newSearchValue = "company";
+              setSearchCompanyName(e.target.value);
+              if (!searchRef.current.includes(newSearchValue)) {
+                searchRef.current.push(newSearchValue);
+              }
+              handleFilterChange("companyName", e.target.value);
+            }}
+          />
+          <div style={{ marginTop: 8 }}>
+            <Button
+              type="primary"
+              icon={<SearchOutlined />}
+              onClick={() =>
+                handleFilterChange("companyName", searchCompanyName)
+              }
+              style={{ marginRight: 8 }}
+            >
+              Search
+            </Button>
+            <Button
+              icon={<ReloadOutlined />}
+              onClick={() => {
+                setSearchCompanyName(""); // Reset the search field
+                handleFilterChange("companyName", ""); // Reset filter
+              }}
+            >
+              Reset
+            </Button>
+          </div>
+        </div>
+      ),
+      filterIcon: () => (
+        <SearchOutlined
+          style={{ color: searchCompanyName ? "blue" : "gray" }}
         />
-      ) : null,
+      ),
     },
     {
       title: "Date of Birth",
       dataIndex: "user",
       key: "dateOfBirth",
-      render: (user: any) => {
-        // Safely access and format the dateOfBirth field
-        const dateOfBirth = user?.dateOfBirth;
-        return dateOfBirth
-          ? new Date(dateOfBirth).toLocaleDateString("en-GB")
-          : "";
+      render: ({ dateOfBirth }) => {
+        const date = new Date(dateOfBirth);
+        return dateOfBirth ? date.toLocaleDateString("en-GB") : "";
       },
-      filterDropdown: showFilters ? (
-        <Input
-          placeholder="Search date of bIrth"
-          onChange={(e) => handleFilterChange("dateOfBirth", e.target.value)}
-        />
-      ) : null,
+      filterDropdown: (
+        <div style={{ padding: 8 }}>
+          <Input
+            placeholder="Search date of bIrth"
+            value={searchDob}
+            suffix={
+              <SearchOutlined style={{ color: searchDob ? "blue" : "gray" }} />
+            }
+            onChange={(e) => {
+              const newSearchValue = "dateOfBirth";
+              setSearchDob(e.target.value);
+              if (!searchRef.current.includes(newSearchValue)) {
+                searchRef.current.push(newSearchValue);
+              }
+              handleFilterChange("dateOfBirth", e.target.value);
+            }}
+          />
+          <div style={{ marginTop: 8 }}>
+            <Button
+              type="primary"
+              icon={<SearchOutlined />}
+              onClick={() => handleFilterChange("dateOfBirth", searchDob)}
+              style={{ marginRight: 8 }}
+            >
+              Search
+            </Button>
+            <Button
+              icon={<ReloadOutlined />}
+              onClick={() => {
+                setSearchDob(""); // Reset the search field
+                handleFilterChange("dateOfBirth", ""); // Reset filter
+              }}
+            >
+              Reset
+            </Button>
+          </div>
+        </div>
+      ),
+      filterIcon: () => (
+        <SearchOutlined style={{ color: searchDob ? "blue" : "gray" }} />
+      ),
     },
     {
       title: "Status",
       dataIndex: "status",
       key: "status",
+      filterDropdown: (
+        <Checkbox.Group
+          options={[
+            { label: "Available", value: "AVAILABLE" },
+            { label: "On Leave", value: "ON_LEAVE" },
+            { label: "Suspended", value: "SUSPENDED" },
+            { label: "Off Duty", value: "OFF_DUTY" },
+            { label: "On Trip", value: "ON_TRIP" },
+          ]}
+          value={searchStatus}
+          onChange={(checkedValues) => {
+            setSearchStatus(checkedValues);
+            handleFilterChange("status", checkedValues);
+          }}
+          className="p-4"
+        />
+      ),
+      filterIcon: () => (
+        <FilterOutlined
+          style={{
+            color: searchStatus.length > 0 ? "blue" : "gray", // Change color based on selection
+          }}
+        />
+      ),
       render: (status: string) => {
         const statusColors: { [key: string]: string } = {
           AVAILABLE: "green",
-          ON_LEAVE: "blue",
+          ON_LEAVE: "gray",
           SUSPENDED: "red",
-          OFF_DUTY: "orange",
-          ON_TRIP: "purple",
+          OFF_DUTY: "yellow",
+          ON_TRIP: "blue",
         };
         return (
           <Tag color={statusColors[status] || "default"}>
@@ -237,13 +468,50 @@ export default function DriverPage() {
       title: "Contact",
       dataIndex: "user",
       key: "contacts",
-      render: ({ contacts }) => <p>{contacts}</p>,
-      filterDropdown: showFilters ? (
-        <Input
-          placeholder="Search contact"
-          onChange={(e) => handleFilterChange("contacts", e.target.value)}
-        />
-      ) : null,
+      render: ({ contacts }) => <a>{contacts}</a>,
+      filterDropdown: (
+        <div style={{ padding: 8 }}>
+          <Input
+            placeholder="Search contact"
+            value={searchContact}
+            suffix={
+              <SearchOutlined
+                style={{ color: searchContact ? "blue" : "gray" }}
+              />
+            }
+            onChange={(e) => {
+              const searchValue = "contacts";
+              setSearchContact(e.target.value);
+              if (!searchRef.current.includes(searchValue)) {
+                searchRef.current.push(searchValue);
+              }
+              handleFilterChange("contacts", e.target.value);
+            }}
+          />
+          <div style={{ marginTop: 8 }}>
+            <Button
+              type="primary"
+              icon={<SearchOutlined />}
+              onClick={() => handleFilterChange("contacts", searchContact)}
+              style={{ marginRight: 8 }}
+            >
+              Search
+            </Button>
+            <Button
+              icon={<ReloadOutlined />}
+              onClick={() => {
+                setSearchContact(""); // Reset the search field
+                handleFilterChange("contacts", ""); // Reset filter
+              }}
+            >
+              Reset
+            </Button>
+          </div>
+        </div>
+      ),
+      filterIcon: () => (
+        <SearchOutlined style={{ color: searchContact ? "blue" : "gray" }} />
+      ),
     },
     {
       title: "license Expiry Date",
@@ -253,25 +521,99 @@ export default function DriverPage() {
         const date = new Date(text);
         return text ? date.toLocaleDateString("en-GB") : ""; // "en-GB" is for "dd/mm/yyyy"
       },
-      filterDropdown: showFilters ? (
-        <Input
-          placeholder="Search licenseExpiryDate"
-          onChange={(e) =>
-            handleFilterChange("licenseExpiryDate", e.target.value)
-          }
+      filterDropdown: (
+        <div style={{ padding: 8 }}>
+          <Input
+            placeholder="Search licenseExpiryDate"
+            value={searchLicenseExpiryDate}
+            suffix={
+              <SearchOutlined
+                style={{ color: searchLicenseExpiryDate ? "blue" : "gray" }}
+              />
+            }
+            onChange={(e) => {
+              const searchValue = "licenseExpiryDate";
+              setSearchLicenseExpiryDate(e.target.value);
+              if (!searchRef.current.includes(searchValue)) {
+                searchRef.current.push(searchValue);
+              }
+              handleFilterChange("licenseExpiryDate", e.target.value);
+            }}
+          />
+          <div style={{ marginTop: 8 }}>
+            <Button
+              type="primary"
+              icon={<SearchOutlined />}
+              onClick={() =>
+                handleFilterChange("licenseExpiryDate", searchLicenseExpiryDate)
+              }
+              style={{ marginRight: 8 }}
+            >
+              Search
+            </Button>
+            <Button
+              icon={<ReloadOutlined />}
+              onClick={() => {
+                setSearchLicenseExpiryDate(""); // Reset the search field
+                handleFilterChange("licenseExpiryDate", ""); // Reset filter
+              }}
+            >
+              Reset
+            </Button>
+          </div>
+        </div>
+      ),
+      filterIcon: () => (
+        <SearchOutlined
+          style={{ color: searchLicenseExpiryDate ? "blue" : "gray" }}
         />
-      ) : null,
+      ),
     },
     {
       title: "CNIC Number",
       dataIndex: "nic",
       key: "nic",
-      filterDropdown: showFilters ? (
-        <Input
-          placeholder="Search Cnic"
-          onChange={(e) => handleFilterChange("nic", e.target.value)}
-        />
-      ) : null,
+      filterDropdown: (
+        <div style={{ padding: 8 }}>
+          <Input
+            placeholder="Search Cnic"
+            value={searchNic}
+            suffix={
+              <SearchOutlined style={{ color: searchNic ? "blue" : "gray" }} />
+            }
+            onChange={(e) => {
+              const searchValue = "nic";
+              setNic(e.target.value);
+              if (!searchRef.current.includes(searchValue)) {
+                searchRef.current.push(searchValue);
+              }
+              handleFilterChange("nic", e.target.value);
+            }}
+          />
+          <div style={{ marginTop: 8 }}>
+            <Button
+              type="primary"
+              icon={<SearchOutlined />}
+              onClick={() => handleFilterChange("nic", searchNic)}
+              style={{ marginRight: 8 }}
+            >
+              Search
+            </Button>
+            <Button
+              icon={<ReloadOutlined />}
+              onClick={() => {
+                setNic(""); // Reset the search field
+                handleFilterChange("nic", ""); // Reset filter
+              }}
+            >
+              Reset
+            </Button>
+          </div>
+        </div>
+      ),
+      filterIcon: () => (
+        <SearchOutlined style={{ color: searchNic ? "blue" : "gray" }} />
+      ),
     },
     // {
     //   title: "Profile Picture",
@@ -401,21 +743,10 @@ export default function DriverPage() {
           Add Driver
         </Button>
       </div>
-      <Space>
-        Search Filters{" "}
-        <Tooltip title="Toggle Filter">
-          <FilterOutlined
-            onClick={() =>
-              setShowFilters((prevShowFilters) => !prevShowFilters)
-            }
-            style={{ cursor: "pointer" }}
-          />
-        </Tooltip>
-      </Space>
 
       <Table
         columns={columns}
-        dataSource={filteredData}
+        dataSource={drivers}
         loading={loading}
         scroll={{ x: "max-content" }}
         pagination={{

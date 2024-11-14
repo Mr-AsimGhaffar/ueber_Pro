@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Button,
   Table,
@@ -12,9 +12,15 @@ import {
   Space,
   Tooltip,
 } from "antd";
-import { UserAddOutlined, FilterOutlined } from "@ant-design/icons";
+import {
+  UserAddOutlined,
+  FilterOutlined,
+  SearchOutlined,
+  ReloadOutlined,
+} from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 import UserForm from "@/components/UserForm";
+import debounce from "lodash.debounce";
 
 interface User {
   key: string;
@@ -33,13 +39,24 @@ interface User {
 export default function UserPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [users, setUsers] = useState<User[]>([]);
-  const [showFilters, setShowFilters] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(false);
+  const [searchFirstName, setSearchFirstName] = useState("");
+  const [searchLastName, setSearchLastName] = useState("");
+  const [searchEmail, setSearchEmail] = useState("");
+  const [searchCompanyName, setSearchCompanyName] = useState("");
+  const [searchRole, setSearchRole] = useState("");
+  const [searchDob, setSearchDob] = useState("");
+  const [searchContact, setSearchContact] = useState("");
+  const [searchCreatedBy, setSearchCreatedBy] = useState("");
+  const [searchStatus, setSearchStatus] = useState<string[]>([]);
+  const searchRef = useRef<string[]>([]);
   const [filters, setFilters] = useState({
     firstName: "",
     lastName: "",
     email: "",
+    "company.name": "",
+    "role.name": "",
     password: "",
     confirmPassword: "",
     dateOfBirth: "",
@@ -52,86 +69,95 @@ export default function UserPage() {
     current: 1,
     pageSize: 10,
   });
-  useEffect(() => {
-    const fetchUsers = async () => {
-      setLoading(true);
-      try {
-        const response = await fetch(
-          `/api/listUsers?page=${pagination.current}&limit=${pagination.pageSize}`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              "ngrok-skip-browser-warning": "skipBrowserWarning",
-            },
-          }
-        );
-        if (response.ok) {
-          const data = await response.json();
-          setUsers(
-            data.data.map((item: User) => ({
-              ...item,
-              key: item.id.toString(),
-            }))
-          );
-          setPagination((prev) => ({
-            ...prev,
-            total: data.meta.total,
-          }));
-        } else {
-          const error = await response.json();
-          message.error(error.message || "Failed to fetch users");
-        }
-      } catch (error) {
-        console.error("Error fetching users:", error);
-        message.error("An error occurred while fetching users");
-      } finally {
-        setLoading(false);
-      }
-    };
 
-    fetchUsers();
-  }, [pagination.current, pagination.pageSize]);
+  const fetchUsers = async (currentFilters = filters) => {
+    setLoading(true);
+    try {
+      const filtersObject = {
+        ...(currentFilters.createdBy
+          ? {
+              createdBy: {
+                firstName: currentFilters.createdBy.search,
+                lastName: currentFilters.createdBy.search,
+              },
+            }
+          : {}),
+        ...(currentFilters.status ? { status: currentFilters.status } : {}),
+        ...(currentFilters.firstName
+          ? { firstName: currentFilters.firstName }
+          : {}),
+        ...(currentFilters.lastName
+          ? { lastName: currentFilters.lastName }
+          : {}),
+        ...(currentFilters.email ? { email: currentFilters.email } : {}),
+        ...(currentFilters["company.name"]
+          ? { "company.name": currentFilters["company.name"] }
+          : {}),
+        ...(currentFilters.dateOfBirth
+          ? { dateOfBirth: currentFilters.dateOfBirth }
+          : {}),
+        ...(currentFilters["role.name"]
+          ? { "role.name": currentFilters["role.name"] }
+          : {}),
+        ...(currentFilters.contacts
+          ? { contacts: currentFilters.contacts }
+          : {}),
+      };
+      const query = new URLSearchParams({
+        page: String(pagination.current),
+        limit: String(pagination.pageSize),
+        filters: JSON.stringify(filtersObject),
+      }).toString();
+      const response = await fetch(`/api/listUsers?${query}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          "ngrok-skip-browser-warning": "skipBrowserWarning",
+        },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setUsers(
+          data.data.map((item: User) => ({
+            ...item,
+            key: item.id.toString(),
+          }))
+        );
+        setPagination((prev) => ({
+          ...prev,
+          total: data.meta.total,
+        }));
+      } else {
+        const error = await response.json();
+        message.error(error.message || "Failed to fetch users");
+      }
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      message.error("An error occurred while fetching users");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const debouncedFetchCompanies = debounce(
+    (currentFilters) => fetchUsers(currentFilters),
+    500,
+    { leading: true, trailing: false } // Leading ensures the first call executes immediately
+  );
 
   const handleFilterChange = (
     key: keyof typeof filters,
     value: string | string[]
   ) => {
-    setFilters((prev) => ({ ...prev, [key]: value }));
+    const updatedFilters = { ...filters, [key]: value };
+    setFilters(updatedFilters);
+    setPagination((prev) => ({ ...prev, current: 1 })); // Reset to first page
+    debouncedFetchCompanies(updatedFilters);
   };
 
-  const filteredData = users.filter((user) => {
-    const {
-      firstName,
-      lastName,
-      email,
-      password,
-      confirmPassword,
-      dateOfBirth,
-      contacts,
-      status,
-      createdBy,
-    } = filters;
-    return (
-      (!firstName ||
-        user.firstName.toLowerCase().includes(firstName.toLowerCase())) &&
-      (!lastName ||
-        user.lastName.toLowerCase().includes(lastName.toLowerCase())) &&
-      (!email || user.email.toLowerCase().includes(email.toLowerCase())) &&
-      (!password ||
-        user.password.toLowerCase().includes(password.toLowerCase())) &&
-      (!confirmPassword ||
-        user.confirmPassword
-          .toLowerCase()
-          .includes(confirmPassword.toLowerCase())) &&
-      (!dateOfBirth ||
-        user.dateOfBirth.toLowerCase().includes(dateOfBirth.toLowerCase())) &&
-      (!contacts ||
-        user.contacts.toLowerCase().includes(contacts.toLowerCase())) &&
-      (!status.length || status.includes(user.status)) &&
-      (!createdBy || String(user.createdBy).includes(createdBy.toLowerCase()))
-    );
-  });
+  useEffect(() => {
+    fetchUsers();
+  }, [pagination.current, pagination.pageSize]);
 
   const columns: ColumnsType<User> = [
     {
@@ -139,53 +165,205 @@ export default function UserPage() {
       dataIndex: "firstName",
       key: "firstName",
       render: (text) => <a>{text}</a>,
-      filterDropdown: showFilters ? (
-        <Input
-          placeholder="Search First Name"
-          onChange={(e) => handleFilterChange("firstName", e.target.value)}
-        />
-      ) : null,
+      filterDropdown: (
+        <div style={{ padding: 8 }}>
+          <Input
+            placeholder="Search First Name"
+            value={searchFirstName}
+            suffix={
+              <SearchOutlined
+                style={{ color: searchFirstName ? "blue" : "gray" }}
+              />
+            }
+            onChange={(e) => {
+              const newSearchValue = "firstName";
+              setSearchFirstName(e.target.value);
+              if (!searchRef.current.includes(newSearchValue)) {
+                searchRef.current.push(newSearchValue);
+              }
+              handleFilterChange("firstName", e.target.value);
+            }}
+          />
+          <div style={{ marginTop: 8 }}>
+            <Button
+              type="primary"
+              icon={<SearchOutlined />}
+              onClick={() => handleFilterChange("firstName", searchFirstName)}
+              style={{ marginRight: 8 }}
+            >
+              Search
+            </Button>
+            <Button
+              icon={<ReloadOutlined />}
+              onClick={() => {
+                setSearchFirstName(""); // Reset the search field
+                handleFilterChange("firstName", ""); // Reset filter
+              }}
+            >
+              Reset
+            </Button>
+          </div>
+        </div>
+      ),
+      filterIcon: () => (
+        <SearchOutlined style={{ color: searchFirstName ? "blue" : "gray" }} />
+      ),
     },
     {
       title: "Last Name",
       dataIndex: "lastName",
       key: "lastName",
       render: (text) => <a>{text}</a>,
-      filterDropdown: showFilters ? (
-        <Input
-          placeholder="Search Last Name"
-          onChange={(e) => handleFilterChange("lastName", e.target.value)}
-        />
-      ) : null,
+      filterDropdown: (
+        <div style={{ padding: 8 }}>
+          <Input
+            placeholder="Search Last Name"
+            value={searchLastName}
+            suffix={
+              <SearchOutlined
+                style={{ color: searchLastName ? "blue" : "gray" }}
+              />
+            }
+            onChange={(e) => {
+              const newSearchValue = "lastName";
+              setSearchLastName(e.target.value);
+              if (!searchRef.current.includes(newSearchValue)) {
+                searchRef.current.push(newSearchValue);
+              }
+              handleFilterChange("lastName", e.target.value);
+            }}
+          />
+          <div style={{ marginTop: 8 }}>
+            <Button
+              type="primary"
+              icon={<SearchOutlined />}
+              onClick={() => handleFilterChange("lastName", searchLastName)}
+              style={{ marginRight: 8 }}
+            >
+              Search
+            </Button>
+            <Button
+              icon={<ReloadOutlined />}
+              onClick={() => {
+                setSearchLastName(""); // Reset the search field
+                handleFilterChange("lastName", ""); // Reset filter
+              }}
+            >
+              Reset
+            </Button>
+          </div>
+        </div>
+      ),
+      filterIcon: () => (
+        <SearchOutlined style={{ color: searchLastName ? "blue" : "gray" }} />
+      ),
     },
     {
       title: "Email",
       dataIndex: "email",
       key: "email",
-      filterDropdown: showFilters ? (
-        <Input
-          placeholder="Search Email"
-          onChange={(e) => handleFilterChange("email", e.target.value)}
-        />
-      ) : null,
+      filterDropdown: (
+        <div style={{ padding: 8 }}>
+          <Input
+            placeholder="Search Email"
+            value={searchEmail}
+            suffix={
+              <SearchOutlined
+                style={{ color: searchEmail ? "blue" : "gray" }}
+              />
+            }
+            onChange={(e) => {
+              const searchValue = "email";
+              setSearchEmail(e.target.value);
+              if (!searchRef.current.includes(searchValue)) {
+                searchRef.current.push(searchValue);
+              }
+              handleFilterChange("email", e.target.value);
+            }}
+          />
+          <div style={{ marginTop: 8 }}>
+            <Button
+              type="primary"
+              icon={<SearchOutlined />}
+              onClick={() => handleFilterChange("email", searchEmail)}
+              style={{ marginRight: 8 }}
+            >
+              Search
+            </Button>
+            <Button
+              icon={<ReloadOutlined />}
+              onClick={() => {
+                setSearchEmail(""); // Reset the search field
+                handleFilterChange("email", ""); // Reset filter
+              }}
+            >
+              Reset
+            </Button>
+          </div>
+        </div>
+      ),
+      filterIcon: () => (
+        <SearchOutlined style={{ color: searchEmail ? "blue" : "gray" }} />
+      ),
     },
     {
       title: "Company Name",
       dataIndex: "company",
       key: "company",
       render: (company) => {
-        if (company && company.company) {
-          const { name } = company.company;
+        if (company && company) {
+          const { name } = company;
           return <p>{name}</p>;
         }
         return <p>Company not available</p>;
       },
-      filterDropdown: showFilters ? (
-        <Input
-          placeholder="Search Created By"
-          onChange={(e) => handleFilterChange("createdBy", e.target.value)}
+      filterDropdown: (
+        <div style={{ padding: 8 }}>
+          <Input
+            placeholder="Search Company Name"
+            value={searchCompanyName}
+            suffix={
+              <SearchOutlined
+                style={{ color: searchCompanyName ? "blue" : "gray" }}
+              />
+            }
+            onChange={(e) => {
+              const newSearchValue = "company";
+              setSearchCompanyName(e.target.value);
+              if (!searchRef.current.includes(newSearchValue)) {
+                searchRef.current.push(newSearchValue);
+              }
+              handleFilterChange("company.name", e.target.value);
+            }}
+          />
+          <div style={{ marginTop: 8 }}>
+            <Button
+              type="primary"
+              icon={<SearchOutlined />}
+              onClick={() =>
+                handleFilterChange("company.name", searchCompanyName)
+              }
+              style={{ marginRight: 8 }}
+            >
+              Search
+            </Button>
+            <Button
+              icon={<ReloadOutlined />}
+              onClick={() => {
+                setSearchCompanyName(""); // Reset the search field
+                handleFilterChange("company.name", ""); // Reset filter
+              }}
+            >
+              Reset
+            </Button>
+          </div>
+        </div>
+      ),
+      filterIcon: () => (
+        <SearchOutlined
+          style={{ color: searchCompanyName ? "blue" : "gray" }}
         />
-      ) : null,
+      ),
     },
     {
       title: "Role",
@@ -198,32 +376,124 @@ export default function UserPage() {
         }
         return null;
       },
-      filterDropdown: showFilters ? (
-        <Input
-          placeholder="Search Created By"
-          onChange={(e) => handleFilterChange("createdBy", e.target.value)}
-        />
-      ) : null,
+      filterDropdown: (
+        <div style={{ padding: 8 }}>
+          <Input
+            placeholder="Search Role"
+            value={searchRole}
+            suffix={
+              <SearchOutlined style={{ color: searchRole ? "blue" : "gray" }} />
+            }
+            onChange={(e) => {
+              const newSearchValue = "role";
+              setSearchRole(e.target.value);
+              if (!searchRef.current.includes(newSearchValue)) {
+                searchRef.current.push(newSearchValue);
+              }
+              handleFilterChange("role.name", e.target.value);
+            }}
+          />
+          <div style={{ marginTop: 8 }}>
+            <Button
+              type="primary"
+              icon={<SearchOutlined />}
+              onClick={() => handleFilterChange("role.name", searchRole)}
+              style={{ marginRight: 8 }}
+            >
+              Search
+            </Button>
+            <Button
+              icon={<ReloadOutlined />}
+              onClick={() => {
+                setSearchRole(""); // Reset the search field
+                handleFilterChange("role.name", ""); // Reset filter
+              }}
+            >
+              Reset
+            </Button>
+          </div>
+        </div>
+      ),
+      filterIcon: () => (
+        <SearchOutlined style={{ color: searchRole ? "blue" : "gray" }} />
+      ),
     },
     {
-      title: "Date of BIrth",
+      title: "Date of Birth",
       dataIndex: "dateOfBirth",
       key: "dateOfBirth",
       render: (text: string) => {
         const date = new Date(text);
         return text ? date.toLocaleDateString("en-GB") : "";
       },
-      filterDropdown: showFilters ? (
-        <Input
-          placeholder="Search date of bIrth"
-          onChange={(e) => handleFilterChange("dateOfBirth", e.target.value)}
-        />
-      ) : null,
+      filterDropdown: (
+        <div style={{ padding: 8 }}>
+          <Input
+            placeholder="Search date of bIrth"
+            value={searchDob}
+            suffix={
+              <SearchOutlined style={{ color: searchDob ? "blue" : "gray" }} />
+            }
+            onChange={(e) => {
+              const newSearchValue = "dateOfBirth";
+              setSearchDob(e.target.value);
+              if (!searchRef.current.includes(newSearchValue)) {
+                searchRef.current.push(newSearchValue);
+              }
+              handleFilterChange("dateOfBirth", e.target.value);
+            }}
+          />
+          <div style={{ marginTop: 8 }}>
+            <Button
+              type="primary"
+              icon={<SearchOutlined />}
+              onClick={() => handleFilterChange("dateOfBirth", searchDob)}
+              style={{ marginRight: 8 }}
+            >
+              Search
+            </Button>
+            <Button
+              icon={<ReloadOutlined />}
+              onClick={() => {
+                setSearchDob(""); // Reset the search field
+                handleFilterChange("dateOfBirth", ""); // Reset filter
+              }}
+            >
+              Reset
+            </Button>
+          </div>
+        </div>
+      ),
+      filterIcon: () => (
+        <SearchOutlined style={{ color: searchDob ? "blue" : "gray" }} />
+      ),
     },
     {
       title: "Status",
       dataIndex: "status",
       key: "status",
+      filterDropdown: (
+        <Checkbox.Group
+          options={[
+            { label: "Active", value: "ACTIVE" },
+            { label: "Inactive", value: "IN_ACTIVE" },
+            { label: "Suspended", value: "SUSPENDED" },
+          ]}
+          value={searchStatus}
+          onChange={(checkedValues) => {
+            setSearchStatus(checkedValues);
+            handleFilterChange("status", checkedValues);
+          }}
+          className="p-4"
+        />
+      ),
+      filterIcon: () => (
+        <FilterOutlined
+          style={{
+            color: searchStatus.length > 0 ? "blue" : "gray", // Change color based on selection
+          }}
+        />
+      ),
       render: (status: string) => {
         const statusColors: { [key: string]: string } = {
           ACTIVE: "green",
@@ -241,12 +511,49 @@ export default function UserPage() {
       title: "Contact",
       dataIndex: "contacts",
       key: "contacts",
-      filterDropdown: showFilters ? (
-        <Input
-          placeholder="Search contact"
-          onChange={(e) => handleFilterChange("contacts", e.target.value)}
-        />
-      ) : null,
+      filterDropdown: (
+        <div style={{ padding: 8 }}>
+          <Input
+            placeholder="Search contact"
+            value={searchContact}
+            suffix={
+              <SearchOutlined
+                style={{ color: searchContact ? "blue" : "gray" }}
+              />
+            }
+            onChange={(e) => {
+              const searchValue = "contacts";
+              setSearchContact(e.target.value);
+              if (!searchRef.current.includes(searchValue)) {
+                searchRef.current.push(searchValue);
+              }
+              handleFilterChange("contacts", e.target.value);
+            }}
+          />
+          <div style={{ marginTop: 8 }}>
+            <Button
+              type="primary"
+              icon={<SearchOutlined />}
+              onClick={() => handleFilterChange("contacts", searchContact)}
+              style={{ marginRight: 8 }}
+            >
+              Search
+            </Button>
+            <Button
+              icon={<ReloadOutlined />}
+              onClick={() => {
+                setSearchContact(""); // Reset the search field
+                handleFilterChange("contacts", ""); // Reset filter
+              }}
+            >
+              Reset
+            </Button>
+          </div>
+        </div>
+      ),
+      filterIcon: () => (
+        <SearchOutlined style={{ color: searchContact ? "blue" : "gray" }} />
+      ),
     },
     {
       title: "Created By",
@@ -259,12 +566,49 @@ export default function UserPage() {
         }
         return null;
       },
-      filterDropdown: showFilters ? (
-        <Input
-          placeholder="Search Created By"
-          onChange={(e) => handleFilterChange("createdBy", e.target.value)}
-        />
-      ) : null,
+      filterDropdown: (
+        <div style={{ padding: 8 }}>
+          <Input
+            placeholder="Search Created By"
+            value={searchCreatedBy}
+            suffix={
+              <SearchOutlined
+                style={{ color: searchCreatedBy ? "blue" : "gray" }}
+              />
+            }
+            onChange={(e) => {
+              const searchValue = "createdByUser";
+              setSearchCreatedBy(e.target.value);
+              if (!searchRef.current.includes(searchValue)) {
+                searchRef.current.push(searchValue);
+              }
+              handleFilterChange("createdBy", e.target.value);
+            }}
+          />
+          <div style={{ marginTop: 8 }}>
+            <Button
+              type="primary"
+              icon={<SearchOutlined />}
+              onClick={() => handleFilterChange("createdBy", searchCreatedBy)}
+              style={{ marginRight: 8 }}
+            >
+              Search
+            </Button>
+            <Button
+              icon={<ReloadOutlined />}
+              onClick={() => {
+                setSearchCompanyName(""); // Reset the search field
+                handleFilterChange("createdBy", ""); // Reset filter
+              }}
+            >
+              Reset
+            </Button>
+          </div>
+        </div>
+      ),
+      filterIcon: () => (
+        <SearchOutlined style={{ color: searchCreatedBy ? "blue" : "gray" }} />
+      ),
     },
     // {
     //   title: "Profile Picture",
@@ -394,21 +738,10 @@ export default function UserPage() {
           Add User
         </Button>
       </div>
-      <Space>
-        Search Filters{" "}
-        <Tooltip title="Toggle Filter">
-          <FilterOutlined
-            onClick={() =>
-              setShowFilters((prevShowFilters) => !prevShowFilters)
-            }
-            style={{ cursor: "pointer" }}
-          />
-        </Tooltip>
-      </Space>
 
       <Table
         columns={columns}
-        dataSource={filteredData}
+        dataSource={users}
         loading={loading}
         scroll={{ x: "max-content" }}
         pagination={{
