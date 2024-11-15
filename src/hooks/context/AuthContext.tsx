@@ -1,36 +1,48 @@
-// context/AuthContext.tsx
-import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
-import { getUser } from '@/lib/data';
+// context/UserContext.tsx
+"use client";
+import {
+  createContext,
+  useContext,
+  useState,
+  ReactNode,
+  useEffect,
+} from "react";
 
-interface AuthContextType {
-  user: any;
-  setUser: (user: any) => void;
+interface User {
+  id: string;
+  firstName: string;
+  lastName: string;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+interface UserContextType {
+  user: User | null;
+  setUser: (user: User) => void;
+}
 
-export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<any>(null);
+export const UserContext = createContext<UserContextType | undefined>(
+  undefined
+);
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      const currentUser = await getUser();
-      setUser(currentUser);
-    };
-    fetchUser();
-  }, []);
+export const UserProvider = ({
+  children,
+  initialUser,
+}: {
+  children: ReactNode;
+  initialUser: User | null;
+}) => {
+  const [user, setUser] = useState<User | null>(initialUser);
 
   return (
-    <AuthContext.Provider value={{ user, setUser }}>
+    <UserContext.Provider value={{ user, setUser }}>
       {children}
-    </AuthContext.Provider>
+    </UserContext.Provider>
   );
 };
 
-export const useAuth = (): AuthContextType => {
-  const context = useContext(AuthContext);
+export const useUser = () => {
+  const context = useContext(UserContext);
   if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useUser must be used within a UserProvider");
   }
   return context;
 };
