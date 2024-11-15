@@ -41,7 +41,7 @@ export default async function handler(
             password,
             confirmPassword,
             dateOfBirth,
-            status,
+            driverStatus: status,
             contacts: [contacts],
             licenseExpiryDate,
             nic,
