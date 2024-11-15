@@ -240,12 +240,16 @@ export default function UserForm({
           rules={[{ required: true, message: "Please select a company" }]}
         >
           <Select
+            showSearch
             placeholder="Select a company"
             loading={loading}
             options={userName.map((user) => ({
               value: user.id,
               label: user.name,
             }))}
+            filterOption={(input, option) =>
+              (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
+            }
           />
         </Form.Item>
 
