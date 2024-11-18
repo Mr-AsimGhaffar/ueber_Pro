@@ -8,11 +8,11 @@ async function getMessages(locale: string) {
 
 interface Props {
   locale: Locale;
-  user: User;
+  // user: User;
 }
 
-export default async function Navbar({ locale, user }: Props) {
+export default async function Navbar({ locale }: Props) {
   const messages = await getMessages(locale);
 
-  return <NavbarContent locale={locale} messages={messages} user={user} />;
+  return <NavbarContent locale={locale} messages={messages} />;
 }

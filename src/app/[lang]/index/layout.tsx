@@ -5,7 +5,7 @@ import Sidebar from "@/components/Sidebar";
 
 import { getUser } from "@/lib/data";
 import { Locale } from "@/lib/definitions";
-
+import { UserProvider } from "@/hooks/context/AuthContext";
 import { i18n } from "../../../../i18n-config";
 import { cookies, headers } from "next/headers";
 
@@ -36,10 +36,10 @@ export default async function Root({ params, children }: Props) {
       <body className="relative min-h-screen overflow-y-auto bg-gray-50">
         <ConfigProvider>
           {!isAuthPage && (
-            <>
-              <Navbar locale={params.lang} user={user} />
+            <UserProvider initialUser={user}>
+              <Navbar locale={params.lang} />
               <Sidebar locale={params.lang} role={role} />
-            </>
+            </UserProvider>
           )}
           {isAuthPage ? children : <Content>{children}</Content>}
         </ConfigProvider>

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { IntlProvider, FormattedMessage } from "react-intl";
 import clsx from "clsx";
 import Link from "next/link";
@@ -8,18 +8,21 @@ import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import useOutsideClick from "@/hooks/useOutsideClick";
 import { User, Locale } from "@/lib/definitions";
-import { Spin } from "antd";
+import { message, Spin } from "antd";
+import Cookies from "js-cookie";
+import { useUser } from "@/hooks/context/AuthContext";
 
 interface Props {
-  user: User;
+  // user: User;
   locale: Locale;
   messages: Record<string, string>;
 }
 
-export default function NavbarContent({ user, locale, messages }: Props) {
+export default function NavbarContent({ locale, messages }: Props) {
+  const { user } = useUser();
+  // const [selectedUser, setSelectedUser] = useState<any>(null);
   const pathname = usePathname();
   const router = useRouter();
-
   const [loading, setLoading] = useState(false);
   const [percent, setPercent] = useState(0);
 
@@ -80,6 +83,37 @@ export default function NavbarContent({ user, locale, messages }: Props) {
   useOutsideClick(langSwitcherMenuRef, () => {
     setLangSwitcherMenuOpen(false);
   });
+
+  // const handleEdit = async (userId: string) => {
+  //   try {
+  //     const response = await fetch(`/api/getUserById?id=${userId}`, {
+  //       method: "GET",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //     });
+
+  //     if (response.ok) {
+  //       const data = await response.json();
+  //       setSelectedUser(data.data);
+  //       setUser(data.data);
+  //     } else {
+  //       const error = await response.json();
+  //       message.error(error.message || "Failed to fetch user details");
+  //     }
+  //   } catch (error) {
+  //     console.error("Error fetching user data:", error);
+  //     message.error("An error occurred while fetching user details");
+  //   }
+  // };
+  // useEffect(() => {
+  //   const userId = Cookies.get("id"); // Use js-cookie to get the 'id' cookie
+  //   if (userId) {
+  //     handleEdit(userId);
+  //   } else {
+  //     message.error("User ID not found in cookies");
+  //   }
+  // }, []);
 
   return (
     <IntlProvider locale={locale} messages={messages}>
@@ -281,7 +315,11 @@ export default function NavbarContent({ user, locale, messages }: Props) {
                       {user?.firstName
                         ? user.firstName.charAt(0).toUpperCase() +
                           user.firstName.slice(1)
-                        : "Guest"}
+                        : "Guest"}{" "}
+                      {user?.lastName
+                        ? user.lastName.charAt(0).toUpperCase() +
+                          user.lastName.slice(1)
+                        : ""}
                     </p>
                   </MenuItem>
 
