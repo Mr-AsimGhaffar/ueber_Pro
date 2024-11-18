@@ -1,19 +1,98 @@
 "use client";
 
+import { useCar } from "@/hooks/context/AuthContextCars";
 import { Table } from "antd";
 
-interface Booking {
-  id: string;
-  carImage: string;
-  car: string;
-  rentType: string;
-  startDate: string;
-  endDate: string;
-  price: string; // Price as a string
-  status: "upcoming" | "inprogress" | "completed" | "Cancelled";
-}
-
 const DashboardTable = () => {
+  const { cars } = useCar();
+  const capitalizeFirstLetter = (str: string) => {
+    return str
+      .split(" ")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
+  };
+  const formatStatus = (status: string) => {
+    return capitalizeFirstLetter(status.replace(/_/g, " "));
+  };
+  const formatDate = (date: string) => {
+    const parsedDate = new Date(date);
+    return parsedDate.toLocaleDateString("en-US", {
+      year: "2-digit",
+      month: "2-digit",
+      day: "2-digit",
+    });
+  };
+
+  const bookings =
+    cars?.data?.map((car, index) => ({
+      key: car.id.toString(),
+      car: capitalizeFirstLetter(car.brand.name),
+      // carImage: car.imageUrl,
+      rentType: car.rentalType,
+      startDate: formatDate(car.createdAt),
+      endDate: formatDate(car.updatedAt),
+      category: car.category.name,
+      status: car.status,
+    })) || [];
+
+  const columns = [
+    {
+      title: "Car",
+      // dataIndex: "car",
+      key: "car",
+      render: (record: { car: string; rentType: string }) => {
+        return (
+          <div className="flex items-center gap-4">
+            <img
+              src="https://images.unsplash.com/photo-1542362567-b07e54358753?ixlib=rb-1.2.1&auto=format&fit=crop&w=334&q=80"
+              alt={record.car}
+              className="w-12 h-12 object-cover"
+            />
+            <div>
+              <p className="text-sm md:text-base font-semibold">{record.car}</p>
+              <p className="text-gray-500">Rent Type : {record.rentType}</p>
+            </div>
+          </div>
+        );
+      },
+    },
+    {
+      title: "Start Date",
+      dataIndex: "startDate",
+      key: "startDate",
+    },
+    {
+      title: "End Date",
+      dataIndex: "endDate",
+      key: "endDate",
+    },
+    {
+      title: "Category",
+      dataIndex: "category",
+      key: "category",
+      render: (text: String) => <span>{`${text}`}</span>,
+    },
+    {
+      title: "Status",
+      dataIndex: "status",
+      key: "status",
+      render: (text: string) => (
+        <span
+          className={`p-1 rounded-lg font-bold ${
+            text === "AVAILABLE"
+              ? "bg-green-100 text-green-600"
+              : text === "IN_USE"
+              ? "bg-blue-100 text-blue-600"
+              : text === "MAINTENANCE"
+              ? "bg-red-100 text-red-600"
+              : "bg-green-100 text-green-600"
+          }`}
+        >
+          {formatStatus(text)}
+        </span>
+      ),
+    },
+  ];
   return (
     <div>
       <Table
@@ -24,117 +103,5 @@ const DashboardTable = () => {
     </div>
   );
 };
-
-const bookings = [
-  {
-    key: "1",
-    car: "Ferrari 458 MM Speciale",
-    carImage: "https://images.unsplash.com/photo-1550355291-bbee04a92027",
-    rentType: "Hourly",
-    startDate: "15 Sep 2023, 11:30 PM",
-    endDate: "15 Sep 2023, 1:30 PM",
-    price: "200",
-    status: "Upcoming",
-  },
-  {
-    key: "2",
-    car: "Kia Soul 2016",
-    carImage: "https://images.unsplash.com/photo-1549317661-bd32c8ce0db2",
-    rentType: "Hourly",
-    startDate: "15 Sep 2023, 09:00 AM",
-    endDate: "15 Sep 2023, 1:30 PM",
-    price: "300",
-    status: "Upcoming",
-  },
-  {
-    key: "3",
-    car: "Toyota Camry SE 350",
-    carImage: "https://images.unsplash.com/photo-1542362567-b07e54358753",
-    rentType: "Day",
-    startDate: "18 Sep 2023, 09:00 AM",
-    endDate: "18 Sep 2023, 05:00 PM",
-    price: "600",
-    status: "Inprogress",
-  },
-  {
-    key: "4",
-    car: "Audi A3 2019 new",
-    carImage: "https://images.unsplash.com/photo-1550355291-bbee04a92027",
-    rentType: "Weekly",
-    startDate: "10 Oct 2023, 10:30 AM",
-    endDate: "16 Oct 2023, 10:30 AM",
-    price: "800",
-    status: "Cancelled",
-  },
-  {
-    key: "5",
-    car: "2018 Chevrolet Camaro",
-    carImage: "https://images.unsplash.com/photo-1549317661-bd32c8ce0db2",
-    rentType: "Hourly",
-    startDate: "14 Nov 2023, 02:00 PM",
-    endDate: "14 Nov 2023, 04:00 PM",
-    price: "240",
-    status: "Completed",
-  },
-];
-
-const columns = [
-  {
-    title: "Car",
-    // dataIndex: "car",
-    key: "car",
-    render: (record: Booking) => {
-      return (
-        <div className="flex items-center gap-4">
-          <img
-            src={record.carImage}
-            alt={record.car}
-            className="w-12 h-12 object-cover"
-          />
-          <div>
-            <p className="text-sm md:text-base font-semibold">{record.car}</p>
-            <p className="text-gray-500">Rent Type : {record.rentType}</p>
-          </div>
-        </div>
-      );
-    },
-  },
-  {
-    title: "Start Date",
-    dataIndex: "startDate",
-    key: "startDate",
-  },
-  {
-    title: "End Date",
-    dataIndex: "endDate",
-    key: "endDate",
-  },
-  {
-    title: "Price",
-    dataIndex: "price",
-    key: "price",
-    render: (text: String) => <span>{`$${text}`}</span>,
-  },
-  {
-    title: "Status",
-    dataIndex: "status",
-    key: "status",
-    render: (text: String) => (
-      <span
-        className={`p-1 rounded-lg font-bold ${
-          text === "Upcoming"
-            ? "bg-yellow-100 text-yellow-600"
-            : text === "Inprogress"
-            ? "bg-blue-100 text-blue-600"
-            : text === "Cancelled"
-            ? "bg-red-100 text-red-600"
-            : "bg-green-100 text-green-600"
-        }`}
-      >
-        {text}
-      </span>
-    ),
-  },
-];
 
 export default DashboardTable;

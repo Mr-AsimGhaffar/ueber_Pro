@@ -1,4 +1,4 @@
-import { User, Report, TeamMember, Activity } from "@/lib/definitions";
+import { User, Cars, Report, TeamMember, Activity } from "@/lib/definitions";
 import { cookies } from "next/headers";
 import Cookies from "js-cookie";
 
@@ -69,6 +69,27 @@ export async function getUser(): Promise<User> {
 
   const user = await response.json();
   return user.data;
+}
+
+export async function getCars(): Promise<Cars> {
+  const accessToken = await getAccessToken();
+
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/car/`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+
+  if (!response.ok) {
+    if (response.status === 401) {
+      throw new Error("Unauthorized. Please log in again.");
+    }
+    throw new Error("Failed to fetch user data");
+  }
+
+  const cars = await response.json();
+  return cars;
 }
 
 export async function getReports(): Promise<Report[]> {

@@ -20,124 +20,30 @@ import {
   AppstoreOutlined,
   EnvironmentOutlined,
 } from "@ant-design/icons";
-import { useRouter } from "next/navigation";
+import CarFilters from "@/components/cars/CarFilters";
+import { useCar } from "@/hooks/context/AuthContextCars";
+import { BsFillFuelPumpFill } from "react-icons/bs";
+import { CiCalendar } from "react-icons/ci";
+import { MdCarRental, MdEventAvailable } from "react-icons/md";
+import { TbListDetails } from "react-icons/tb";
 
 const { Option } = Select;
 
-interface User {
-  id: number;
-  name: string;
-  username: string;
-  email: string;
-  image: string;
-  address: {
-    street: string;
-    suite: string;
-    city: string;
-    zipcode: string;
-    geo: {
-      lat: string;
-      lng: string;
-    };
-  };
-}
-
-// interface CarListing {
-//   id: string;
-//   name: string;
-//   brand: string;
-//   rating: number;
-//   reviews: number;
-//   transmission: string;
-//   mileage: string;
-//   fuelType: string;
-//   year: string;
-//   capacity: string;
-//   location: string;
-//   price: number;
-//   image: string;
-//   featured?: boolean;
-//   topRated?: boolean;
-// }
-
-// const carListings: CarListing[] = [
-//   {
-//     id: "1",
-//     name: "Toyota Camry SE 350",
-//     brand: "Toyota",
-//     rating: 4.5,
-//     reviews: 138,
-//     transmission: "Auto",
-//     mileage: "10 KM",
-//     fuelType: "Petrol",
-//     year: "2018",
-//     capacity: "5 Persons",
-//     location: "Washington",
-//     price: 160,
-//     image:
-//       "https://images.unsplash.com/photo-1550355291-bbee04a92027?ixlib=rb-1.2.1&auto=format&fit=crop&w=334&q=80",
-//     featured: true,
-//   },
-//   {
-//     id: "2",
-//     name: "Kia Soul 2016",
-//     brand: "KIA",
-//     rating: 4.0,
-//     reviews: 170,
-//     transmission: "Auto",
-//     mileage: "22 KM",
-//     fuelType: "Petrol",
-//     year: "2016",
-//     capacity: "5 Persons",
-//     location: "Belgium",
-//     price: 80,
-//     image:
-//       "https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?ixlib=rb-1.2.1&auto=format&fit=crop&w=334&q=80",
-//   },
-//   {
-//     id: "3",
-//     name: "Audi A3 2019 new",
-//     brand: "Audi",
-//     rating: 4.8,
-//     reviews: 150,
-//     transmission: "Manual",
-//     mileage: "10 KM",
-//     fuelType: "Petrol",
-//     year: "2019",
-//     capacity: "4 Persons",
-//     location: "Newyork, USA",
-//     price: 45,
-//     image:
-//       "https://images.unsplash.com/photo-1542362567-b07e54358753?ixlib=rb-1.2.1&auto=format&fit=crop&w=334&q=80",
-//   },
-// ];
-
 export default function ListingsPage() {
+  const { cars } = useCar();
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  const [users, setUsers] = useState<User[]>([]);
-  const router = useRouter();
 
-  useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const response = await fetch("/api/carListing"); // Call your API
-        const data = await response.json();
-        setUsers(data);
-      } catch (error) {
-        console.error("Error fetching users:", error);
-      }
-    };
-
-    fetchUsers();
-  }, []);
-
-  const handleCarClick = (userId: number) => {
-    router.push(`/en/index/listings/${userId}`);
+  const capitalizeFirstLetter = (str: string) => {
+    return str
+      .split(" ")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
   };
 
   return (
     <div className="p-6">
       {/* Search Section */}
+      <CarFilters />
       <Card className="mb-8">
         <Row gutter={[16, 16]}>
           <Col xs={24} sm={24} md={6}>
@@ -217,29 +123,23 @@ export default function ListingsPage() {
 
       {/* Car Listings */}
       <Row gutter={[16, 16]}>
-        {users.map((user) => (
+        {cars?.data?.map((car) => (
           <Col
-            key={user.id}
+            key={car.id}
             xs={24}
             sm={viewMode === "grid" ? 12 : 24}
-            lg={viewMode === "grid" ? 8 : 24}
+            lg={viewMode === "grid" ? 6 : 24}
           >
             <Card
               cover={
-                <div
-                  className="relative cursor-pointer"
-                  onClick={() => handleCarClick(user.id)}
-                >
-                  <img
-                    alt={user.name}
-                    src="https://images.unsplash.com/photo-1542362567-b07e54358753?ixlib=rb-1.2.1&auto=format&fit=crop&w=334&q=80"
-                    className="h-48 w-full object-cover"
-                  />
-                  {/* {car.featured && (
-                    <div className="absolute top-4 left-0 bg-red-500 text-white px-4 py-1">
-                      Featured
-                    </div>
-                  )} */}
+                <div className="relative cursor-pointer">
+                  <div className="overflow-hidden">
+                    <img
+                      alt={car.brand.name}
+                      src="https://images.unsplash.com/photo-1542362567-b07e54358753?ixlib=rb-1.2.1&auto=format&fit=crop&w=334&q=80"
+                      className="h-48 w-full object-cover transition-transform duration-700 ease-in-out hover:scale-110"
+                    />
+                  </div>
                   <Button
                     type="text"
                     icon={<HeartOutlined />}
@@ -248,14 +148,15 @@ export default function ListingsPage() {
                 </div>
               }
               className="cursor-pointer hover:shadow-lg transition-shadow"
-              onClick={() => handleCarClick(user.id)}
             >
               <div className="flex flex-col gap-2">
                 <div className="flex justify-between items-start">
-                  <h3 className="text-lg font-semibold">{user.name}</h3>
+                  <h3 className="text-lg font-bold">
+                    {capitalizeFirstLetter(car.brand.name)}
+                  </h3>
                   <div className="text-xl font-bold text-red-500">
-                    ${user.username}
-                    <span className="text-sm text-gray-500">/day</span>
+                    {car.category.name}
+                    {/* <span className="text-sm text-gray-500">/day</span> */}
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -268,25 +169,36 @@ export default function ListingsPage() {
                 </div>
                 <div className="grid grid-cols-2 gap-2 mt-2">
                   <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <span>{user.address.street}</span>
+                    <span className="flex items-center gap-1">
+                      <BsFillFuelPumpFill />
+                      {car.carFuelType.name}
+                    </span>
                   </div>
                   <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <span>{user.address.city}</span>
+                    <span className="flex items-center gap-1">
+                      <MdEventAvailable />
+                      {car.status}
+                    </span>
                   </div>
                   <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <span>{user.address.suite}</span>
+                    <span className="flex items-center gap-1">
+                      <CiCalendar />
+                      {car.year}
+                    </span>
                   </div>
                   <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <span>{user.address.zipcode}</span>
+                    <span className="flex items-center gap-1">
+                      <MdCarRental />
+                      {car.rentalType}
+                    </span>
                   </div>
                 </div>
                 <div className="mt-4">
-                  <Button
-                    type="primary"
-                    block
-                    onClick={() => handleCarClick(user.id)}
-                  >
-                    View Details
+                  <Button type="primary" block>
+                    <div className="flex items-center gap-2">
+                      <TbListDetails />
+                      View Details
+                    </div>
                   </Button>
                 </div>
               </div>
