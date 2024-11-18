@@ -66,10 +66,7 @@ export default function UserPage() {
       const filtersObject = {
         ...(currentFilters.createdBy
           ? {
-              createdBy: {
-                firstName: currentFilters.createdBy.search,
-                lastName: currentFilters.createdBy.search,
-              },
+              "createdByUser.name": currentFilters.createdBy,
             }
           : {}),
         ...(currentFilters.status ? { status: currentFilters.status } : {}),

@@ -42,7 +42,7 @@ export default async function handler(
             confirmPassword,
             dateOfBirth,
             status,
-            contacts: [contacts],
+            contacts: Array.isArray(contacts) ? contacts : [contacts],
           }),
         }
       );
