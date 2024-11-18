@@ -60,10 +60,7 @@ export default function CompanyPage() {
       const filtersObject = {
         ...(currentFilters.createdBy
           ? {
-              createdBy: {
-                firstName: currentFilters.createdBy.search,
-                lastName: currentFilters.createdBy.search,
-              },
+              "createdByUser.name": currentFilters.createdBy,
             }
           : {}),
         ...(currentFilters.status ? { status: currentFilters.status } : {}),
@@ -415,7 +412,7 @@ export default function CompanyPage() {
               if (!searchRef.current.includes(searchValue)) {
                 searchRef.current.push(searchValue);
               }
-              handleFilterChange("createdBy", { search: e.target.value });
+              handleFilterChange("createdBy", e.target.value);
             }}
           />
           <div style={{ marginTop: 8 }}>
