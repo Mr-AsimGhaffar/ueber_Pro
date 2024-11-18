@@ -1,17 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import {
-  Button,
-  Table,
-  Tag,
-  Modal,
-  message,
-  Input,
-  Checkbox,
-  Space,
-  Tooltip,
-} from "antd";
+import { Button, Table, Tag, Modal, message, Input, Checkbox } from "antd";
 import {
   FilterOutlined,
   ReloadOutlined,
@@ -685,6 +675,7 @@ export default function DriverPage() {
               driver.id === result.data.id ? result.data : driver
             )
           );
+          await fetchDrivers();
           message.success(result.message);
           setIsModalOpen(false);
         } else {
@@ -709,6 +700,7 @@ export default function DriverPage() {
         if (response.ok) {
           const result = await response.json();
           setDrivers((prevDrivers) => [result.data, ...prevDrivers]);
+          await fetchDrivers();
           message.success("Successfully added driver");
           setIsModalOpen(false);
         } else {
