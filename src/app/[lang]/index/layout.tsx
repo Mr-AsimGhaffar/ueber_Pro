@@ -3,11 +3,12 @@ import Navbar from "@/components/Navbar";
 import Content from "@/components/Content";
 import Sidebar from "@/components/Sidebar";
 
-import { getUser } from "@/lib/data";
+import { getCars, getUser } from "@/lib/data";
 import { Locale } from "@/lib/definitions";
 import { UserProvider } from "@/hooks/context/AuthContext";
+import { CarProvider } from "@/hooks/context/AuthContextCars";
 import { i18n } from "../../../../i18n-config";
-import { cookies, headers } from "next/headers";
+import { headers } from "next/headers";
 
 import "@/app/globals.css";
 
@@ -27,6 +28,7 @@ export default async function Root({ params, children }: Props) {
 
   const pathname: string = headerList.get("x-current-path") || "";
   const user = await getUser();
+  const cars = await getCars();
   const isAuthPage =
     params.lang &&
     ["login", "register"].some((route) => pathname.includes(route));
@@ -35,13 +37,17 @@ export default async function Root({ params, children }: Props) {
     <html lang={params.lang}>
       <body className="relative min-h-screen overflow-y-auto bg-gray-50">
         <ConfigProvider>
-          {!isAuthPage && (
-            <UserProvider initialUser={user}>
-              <Navbar locale={params.lang} />
-              <Sidebar locale={params.lang} role={role} />
-            </UserProvider>
-          )}
-          {isAuthPage ? children : <Content>{children}</Content>}
+          <UserProvider initialUser={user}>
+            <CarProvider initialCar={cars || { data: [] }}>
+              {!isAuthPage && (
+                <>
+                  <Navbar locale={params.lang} />
+                  <Sidebar locale={params.lang} role={role} />
+                </>
+              )}
+              {isAuthPage ? children : <Content>{children}</Content>}
+            </CarProvider>
+          </UserProvider>
         </ConfigProvider>
       </body>
     </html>

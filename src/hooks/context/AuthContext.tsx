@@ -1,18 +1,6 @@
-// context/UserContext.tsx
 "use client";
-import {
-  createContext,
-  useContext,
-  useState,
-  ReactNode,
-  useEffect,
-} from "react";
-
-interface User {
-  id: string;
-  firstName: string;
-  lastName: string;
-}
+import { createContext, useContext, useState, ReactNode } from "react";
+import { User } from "@/lib/definitions";
 
 interface UserContextType {
   user: User | null;

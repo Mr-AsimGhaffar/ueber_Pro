@@ -14,6 +14,12 @@ const nextConfig = {
         port: "",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "dreamsrent.dreamstechnologies.com",
+        port: "",
+        pathname: "/**",
+      },
     ],
   },
 };
