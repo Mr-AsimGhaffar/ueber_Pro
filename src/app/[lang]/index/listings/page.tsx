@@ -12,6 +12,7 @@ import {
   Space,
   Row,
   Col,
+  Spin,
 } from "antd";
 import {
   SearchOutlined,
@@ -26,19 +27,50 @@ import { BsFillFuelPumpFill } from "react-icons/bs";
 import { CiCalendar } from "react-icons/ci";
 import { MdCarRental, MdEventAvailable } from "react-icons/md";
 import { TbListDetails } from "react-icons/tb";
+import { useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 
 const { Option } = Select;
 
 export default function ListingsPage() {
   const { cars } = useCar();
+  const router = useRouter();
+  const pathname = usePathname();
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [loading, setLoading] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
 
-  const capitalizeFirstLetter = (str: string) => {
+  const capitalizeFirstLetter = (str: string = "") => {
     return str
       .split(" ")
       .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
       .join(" ");
   };
+  useEffect(() => {
+    setIsMounted(true); // Set mounted state to true after component mounts
+  }, []);
+
+  useEffect(() => {
+    if (!isMounted) return;
+
+    // Trigger loading when the pathname changes
+    setLoading(true);
+
+    // After navigation is complete, turn off the loading state
+    const timeoutId = setTimeout(() => setLoading(false), 500); // simulate loading delay
+
+    return () => {
+      clearTimeout(timeoutId); // Clean up timeout on unmount
+    };
+  }, [pathname, isMounted]);
+
+  const handleRouter = (id: number) => {
+    router.push(`/index/listings/${id}`);
+  };
+
+  if (!isMounted) {
+    return null; // Prevent rendering the component until it is mounted
+  }
 
   return (
     <div className="p-6">
@@ -131,13 +163,14 @@ export default function ListingsPage() {
             lg={viewMode === "grid" ? 6 : 24}
           >
             <Card
+              onClick={() => handleRouter(car.id)}
               cover={
-                <div className="relative cursor-pointer">
+                <div className="relative cursor-pointer overflow-hidden">
                   <div className="overflow-hidden">
                     <img
                       alt={car.brand.name}
                       src="https://images.unsplash.com/photo-1542362567-b07e54358753?ixlib=rb-1.2.1&auto=format&fit=crop&w=334&q=80"
-                      className="h-48 w-full object-cover transition-transform duration-700 ease-in-out hover:scale-110"
+                      className="h-48 w-full object-cover transition-transform duration-700 ease-in-out hover:scale-110 rounded-t-lg"
                     />
                   </div>
                   <Button
@@ -147,25 +180,27 @@ export default function ListingsPage() {
                   />
                 </div>
               }
-              className="cursor-pointer hover:shadow-lg transition-shadow"
+              className="cursor-pointer hover:shadow-2xl transition-shadow hover:rounded-tl-lg hover:rounded-tr-lg"
             >
               <div className="flex flex-col gap-2">
                 <div className="flex justify-between items-start">
                   <h3 className="text-lg font-bold">
-                    {capitalizeFirstLetter(car.brand.name)}
+                    {capitalizeFirstLetter(car?.model?.name)}
                   </h3>
                   <div className="text-xl font-bold text-red-500">
-                    {car.category.name}
+                    {capitalizeFirstLetter(car.brand.name)}
                     {/* <span className="text-sm text-gray-500">/day</span> */}
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  {/* <Rate
+                  <Rate
                     disabled
-                    defaultValue={user.address.zipcode}
+                    defaultValue={car.rating}
                     className="text-sm"
-                  /> */}
-                  {/* <span className="text-gray-500">({car.reviews} Reviews)</span> */}
+                  />
+                  <span className="text-gray-500">
+                    ({car.brand.name} Reviews)
+                  </span>
                 </div>
                 <div className="grid grid-cols-2 gap-2 mt-2">
                   <div className="flex items-center gap-2 text-sm text-gray-600">
@@ -177,7 +212,7 @@ export default function ListingsPage() {
                   <div className="flex items-center gap-2 text-sm text-gray-600">
                     <span className="flex items-center gap-1">
                       <MdEventAvailable />
-                      {car.status}
+                      {car.status.replace("_", " ")}
                     </span>
                   </div>
                   <div className="flex items-center gap-2 text-sm text-gray-600">
@@ -194,7 +229,11 @@ export default function ListingsPage() {
                   </div>
                 </div>
                 <div className="mt-4">
-                  <Button type="primary" block>
+                  <Button
+                    type="primary"
+                    block
+                    onClick={() => handleRouter(car.id)}
+                  >
                     <div className="flex items-center gap-2">
                       <TbListDetails />
                       View Details
@@ -206,6 +245,11 @@ export default function ListingsPage() {
           </Col>
         ))}
       </Row>
+      {loading && (
+        <div className="fixed inset-0 flex justify-center items-center bg-opacity-50 bg-black z-50">
+          <Spin size="large" />
+        </div>
+      )}
     </div>
   );
 }

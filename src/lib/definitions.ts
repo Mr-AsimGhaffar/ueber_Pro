@@ -23,6 +23,17 @@ export type Car = {
   updatedAt: string;
   rentalType: string;
   transmission: string;
+  description: string;
+  capacity: string;
+  mileage: string;
+  registrationNumber: string;
+  rating: number;
+  model: {
+    id: number;
+    name: string;
+    createdAt: string;
+    updatedAt: string;
+  };
   carFuelType: {
     id: number;
     name: string;
