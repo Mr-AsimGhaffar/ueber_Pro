@@ -55,11 +55,11 @@ export default function CarDetailPage() {
         setSelectedCar(data.data);
       } else {
         const error = await response.json();
-        message.error(error.message || "Failed to fetch user details");
+        message.error(error.message || "Failed to fetch car details");
       }
     } catch (error) {
-      console.error("Error fetching user data:", error);
-      message.error("An error occurred while fetching user details");
+      console.error("Error fetching car data:", error);
+      message.error("An error occurred while fetching car details");
     } finally {
       setIsLoading(false);
     }

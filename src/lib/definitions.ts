@@ -53,6 +53,19 @@ export type Car = {
     createdAt: string;
     updatedAt: string;
   };
+  specification: {
+    id: number;
+    name: string;
+    logoId: number | null;
+    createdAt: string;
+    updatedAt: string;
+  };
+  color: {
+    id: number;
+    hex: string;
+    createdAt: string;
+    updatedAt: string;
+  };
 };
 export type Cars = {
   data: Car[];

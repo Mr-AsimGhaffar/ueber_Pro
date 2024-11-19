@@ -13,6 +13,8 @@ import {
   Row,
   Col,
   Spin,
+  message,
+  Modal,
 } from "antd";
 import {
   SearchOutlined,
@@ -20,6 +22,7 @@ import {
   UnorderedListOutlined,
   AppstoreOutlined,
   EnvironmentOutlined,
+  UserAddOutlined,
 } from "@ant-design/icons";
 import CarFilters from "@/components/cars/CarFilters";
 import { useCar } from "@/hooks/context/AuthContextCars";
@@ -29,16 +32,22 @@ import { MdCarRental, MdEventAvailable } from "react-icons/md";
 import { TbListDetails } from "react-icons/tb";
 import { useRouter } from "next/navigation";
 import { usePathname } from "next/navigation";
+import { Car, Cars } from "@/lib/definitions";
+import CarForm from "@/components/CarForm";
+import { FaEdit } from "react-icons/fa";
 
 const { Option } = Select;
 
 export default function ListingsPage() {
-  const { cars } = useCar();
+  const { cars, setCars } = useCar();
   const router = useRouter();
   const pathname = usePathname();
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [loading, setLoading] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [car, setCar] = useState<Car[]>([]);
+  const [selectedCar, setSelectedCar] = useState<Car | null>(null);
 
   const capitalizeFirstLetter = (str: string = "") => {
     return str
@@ -72,10 +81,128 @@ export default function ListingsPage() {
     return null; // Prevent rendering the component until it is mounted
   }
 
+  const handleModalOk = async (values: any) => {
+    if (selectedCar) {
+      // Update user
+      try {
+        const response = await fetch("/api/updateCar", {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            id: selectedCar.id,
+            ...values,
+          }),
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          setCars({
+            data:
+              cars?.data.map((car) =>
+                car.id === result.data.id ? result.data : car
+              ) || [], // Default to an empty array if cars is null
+          });
+          message.success(result.message);
+          setIsModalOpen(false);
+        } else {
+          const error = await response.json();
+          message.error(error.message || "Failed to update car");
+        }
+      } catch (error) {
+        console.error("Error updating car:", error);
+        message.error("An error occurred while updating the car");
+      }
+    } else {
+      // Add user
+      try {
+        const response = await fetch("/api/cars/createCar", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(values),
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          setCars({
+            data: [result.data, ...(cars?.data || [])],
+          });
+          message.success("Successfully added car");
+          setIsModalOpen(false);
+        } else {
+          const error = await response.json();
+          message.error(error.message || "Failed to add car");
+        }
+      } catch (error) {
+        console.error("Error adding car:", error);
+        message.error("An error occurred while adding the car");
+      }
+    }
+  };
+
+  const getCarDetails = async (id: string) => {
+    try {
+      const response = await fetch(`/api/cars/getCarById?id=${id}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setSelectedCar({
+          ...data.data,
+          brand: data.data.brand.name,
+          model: data.data.model.name,
+          category: data.data.category.name,
+          carFuelType: data.data.carFuelType.name,
+          registrationNumber: data.data.registrationNumber,
+          year: data.data.year,
+          description: data.data.description,
+          mileage: data.data.mileage,
+          specification: data.data.specification,
+          // color: data.data.color.hex,
+          capacity: data.data.capacity,
+          transmission: data.data.transmission,
+          rating: data.data.rating,
+          status: data.data.status,
+        });
+        setIsModalOpen(true);
+      } else {
+        const error = await response.json();
+        message.error(error.message || "Failed to fetch car details");
+      }
+    } catch (error) {
+      console.error("Error fetching car data:", error);
+      message.error("An error occurred while fetching car details");
+    }
+  };
+
+  const handleAddCar = () => {
+    setSelectedCar(null);
+    setIsModalOpen(true);
+  };
+  const handleModalCancel = () => {
+    setIsModalOpen(false);
+  };
+
   return (
     <div className="p-6">
       {/* Search Section */}
-      <CarFilters />
+      <div className="flex gap-4">
+        <CarFilters />
+        <Button
+          type="primary"
+          icon={<UserAddOutlined />}
+          onClick={handleAddCar}
+        >
+          Add Car
+        </Button>
+      </div>
       <Card className="mb-8">
         <Row gutter={[16, 16]}>
           <Col xs={24} sm={24} md={6}>
@@ -163,7 +290,7 @@ export default function ListingsPage() {
             lg={viewMode === "grid" ? 6 : 24}
           >
             <Card
-              onClick={() => handleRouter(car.id)}
+              // onClick={() => handleRouter(car.id)}
               cover={
                 <div className="relative cursor-pointer overflow-hidden">
                   <div className="overflow-hidden">
@@ -228,7 +355,7 @@ export default function ListingsPage() {
                     </span>
                   </div>
                 </div>
-                <div className="mt-4">
+                <div className="flex items-center justify-between gap-2 mt-4">
                   <Button
                     type="primary"
                     block
@@ -237,6 +364,16 @@ export default function ListingsPage() {
                     <div className="flex items-center gap-2">
                       <TbListDetails />
                       View Details
+                    </div>
+                  </Button>
+                  <Button
+                    type="primary"
+                    block
+                    onClick={() => getCarDetails(car.id.toString())}
+                  >
+                    <div className="flex items-center gap-2">
+                      <FaEdit />
+                      Edit Car
                     </div>
                   </Button>
                 </div>
@@ -250,6 +387,18 @@ export default function ListingsPage() {
           <Spin size="large" />
         </div>
       )}
+      <Modal
+        open={isModalOpen}
+        onCancel={handleModalCancel}
+        footer={null}
+        width={720}
+      >
+        <CarForm
+          initialValues={selectedCar}
+          onSubmit={handleModalOk}
+          onCancel={handleModalCancel}
+        />
+      </Modal>
     </div>
   );
 }
