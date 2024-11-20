@@ -14,6 +14,7 @@ export default function LoginPage({
 }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [loadingForgotPassword, setLoadingForgotPassword] = useState(false);
 
   const onFinish = async (values: any) => {
     setLoading(true);
@@ -45,6 +46,15 @@ export default function LoginPage({
     } finally {
       setLoading(false); // Stop loading
     }
+  };
+
+  const handleForgotPasswordClick = async () => {
+    setLoadingForgotPassword(true);
+    // Simulate a delay or API request for "forgot password" logic
+    setTimeout(() => {
+      setLoadingForgotPassword(false); // Stop loading after the request
+      router.push(`/${lang}/auth/forgot-password`);
+    }, 2000); // Simulate a delay of 2 seconds for the request
   };
 
   return (
@@ -84,12 +94,14 @@ export default function LoginPage({
               <Form.Item name="remember" valuePropName="checked" noStyle>
                 <Checkbox>Remember me</Checkbox>
               </Form.Item>
-              <Link
-                href={`/${lang}/auth/forgot-password`}
-                className="text-blue-600 hover:text-blue-800"
+              <Button
+                type="link"
+                className="text-blue-600 hover:text-blue-800 text-sm"
+                onClick={handleForgotPasswordClick}
+                loading={loadingForgotPassword}
               >
                 Forgot password?
-              </Link>
+              </Button>
             </div>
           </Form.Item>
 
