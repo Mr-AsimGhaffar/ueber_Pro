@@ -41,7 +41,6 @@ interface Props {
 
 export default async function Root({ params, children }: Props) {
   const headerList = headers();
-  const role = headerList.get("role") || null;
 
   const pathname: string = headerList.get("x-current-path") || "";
   const user = await getUser();
@@ -62,7 +61,7 @@ export default async function Root({ params, children }: Props) {
               {!isAuthPage && (
                 <>
                   <Navbar locale={params.lang} />
-                  <Sidebar locale={params.lang} role={role} />
+                  <Sidebar locale={params.lang} />
                 </>
               )}
               {isAuthPage ? children : <Content>{children}</Content>}
