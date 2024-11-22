@@ -11,11 +11,18 @@ export default async function handler(
       if (!accessToken) {
         throw new Error("Token not found. Please log in.");
       }
-      const { page = 1, limit = 10, filters = "" } = req.query;
+      const {
+        page = 1,
+        limit = 10,
+        filters = "",
+        sort = "",
+        search = "",
+        searchFields = "",
+      } = req.query;
 
       // Send credentials to external API
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/company?page=${page}&limit=${limit}&filters=${filters}`,
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/company?page=${page}&limit=${limit}&filters=${filters}&sort=${sort}&search=${search}&searchFields=${searchFields}`,
         {
           method: "GET",
           headers: {
