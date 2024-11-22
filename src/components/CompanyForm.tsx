@@ -88,7 +88,7 @@ export default function CompanyForm({
           rules={[{ required: true, message: "Please select a Type" }]}
         >
           <Select placeholder="Select Type">
-            <Select.Option value="ANY">Any</Select.Option>
+            <Select.Option value="ANY">Others</Select.Option>
             <Select.Option value="CARS">Cars</Select.Option>
             <Select.Option value="DRIVERS">Drivers</Select.Option>
           </Select>
