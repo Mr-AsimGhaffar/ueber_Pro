@@ -35,7 +35,7 @@ export default function ForgotPasswordPage({
         );
         // Redirect back to login after 2 seconds
         setTimeout(() => {
-          router.push(`/${lang}/auth/login`);
+          router.push(`/${lang}/auth/reset-code?email=${values.email}`);
         }, 2000);
       } else {
         const errorData = await response.json();
