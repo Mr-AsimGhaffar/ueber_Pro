@@ -2,17 +2,17 @@ import { Input, Select } from "antd";
 import { SearchOutlined, DownOutlined } from "@ant-design/icons";
 import { useState } from "react";
 
-interface SearchFiltersProps {
+interface SearchFiltersUsersProps {
   onFilterChange: (
     value: string,
-    filters: { type: string[]; status: string[] }
+    filters: { role: string[]; status: string[] }
   ) => void;
 }
 
-const FilterBar: React.FC<SearchFiltersProps> = ({ onFilterChange }) => {
+const FilterBar: React.FC<SearchFiltersUsersProps> = ({ onFilterChange }) => {
   // const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchValue, setSearchValue] = useState("");
-  const [selectedType, setSelectedType] = useState<string[]>([]);
+  const [selectedRole, setSelectedRole] = useState<string[]>([]);
   const [selectedStatus, setSelectedStatus] = useState<string[]>([]);
   // const [filters, setFilters] = useState({
   //   type: [] as string[],
@@ -32,12 +32,12 @@ const FilterBar: React.FC<SearchFiltersProps> = ({ onFilterChange }) => {
   // };
   const handleSearch = (value: string) => {
     setSearchValue(value);
-    onFilterChange(value, { type: selectedType, status: selectedStatus });
+    onFilterChange(value, { role: selectedRole, status: selectedStatus });
   };
-  const handleTypeChange = (selectedKeys: React.Key[]) => {
-    setSelectedType(selectedKeys as string[]);
+  const handleRoleChange = (selectedKeys: React.Key[]) => {
+    setSelectedRole(selectedKeys as string[]);
     onFilterChange(searchValue, {
-      type: selectedKeys as string[],
+      role: selectedKeys as string[],
       status: selectedStatus,
     });
   };
@@ -45,7 +45,7 @@ const FilterBar: React.FC<SearchFiltersProps> = ({ onFilterChange }) => {
   const handleStatusChange = (selectedKeys: React.Key[]) => {
     setSelectedStatus(selectedKeys as string[]);
     onFilterChange(searchValue, {
-      type: selectedType,
+      role: selectedRole,
       status: selectedKeys as string[],
     });
   };
@@ -58,14 +58,16 @@ const FilterBar: React.FC<SearchFiltersProps> = ({ onFilterChange }) => {
   //   handleFilterChange(key, checkedValues);
   // };
 
-  const menuItemsType = [
-    { key: "CARS", label: "Cars" },
-    { key: "DRIVERS", label: "Drivers" },
-    { key: "ANY", label: "Other" },
+  const menuItemsRole = [
+    { key: "CUSTOMER", label: "Customer" },
+    { key: "DRIVER", label: "Drivers" },
+    { key: "SUPER_ADMIN", label: "Super Admin" },
+    { key: "ADMIN", label: "Admin" },
   ];
   const menuItemsStatus = [
     { key: "ACTIVE", label: "Active" },
     { key: "IN_ACTIVE", label: "Inactive" },
+    { key: "SUSPENDED", label: "Suspended" },
   ];
 
   return (
@@ -74,7 +76,7 @@ const FilterBar: React.FC<SearchFiltersProps> = ({ onFilterChange }) => {
         {/* Search Input */}
         <div>
           <Input
-            placeholder="Search companies"
+            placeholder="Search users"
             prefix={<SearchOutlined />}
             value={searchValue}
             onChange={(e) => handleSearch(e.target.value)}
@@ -85,11 +87,11 @@ const FilterBar: React.FC<SearchFiltersProps> = ({ onFilterChange }) => {
           {/* Country Dropdown */}
           <Select
             mode="multiple"
-            placeholder="Select Type"
-            value={selectedType}
-            onChange={handleTypeChange}
+            placeholder="Select Role"
+            value={selectedRole}
+            onChange={handleRoleChange}
             style={{ width: 220 }}
-            options={menuItemsType.map((item) => ({
+            options={menuItemsRole.map((item) => ({
               label: item.label,
               value: item.key,
             }))}

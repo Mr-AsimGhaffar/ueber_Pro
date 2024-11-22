@@ -3,7 +3,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Button, Table, Tag, Modal, message, Input, Checkbox } from "antd";
 import {
-  FilterOutlined,
   ReloadOutlined,
   SearchOutlined,
   UserAddOutlined,
@@ -13,6 +12,7 @@ import CompanyForm from "@/components/CompanyForm";
 import debounce from "lodash.debounce";
 import SearchFilters from "../../components/SearchFilters";
 import ExportTablePdf from "../../components/ExportTablePdf";
+import { FaSort, FaSortDown, FaSortUp } from "react-icons/fa";
 
 interface Company {
   key: string;
@@ -37,8 +37,6 @@ export default function CompanyPage() {
   const [searchAddress, setSearchAddress] = useState("");
   const [searchContact, setSearchContact] = useState("");
   const [searchCreatedBy, setSearchCreatedBy] = useState("");
-  const [searchType, setSearchType] = useState<string[]>([]);
-  const [searchStatus, setSearchStatus] = useState<string[]>([]);
   const searchRef = useRef<string[]>([]);
   const [filters, setFilters] = useState({
     name: "",
@@ -56,26 +54,37 @@ export default function CompanyPage() {
     current: 1,
     pageSize: 10,
   });
+  const [sortParams, setSortParams] = useState<
+    { field: string; order: string }[]
+  >([]);
+
+  const [search, setSearch] = useState("");
+  const [searchField, setSearchField] = useState("");
+
   const fetchCompanies = async (currentFilters = filters) => {
     setLoading(true);
     try {
       const filtersObject = {
-        ...(currentFilters.createdBy
-          ? {
-              "createdByUser.name": currentFilters.createdBy,
-            }
-          : {}),
-        ...(currentFilters.status ? { status: currentFilters.status } : {}),
-        ...(currentFilters.type ? { type: currentFilters.type } : {}),
-        ...(currentFilters.name ? { name: currentFilters.name } : {}),
-        ...(currentFilters.email ? { email: currentFilters.email } : {}),
-        ...(currentFilters.address ? { address: currentFilters.address } : {}),
-        ...(currentFilters.contact ? { contact: currentFilters.contact } : {}),
+        ...(currentFilters.createdBy && {
+          "createdByUser.name": currentFilters.createdBy,
+        }),
+        ...(currentFilters.status.length && { status: currentFilters.status }),
+        ...(currentFilters.type.length && { type: currentFilters.type }),
+        ...(currentFilters.name && { name: currentFilters.name }),
+        ...(currentFilters.email && { email: currentFilters.email }),
+        ...(currentFilters.address && { address: currentFilters.address }),
+        ...(currentFilters.contact && { contact: currentFilters.contact }),
       };
+      const sort = sortParams
+        .map((param) => `${param.field}:${param.order}`)
+        .join(",");
       const query = new URLSearchParams({
         page: String(pagination.current),
         limit: String(pagination.pageSize),
+        sort,
         filters: JSON.stringify(filtersObject),
+        search,
+        searchFields: "name,email,address,contact,createdByUser.name",
       }).toString();
       const response = await fetch(`/api/listCompanies?${query}`, {
         method: "GET",
@@ -114,23 +123,75 @@ export default function CompanyPage() {
     { leading: true, trailing: false } // Leading ensures the first call executes immediately
   );
 
-  const handleFilterChange = (
-    key: keyof typeof filters,
-    value: string | string[] | { search: string }
-  ) => {
+  const handleFilterChange = (key: string, value: string) => {
     const updatedFilters = { ...filters, [key]: value };
     setFilters(updatedFilters);
     setPagination((prev) => ({ ...prev, current: 1 })); // Reset to first page
     debouncedFetchCompanies(updatedFilters);
   };
+  const handleGeneralSearch = (
+    value: string,
+    newFilters: { type: string[]; status: string[] }
+  ) => {
+    setSearch(value);
+    setFilters((prevFilters) => ({
+      ...prevFilters,
+      ...newFilters,
+    }));
+    setPagination((prev) => ({ ...prev, current: 1 }));
+  };
+
+  const handleSort = (field: string) => {
+    let newSortParams = [...sortParams];
+    const existingIndex = newSortParams.findIndex(
+      (param) => param.field === field
+    );
+
+    if (existingIndex !== -1) {
+      const currentOrder = newSortParams[existingIndex].order;
+      if (currentOrder === "asc") {
+        newSortParams[existingIndex].order = "desc";
+      } else if (currentOrder === "desc") {
+        newSortParams.splice(existingIndex, 1); // Remove the field from sorting if desc
+      }
+    } else {
+      newSortParams.push({ field, order: "asc" });
+    }
+
+    setSortParams(newSortParams);
+    // fetchCompanies(filters); // Pass updated filters
+  };
 
   useEffect(() => {
     fetchCompanies();
-  }, [pagination.current, pagination.pageSize]);
+  }, [pagination.current, pagination.pageSize, sortParams, search, filters]);
 
   const columns: ColumnsType<Company> = [
     {
-      title: "Name",
+      title: (
+        <span className="flex items-center gap-2">
+          Name
+          {sortParams.find((param) => param.field === "name") ? (
+            sortParams.find((param) => param.field === "name")!.order ===
+            "asc" ? (
+              <FaSortUp
+                className="cursor-pointer text-blue-500"
+                onClick={() => handleSort("name")}
+              />
+            ) : (
+              <FaSortDown
+                className="cursor-pointer text-blue-500"
+                onClick={() => handleSort("name")}
+              />
+            )
+          ) : (
+            <FaSort
+              className="cursor-pointer text-gray-400"
+              onClick={() => handleSort("name")}
+            />
+          )}
+        </span>
+      ),
       dataIndex: "name",
       key: "name",
       className: "font-workSans font-semibold",
@@ -179,35 +240,59 @@ export default function CompanyPage() {
       ),
     },
     {
-      title: "Type",
+      title: (
+        <span className="flex items-center gap-2">
+          Type
+          {sortParams.find((param) => param.field === "type") ? (
+            sortParams.find((param) => param.field === "type")!.order ===
+            "asc" ? (
+              <FaSortUp
+                className="cursor-pointer text-blue-500"
+                onClick={() => handleSort("type")}
+              />
+            ) : (
+              <FaSortDown
+                className="cursor-pointer text-blue-500"
+                onClick={() => handleSort("type")}
+              />
+            )
+          ) : (
+            <FaSort
+              className="cursor-pointer text-gray-400"
+              onClick={() => handleSort("type")}
+            />
+          )}
+        </span>
+      ),
       dataIndex: "type",
       key: "type",
       className: "font-workSans",
-      filterDropdown: (
-        <Checkbox.Group
-          options={[
-            { label: "Any", value: "ANY" },
-            { label: "Cars", value: "CARS" },
-            { label: "Driver", value: "DRIVERS" },
-          ]}
-          value={searchType}
-          onChange={(checkedValues) => {
-            setSearchType(checkedValues);
-            handleFilterChange("type", checkedValues);
-          }}
-          className="p-4"
-        />
-      ),
-      filterIcon: () => (
-        <FilterOutlined
-          style={{
-            color: searchType.length > 0 ? "blue" : "gray", // Change color based on selection
-          }}
-        />
-      ),
     },
     {
-      title: "Address",
+      title: (
+        <span className="flex items-center gap-2">
+          Address
+          {sortParams.find((param) => param.field === "address") ? (
+            sortParams.find((param) => param.field === "address")!.order ===
+            "asc" ? (
+              <FaSortUp
+                className="cursor-pointer text-blue-500"
+                onClick={() => handleSort("address")}
+              />
+            ) : (
+              <FaSortDown
+                className="cursor-pointer text-blue-500"
+                onClick={() => handleSort("address")}
+              />
+            )
+          ) : (
+            <FaSort
+              className="cursor-pointer text-gray-400"
+              onClick={() => handleSort("address")}
+            />
+          )}
+        </span>
+      ),
       dataIndex: "address",
       key: "address",
       className: "font-workSans",
@@ -256,31 +341,33 @@ export default function CompanyPage() {
       ),
     },
     {
-      title: "Status",
+      title: (
+        <span className="flex items-center gap-2">
+          Status
+          {sortParams.find((param) => param.field === "status") ? (
+            sortParams.find((param) => param.field === "status")!.order ===
+            "asc" ? (
+              <FaSortUp
+                className="cursor-pointer text-blue-500"
+                onClick={() => handleSort("status")}
+              />
+            ) : (
+              <FaSortDown
+                className="cursor-pointer text-blue-500"
+                onClick={() => handleSort("status")}
+              />
+            )
+          ) : (
+            <FaSort
+              className="cursor-pointer text-gray-400"
+              onClick={() => handleSort("status")}
+            />
+          )}
+        </span>
+      ),
       dataIndex: "status",
       key: "status",
       className: "font-workSans",
-      filterDropdown: (
-        <Checkbox.Group
-          options={[
-            { label: "Active", value: "ACTIVE" },
-            { label: "Inactive", value: "IN_ACTIVE" },
-          ]}
-          value={searchStatus}
-          onChange={(checkedValues) => {
-            setSearchStatus(checkedValues);
-            handleFilterChange("status", checkedValues);
-          }}
-          className="p-4"
-        />
-      ),
-      filterIcon: () => (
-        <FilterOutlined
-          style={{
-            color: searchStatus.length > 0 ? "blue" : "gray", // Change color based on selection
-          }}
-        />
-      ),
       render: (status: string) => {
         const statusColors: { [key: string]: string } = {
           ACTIVE: "green",
@@ -294,7 +381,30 @@ export default function CompanyPage() {
       },
     },
     {
-      title: "Email",
+      title: (
+        <span className="flex items-center gap-2">
+          Email
+          {sortParams.find((param) => param.field === "email") ? (
+            sortParams.find((param) => param.field === "email")!.order ===
+            "asc" ? (
+              <FaSortUp
+                className="cursor-pointer text-blue-500"
+                onClick={() => handleSort("email")}
+              />
+            ) : (
+              <FaSortDown
+                className="cursor-pointer text-blue-500"
+                onClick={() => handleSort("email")}
+              />
+            )
+          ) : (
+            <FaSort
+              className="cursor-pointer text-gray-400"
+              onClick={() => handleSort("email")}
+            />
+          )}
+        </span>
+      ),
       dataIndex: "email",
       key: "email",
       className: "font-workSans text-blue-500",
@@ -343,7 +453,30 @@ export default function CompanyPage() {
       ),
     },
     {
-      title: "Contact",
+      title: (
+        <span className="flex items-center gap-2">
+          Contact
+          {sortParams.find((param) => param.field === "contact") ? (
+            sortParams.find((param) => param.field === "contact")!.order ===
+            "asc" ? (
+              <FaSortUp
+                className="cursor-pointer text-blue-500"
+                onClick={() => handleSort("contact")}
+              />
+            ) : (
+              <FaSortDown
+                className="cursor-pointer text-blue-500"
+                onClick={() => handleSort("contact")}
+              />
+            )
+          ) : (
+            <FaSort
+              className="cursor-pointer text-gray-400"
+              onClick={() => handleSort("contact")}
+            />
+          )}
+        </span>
+      ),
       dataIndex: "contact",
       key: "contact",
       className: "font-workSans",
@@ -392,7 +525,30 @@ export default function CompanyPage() {
       ),
     },
     {
-      title: "Created By",
+      title: (
+        <span className="flex items-center gap-2">
+          Created By
+          {sortParams.find((param) => param.field === "createdBy") ? (
+            sortParams.find((param) => param.field === "createdBy")!.order ===
+            "asc" ? (
+              <FaSortUp
+                className="cursor-pointer text-blue-500"
+                onClick={() => handleSort("createdBy")}
+              />
+            ) : (
+              <FaSortDown
+                className="cursor-pointer text-blue-500"
+                onClick={() => handleSort("createdBy")}
+              />
+            )
+          ) : (
+            <FaSort
+              className="cursor-pointer text-gray-400"
+              onClick={() => handleSort("createdBy")}
+            />
+          )}
+        </span>
+      ),
       dataIndex: "createdByUser",
       key: "createdBy",
       className: "font-workSans",
@@ -575,33 +731,43 @@ export default function CompanyPage() {
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-3xl font-bold font-montserrat">Company</h1>
+        <h1 className="text-3xl font-bold font-montserrat">Companies</h1>
       </div>
-      <div className="flex items-center gap-4 mb-2 font-workSans text-sm">
+      <div className="flex items-center gap-4 mb-2 font-workSans text-sm cursor-pointer">
         <div className="flex items-center gap-1">
-          <div className="font-medium">All</div>
-          <div className="text-gray-700">(66817)</div>
+          <div className="text-blue-700 font-medium">All</div>
+          <div className="text-gray-700 hover:underline">
+            ({pagination.total})
+          </div>
         </div>
         <div className="flex items-center gap-1">
           <div className="text-blue-700 font-medium">New</div>
-          <div className="text-gray-700">(6)</div>
+          <div className="text-gray-700 hover:underline">(6)</div>
         </div>
         <div className="flex items-center gap-1">
-          <div className="text-blue-700 font-medium">Email subscribers</div>
-          <div className="text-gray-700">(8)</div>
+          <div className="text-blue-700 font-medium">Inactive</div>
+          <div className="text-gray-700 hover:underline">(8)</div>
         </div>
         <div className="flex items-center gap-1">
-          <div className="text-blue-700 font-medium">Active Status</div>
-          <div className="text-gray-700">(12)</div>
+          <div className="text-blue-700 font-medium">Active</div>
+          <div className="text-gray-700 hover:underline">(12)</div>
+        </div>
+        <div className="flex items-center gap-1">
+          <div className="text-blue-700 font-medium">Cars</div>
+          <div className="text-gray-700 hover:underline">(2)</div>
+        </div>
+        <div className="flex items-center gap-1">
+          <div className="text-blue-700 font-medium">Drivers</div>
+          <div className="text-gray-700 hover:underline">(4)</div>
         </div>
       </div>
       <div className="flex justify-between items-center  mb-4">
         <div>
-          <SearchFilters />
+          <SearchFilters onFilterChange={handleGeneralSearch} />
         </div>
         <div>
           <div className="flex items-center gap-4">
-            <ExportTablePdf />
+            {/* <ExportTablePdf /> */}
             <Button
               type="primary"
               size="large"
