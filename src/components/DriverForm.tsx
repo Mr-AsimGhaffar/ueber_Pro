@@ -105,7 +105,6 @@ export default function DriverForm({
             {" "}
             {initialValues?.id ? "Edit Driver" : "Add New Driver"}
           </h1>
-          <h3 className="font-medium mb-4">Driver Information</h3>
         </div>
 
         <Form.Item
@@ -281,9 +280,9 @@ export default function DriverForm({
         </Form.Item>
 
         {/* Document Upload */}
-        <div className="md:col-span-2">
+        {/* <div className="md:col-span-2">
           <h3 className="font-medium mb-4 mt-4">Documents</h3>
-        </div>
+        </div> */}
 
         {/* <Form.Item
           name="companyLogo"

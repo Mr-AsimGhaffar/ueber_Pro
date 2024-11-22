@@ -4,24 +4,33 @@ import clsx from "clsx";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import classNames from "classnames";
 
 interface Props {
   href: string;
   children: React.ReactNode;
+  icon?: string;
 }
 
-export default function SidebarLink({ href, children }: Props) {
+export default function SidebarLink({ href, icon, children }: Props) {
   const pathname = usePathname();
+  const isActive = pathname === href;
 
   return (
-    <Link href={href}>
-      <div
-        className={clsx("flex items-center px-4 py-2 my-1 text-base text-gray-200 hover:text-white hover:bg-gray-700", {
-          "text-white bg-gray-700": pathname === href,
-        })}
-      >
-        {children}
-      </div>
+    <Link
+      href={href}
+      className={classNames(
+        "flex items-center w-full py-3 px-4 rounded-md transition-colors duration-200 hover:bg-gray-700",
+        {
+          "bg-blue-700 text-white font-sansInter tracking-wider": isActive,
+          "text-white font-sansInter tracking-wider": !isActive,
+        }
+      )}
+    >
+      {icon && (
+        <span className="material-icons-outlined text-xl mr-3">{icon}</span>
+      )}
+      <span className="truncate flex">{children}</span>
     </Link>
   );
 }

@@ -11,6 +11,8 @@ import {
 import type { ColumnsType } from "antd/es/table";
 import UserForm from "@/components/UserForm";
 import debounce from "lodash.debounce";
+import ExportTablePdf from "../../components/ExportTablePdf";
+import SearchFilters from "../../components/SearchFilters";
 
 interface User {
   key: string;
@@ -146,12 +148,24 @@ export default function UserPage() {
     fetchUsers();
   }, [pagination.current, pagination.pageSize]);
 
+  const formatString = (str: any) => {
+    if (!str) return "";
+    return str
+      .split("_") // Split by underscore
+      .map(
+        (word: any) =>
+          word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+      ) // Capitalize first letter of each word
+      .join(" "); // Join the words back together with spaces
+  };
+
   const columns: ColumnsType<User> = [
     {
       title: "First Name",
       dataIndex: "firstName",
       key: "firstName",
-      render: (text) => <a>{text}</a>,
+      className: "font-workSans",
+      render: (text) => <a>{formatString(text)}</a>,
       filterDropdown: (
         <div style={{ padding: 8 }}>
           <Input
@@ -200,7 +214,8 @@ export default function UserPage() {
       title: "Last Name",
       dataIndex: "lastName",
       key: "lastName",
-      render: (text) => <a>{text}</a>,
+      className: "font-workSans",
+      render: (text) => <a>{formatString(text)}</a>,
       filterDropdown: (
         <div style={{ padding: 8 }}>
           <Input
@@ -249,6 +264,7 @@ export default function UserPage() {
       title: "Email",
       dataIndex: "email",
       key: "email",
+      className: "font-workSans text-blue-500",
       filterDropdown: (
         <div style={{ padding: 8 }}>
           <Input
@@ -297,6 +313,7 @@ export default function UserPage() {
       title: "Company Name",
       dataIndex: "company",
       key: "company",
+      className: "font-workSans",
       render: (company) => {
         if (company && company) {
           const { name } = company;
@@ -356,10 +373,11 @@ export default function UserPage() {
       title: "Role",
       dataIndex: "role",
       key: "role",
+      className: "font-workSans",
       render: (role) => {
         if (role) {
           const { name } = role;
-          return <p>{name}</p>;
+          return <p>{formatString(name)}</p>;
         }
         return null;
       },
@@ -409,6 +427,7 @@ export default function UserPage() {
       title: "Date of Birth",
       dataIndex: "dateOfBirth",
       key: "dateOfBirth",
+      className: "font-workSans",
       render: (text: string) => {
         const date = new Date(text);
         return text ? date.toLocaleDateString("en-GB") : "";
@@ -459,6 +478,7 @@ export default function UserPage() {
       title: "Status",
       dataIndex: "status",
       key: "status",
+      className: "font-workSans",
       filterDropdown: (
         <Checkbox.Group
           options={[
@@ -498,6 +518,7 @@ export default function UserPage() {
       title: "Contact",
       dataIndex: "contacts",
       key: "contacts",
+      className: "font-workSans",
       filterDropdown: (
         <div style={{ padding: 8 }}>
           <Input
@@ -546,10 +567,11 @@ export default function UserPage() {
       title: "Created By",
       dataIndex: "createdByUser",
       key: "createdBy",
+      className: "font-workSans",
       render: (createdByUser) => {
         if (createdByUser) {
           const { firstName, lastName } = createdByUser;
-          return <p>{firstName + " " + lastName}</p>;
+          return <p>{formatString(firstName + " " + lastName)}</p>;
         }
         return null;
       },
@@ -608,6 +630,7 @@ export default function UserPage() {
     {
       title: "Action",
       key: "action",
+      className: "font-workSans",
       render: (_, record) => (
         <Button type="link" onClick={() => handleEdit(record)}>
           Edit
@@ -711,22 +734,64 @@ export default function UserPage() {
   const handlePaginationChange = (page: number, pageSize: number) => {
     setPagination({ current: page, pageSize, total: pagination.total });
   };
+  const rowSelection = {
+    onChange: (selectedRowKeys: React.Key[], selectedRows: User[]) => {
+      console.log(
+        `Selected row keys: ${selectedRowKeys}`,
+        "Selected rows: ",
+        selectedRows
+      );
+    },
+  };
 
   return (
-    <div className="p-6">
-      <div className="mb-6 flex justify-between items-center">
-        <h1 className="text-2xl font-semibold">User Management</h1>
-        <Button
-          type="primary"
-          size="large"
-          icon={<UserAddOutlined />}
-          onClick={handleAddUser}
-        >
-          Add User
-        </Button>
+    <div>
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold font-montserrat">Users</h1>
+      </div>
+      <div className="flex items-center gap-4 mb-2 font-workSans text-sm">
+        <div className="flex items-center gap-1">
+          <div className="font-medium">All</div>
+          <div className="text-gray-700">(66817)</div>
+        </div>
+        <div className="flex items-center gap-1">
+          <div className="text-blue-700 font-medium">New</div>
+          <div className="text-gray-700">(6)</div>
+        </div>
+        <div className="flex items-center gap-1">
+          <div className="text-blue-700 font-medium">Email subscribers</div>
+          <div className="text-gray-700">(8)</div>
+        </div>
+        <div className="flex items-center gap-1">
+          <div className="text-blue-700 font-medium">Active Status</div>
+          <div className="text-gray-700">(12)</div>
+        </div>
+      </div>
+      <div className="flex justify-between items-center  mb-4">
+        <div>
+          <SearchFilters />
+        </div>
+        <div>
+          <div className="flex items-center gap-4">
+            <ExportTablePdf />
+            <Button
+              type="primary"
+              size="large"
+              icon={<UserAddOutlined />}
+              onClick={handleAddUser}
+              className="font-sansInter"
+            >
+              Add User
+            </Button>
+          </div>
+        </div>
       </div>
 
       <Table
+        rowSelection={{
+          type: "checkbox",
+          ...rowSelection,
+        }}
         columns={columns}
         dataSource={users}
         loading={loading}

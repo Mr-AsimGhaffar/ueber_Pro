@@ -11,6 +11,8 @@ import {
 import type { ColumnsType } from "antd/es/table";
 import DriverForm from "@/components/DriverForm";
 import debounce from "lodash.debounce";
+import ExportTablePdf from "../../components/ExportTablePdf";
+import SearchFilters from "../../components/SearchFilters";
 
 interface Driver {
   user: object;
@@ -159,6 +161,7 @@ export default function DriverPage() {
       title: "First Name",
       dataIndex: "user",
       key: "firstName",
+      className: "font-workSans",
       render: ({ firstName }) => <a>{firstName}</a>,
       filterDropdown: (
         <div style={{ padding: 8 }}>
@@ -208,6 +211,7 @@ export default function DriverPage() {
       title: "Last Name",
       dataIndex: "user",
       key: "lastName",
+      className: "font-workSans",
       render: ({ lastName }) => <a>{lastName}</a>,
       filterDropdown: (
         <div style={{ padding: 8 }}>
@@ -257,6 +261,7 @@ export default function DriverPage() {
       title: "Email",
       dataIndex: "user",
       key: "email",
+      className: "font-workSans text-blue-500",
       render: ({ email }) => <a>{email}</a>,
       filterDropdown: (
         <div style={{ padding: 8 }}>
@@ -306,6 +311,7 @@ export default function DriverPage() {
       title: "Company Name",
       dataIndex: "user",
       key: "company",
+      className: "font-workSans",
       render: (company) => {
         if (company && company.company) {
           const { name } = company.company;
@@ -365,6 +371,7 @@ export default function DriverPage() {
       title: "Date of Birth",
       dataIndex: "user",
       key: "dateOfBirth",
+      className: "font-workSans",
       render: ({ dateOfBirth }) => {
         const date = new Date(dateOfBirth);
         return dateOfBirth ? date.toLocaleDateString("en-GB") : "";
@@ -415,6 +422,7 @@ export default function DriverPage() {
       title: "Status",
       dataIndex: "status",
       key: "status",
+      className: "font-workSans",
       filterDropdown: (
         <Checkbox.Group
           options={[
@@ -458,6 +466,7 @@ export default function DriverPage() {
       title: "Contact",
       dataIndex: "user",
       key: "contacts",
+      className: "font-workSans",
       render: ({ contacts }) => <a>{contacts}</a>,
       filterDropdown: (
         <div style={{ padding: 8 }}>
@@ -507,6 +516,7 @@ export default function DriverPage() {
       title: "license Expiry Date",
       dataIndex: "licenseExpiryDate",
       key: "licenseExpiryDate",
+      className: "font-workSans",
       render: (text: string) => {
         const date = new Date(text);
         return text ? date.toLocaleDateString("en-GB") : ""; // "en-GB" is for "dd/mm/yyyy"
@@ -563,6 +573,7 @@ export default function DriverPage() {
       title: "CNIC Number",
       dataIndex: "nic",
       key: "nic",
+      className: "font-workSans",
       filterDropdown: (
         <div style={{ padding: 8 }}>
           <Input
@@ -616,6 +627,7 @@ export default function DriverPage() {
     {
       title: "Action",
       key: "action",
+      className: "font-workSans",
       render: (_, record) => (
         <Button type="link" onClick={() => handleEdit(record)}>
           Edit
@@ -721,22 +733,64 @@ export default function DriverPage() {
   const handlePaginationChange = (page: number, pageSize: number) => {
     setPagination({ current: page, pageSize, total: pagination.total });
   };
+  const rowSelection = {
+    onChange: (selectedRowKeys: React.Key[], selectedRows: Driver[]) => {
+      console.log(
+        `Selected row keys: ${selectedRowKeys}`,
+        "Selected rows: ",
+        selectedRows
+      );
+    },
+  };
 
   return (
-    <div className="p-6">
-      <div className="mb-6 flex justify-between items-center">
-        <h1 className="text-2xl font-semibold">Driver Management</h1>
-        <Button
-          type="primary"
-          size="large"
-          icon={<UserAddOutlined />}
-          onClick={handleAddDriver}
-        >
-          Add Driver
-        </Button>
+    <div>
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold font-montserrat">Drivers</h1>
+      </div>
+      <div className="flex items-center gap-4 mb-2 font-workSans text-sm">
+        <div className="flex items-center gap-1">
+          <div className="font-medium">All</div>
+          <div className="text-gray-700">(66817)</div>
+        </div>
+        <div className="flex items-center gap-1">
+          <div className="text-blue-700 font-medium">New</div>
+          <div className="text-gray-700">(6)</div>
+        </div>
+        <div className="flex items-center gap-1">
+          <div className="text-blue-700 font-medium">Email subscribers</div>
+          <div className="text-gray-700">(8)</div>
+        </div>
+        <div className="flex items-center gap-1">
+          <div className="text-blue-700 font-medium">Active Status</div>
+          <div className="text-gray-700">(12)</div>
+        </div>
+      </div>
+      <div className="flex justify-between items-center mb-4">
+        <div>
+          <SearchFilters />
+        </div>
+        <div>
+          <div className="flex items-center gap-4">
+            <ExportTablePdf />
+            <Button
+              type="primary"
+              size="large"
+              icon={<UserAddOutlined />}
+              onClick={handleAddDriver}
+              className="font-sansInter"
+            >
+              Add Driver
+            </Button>
+          </div>
+        </div>
       </div>
 
       <Table
+        rowSelection={{
+          type: "checkbox",
+          ...rowSelection,
+        }}
         columns={columns}
         dataSource={drivers}
         loading={loading}
