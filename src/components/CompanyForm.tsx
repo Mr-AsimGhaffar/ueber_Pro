@@ -57,7 +57,6 @@ export default function CompanyForm({
             {" "}
             {initialValues ? "Edit Company" : "Add New Company"}
           </h1>
-          <h3 className="font-medium mb-4">Company Information</h3>
         </div>
 
         <Form.Item
@@ -89,7 +88,7 @@ export default function CompanyForm({
           rules={[{ required: true, message: "Please select a Type" }]}
         >
           <Select placeholder="Select Type">
-            <Select.Option value="ANY">Any</Select.Option>
+            <Select.Option value="ANY">Others</Select.Option>
             <Select.Option value="CARS">Cars</Select.Option>
             <Select.Option value="DRIVERS">Drivers</Select.Option>
           </Select>
@@ -144,9 +143,9 @@ export default function CompanyForm({
         </Form.Item>
 
         {/* Document Upload */}
-        <div className="md:col-span-2">
+        {/* <div className="md:col-span-2">
           <h3 className="font-medium mb-4 mt-4">Documents</h3>
-        </div>
+        </div> */}
 
         {/* <Form.Item
           name="logo"

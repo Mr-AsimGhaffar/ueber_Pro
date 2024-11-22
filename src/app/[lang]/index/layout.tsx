@@ -9,6 +9,7 @@ import { UserProvider } from "@/hooks/context/AuthContext";
 import { CarProvider } from "@/hooks/context/AuthContextCars";
 import { i18n } from "../../../../i18n-config";
 import { headers } from "next/headers";
+import { Inter, Work_Sans, Montserrat } from "next/font/google";
 
 import "@/app/globals.css";
 
@@ -16,6 +17,22 @@ export const metadata = {
   title: "Next.js i18n Dashboard Template",
   description: "How to create internationalized dasboard with Next.js",
 };
+
+const inter = Inter({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-inter",
+});
+const workSans = Work_Sans({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-workSans",
+});
+const montserrat = Montserrat({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-montserrat",
+});
 
 interface Props {
   params: { lang: Locale };
@@ -34,7 +51,10 @@ export default async function Root({ params, children }: Props) {
     ["login", "register"].some((route) => pathname.includes(route));
 
   return (
-    <html lang={params.lang}>
+    <html
+      lang={params.lang}
+      className={`${inter.variable} ${workSans.variable} ${montserrat.variable}`}
+    >
       <body className="relative min-h-screen overflow-y-auto bg-gray-50">
         <ConfigProvider>
           <UserProvider initialUser={user}>

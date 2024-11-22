@@ -97,7 +97,6 @@ export default function UserForm({
             {" "}
             {initialValues ? "Edit User" : "Add New User"}
           </h1>
-          <h3 className="font-medium mb-4">User Information</h3>
         </div>
 
         <Form.Item
@@ -266,9 +265,9 @@ export default function UserForm({
         </Form.Item>
 
         {/* Document Upload */}
-        <div className="md:col-span-2">
+        {/* <div className="md:col-span-2">
           <h3 className="font-medium mb-4 mt-4">Documents</h3>
-        </div>
+        </div> */}
 
         {/* Uncomment and extend validation for company logo upload */}
         {/* <Form.Item
