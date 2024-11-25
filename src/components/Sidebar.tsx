@@ -1,6 +1,7 @@
 import SidebarLink from "@/components/SidebarLink";
 import { getIntl } from "@/lib/intl";
 import { Locale } from "@/lib/definitions";
+import CollapsibleSidebar from "./CollapsibleSidebar";
 
 interface Props {
   locale: Locale;
@@ -23,6 +24,98 @@ export default async function Sidebar({ locale, role }: Props) {
         </div>
         <div className="text-xl text-gray-200">Ueber Pro</div>
       </div> */}
+
+      {/* <hr className="h-px border-t-0 bg-transparent bg-gradient-to-r from-transparent via-neutral-500 to-transparent opacity-25" /> */}
+      <CollapsibleSidebar
+        collapseChildren={
+          <div>
+            <img
+              src="/images/ueberProLogo.png"
+              alt="Ueber Pro Logo"
+              width={50}
+              height={50}
+              className="mt-[-10]"
+            />
+            <SidebarLink href={`/${locale}/index/home`}>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1.5}
+                stroke="currentColor"
+                className="size-6"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"
+                />
+              </svg>
+            </SidebarLink>
+            <SidebarLink href={`/${locale}/index/company`}>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1.5}
+                stroke="currentColor"
+                className="size-6"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M4 21h16M7 21V7a1 1 0 011-1h8a1 1 0 011 1v14M10 21V12h4v9M8 3h8M6 16h2v2H6v-2m0-5h2v2H6v-2m10 5h2v2h-2v-2m0-5h2v2h-2v-2"
+                />
+              </svg>
+            </SidebarLink>
+            <SidebarLink href={`/${locale}/index/users`}>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1.5}
+                stroke="currentColor"
+                className="size-6"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M5.5 18a5.5 5.5 0 0111 0M4.75 18a7.25 7.25 0 0114.5 0M9 8.5A3.5 3.5 0 1115 8.5A3.5 3.5 0 019 8.5zM7.5 11.5a3.25 3.25 0 117.25-3.25 3.25 3.25 0 017.25 3.25"
+                />
+              </svg>
+            </SidebarLink>
+            <SidebarLink href={`/${locale}/index/drivers`}>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1.5}
+                stroke="currentColor"
+                className="size-6"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"
+                />
+              </svg>
+            </SidebarLink>
+            <SidebarLink href={`/${locale}/index/bookings`}>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1.5}
+                stroke="currentColor"
+                className="size-6"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0ZM3.75 12h.007v.008H3.75V12Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm-.375 5.25h.007v.008H3.75v-.008Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"
+                />
+              </svg>
+            </SidebarLink>
 
             <SidebarLink href={`/${locale}/index/listings`}>
               <svg
@@ -304,6 +397,7 @@ export default async function Sidebar({ locale, role }: Props) {
             </>
           )}
         </div>
+      </CollapsibleSidebar>
     </>
   );
 }
