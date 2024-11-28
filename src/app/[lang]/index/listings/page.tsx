@@ -2,28 +2,17 @@
 
 import React, { useEffect, useState } from "react";
 import {
-  Input,
   Select,
-  DatePicker,
-  TimePicker,
   Button,
   Card,
   Rate,
-  Space,
   Row,
   Col,
   Spin,
   message,
   Modal,
 } from "antd";
-import {
-  SearchOutlined,
-  HeartOutlined,
-  UnorderedListOutlined,
-  AppstoreOutlined,
-  EnvironmentOutlined,
-  UserAddOutlined,
-} from "@ant-design/icons";
+import { HeartOutlined, UserAddOutlined } from "@ant-design/icons";
 import CarFilters from "@/components/cars/CarFilters";
 import { useCar } from "@/hooks/context/AuthContextCars";
 import { BsFillFuelPumpFill } from "react-icons/bs";
@@ -32,10 +21,9 @@ import { MdCarRental, MdEventAvailable } from "react-icons/md";
 import { TbListDetails } from "react-icons/tb";
 import { useRouter } from "next/navigation";
 import { usePathname } from "next/navigation";
-import { Car, Cars } from "@/lib/definitions";
+import { Car } from "@/lib/definitions";
 import CarForm from "@/components/CarForm";
 import { FaEdit } from "react-icons/fa";
-// import { getCars } from "@/lib/data";
 
 const { Option } = Select;
 
@@ -49,7 +37,6 @@ export default function ListingsPage() {
   const [loading, setLoading] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [car, setCar] = useState<Car[]>([]);
   const [selectedCar, setSelectedCar] = useState<Car | null>(null);
 
   const fetchFilteredCars = async () => {
@@ -66,13 +53,6 @@ export default function ListingsPage() {
       });
       console.log("queryparams", queryParams);
       const keys = ["brand", "carFuelType", "category"];
-      // Object.entries(filters).forEach(([key, values]) => {
-      //   if (Array.isArray(values) && values.length) {
-      //     values.forEach((value) => {
-      //       queryParams.append(keys.includes(key) ? `${key}.name` : key, value);
-      //     });
-      //   }
-      // });
       const response = await fetch(
         `/api/cars/listCars?${queryParams.toString()}`
       );
@@ -292,7 +272,7 @@ export default function ListingsPage() {
       </Card> */}
 
       {/* Filters and View Toggle */}
-      <div className="mb-6 flex justify-between items-center">
+      {/* <div className="mb-6 flex justify-between items-center">
         <div className="flex items-center gap-4">
           <span>Show: </span>
           <Select defaultValue="5" style={{ width: 80 }}>
@@ -319,7 +299,7 @@ export default function ListingsPage() {
             onClick={() => setViewMode("list")}
           />
         </div>
-      </div>
+      </div> */}
 
       {/* Car Listings */}
       <Row gutter={[16, 16]}>
