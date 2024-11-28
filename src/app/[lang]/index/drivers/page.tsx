@@ -11,6 +11,9 @@ import {
 import type { ColumnsType } from "antd/es/table";
 import DriverForm from "@/components/DriverForm";
 import debounce from "lodash.debounce";
+import ExportTablePdf from "../../components/ExportTablePdf";
+import SearchFiltersDriver from "../../components/SearchFiltersDriver";
+import { FaSort, FaSortDown, FaSortUp } from "react-icons/fa";
 
 interface Driver {
   user: object;
@@ -57,12 +60,19 @@ export default function DriverPage() {
     createdBy: "",
     licenseExpiryDate: "",
     nic: "",
+    search: "",
   });
   const [pagination, setPagination] = useState({
     total: 0,
     current: 1,
     pageSize: 10,
   });
+  const [sortParams, setSortParams] = useState<
+    { field: string; order: string }[]
+  >([]);
+
+  const [search, setSearch] = useState("");
+  const [searchField, setSearchField] = useState("");
 
   const fetchDrivers = async (currentFilters = filters) => {
     setLoading(true);
@@ -98,10 +108,17 @@ export default function DriverPage() {
           : {}),
         ...(currentFilters.nic ? { nic: currentFilters.nic } : {}),
       };
+      const sort = sortParams
+        .map((param) => `${param.field}:${param.order}`)
+        .join(",");
       const query = new URLSearchParams({
         page: String(pagination.current),
+        sort,
         limit: String(pagination.pageSize),
         filters: JSON.stringify(filtersObject),
+        search,
+        searchFields:
+          "user.firstName,user.lastName,user.email,user.company.name,nic",
       }).toString();
       const response = await fetch(`/api/listDrivers?${query}`, {
         method: "GET",
@@ -140,25 +157,77 @@ export default function DriverPage() {
     { leading: true, trailing: false } // Leading ensures the first call executes immediately
   );
 
-  const handleFilterChange = (
-    key: keyof typeof filters,
-    value: string | string[]
-  ) => {
+  const handleFilterChange = (key: string, value: string) => {
     const updatedFilters = { ...filters, [key]: value };
     setFilters(updatedFilters);
     setPagination((prev) => ({ ...prev, current: 1 })); // Reset to first page
     debouncedFetchCompanies(updatedFilters);
   };
+  const handleGeneralSearch = (
+    value: string,
+    newFilters: { status: string[] }
+  ) => {
+    setSearch(value);
+    setFilters((prevFilters) => ({
+      ...prevFilters,
+      ...newFilters,
+    }));
+    setPagination((prev) => ({ ...prev, current: 1 }));
+  };
+  const handleSort = (field: string) => {
+    let newSortParams = [...sortParams];
+    const existingIndex = newSortParams.findIndex(
+      (param) => param.field === field
+    );
+
+    if (existingIndex !== -1) {
+      const currentOrder = newSortParams[existingIndex].order;
+      if (currentOrder === "asc") {
+        newSortParams[existingIndex].order = "desc";
+      } else if (currentOrder === "desc") {
+        newSortParams.splice(existingIndex, 1); // Remove the field from sorting if desc
+      }
+    } else {
+      newSortParams.push({ field, order: "asc" });
+    }
+
+    setSortParams(newSortParams);
+    // fetchCompanies(filters); // Pass updated filters
+  };
 
   useEffect(() => {
     fetchDrivers();
-  }, [pagination.current, pagination.pageSize]);
+  }, [pagination.current, pagination.pageSize, sortParams, search, filters]);
 
   const columns: ColumnsType<Driver> = [
     {
-      title: "First Name",
+      title: (
+        <span className="flex items-center gap-2">
+          First Name
+          {sortParams.find((param) => param.field === "user.firstName") ? (
+            sortParams.find((param) => param.field === "user.firstName")!
+              .order === "asc" ? (
+              <FaSortUp
+                className="cursor-pointer text-blue-500"
+                onClick={() => handleSort("user.firstName")}
+              />
+            ) : (
+              <FaSortDown
+                className="cursor-pointer text-blue-500"
+                onClick={() => handleSort("user.firstName")}
+              />
+            )
+          ) : (
+            <FaSort
+              className="cursor-pointer text-gray-400"
+              onClick={() => handleSort("user.firstName")}
+            />
+          )}
+        </span>
+      ),
       dataIndex: "user",
       key: "firstName",
+      className: "font-workSans",
       render: ({ firstName }) => <a>{firstName}</a>,
       filterDropdown: (
         <div style={{ padding: 8 }}>
@@ -205,9 +274,33 @@ export default function DriverPage() {
       ),
     },
     {
-      title: "Last Name",
+      title: (
+        <span className="flex items-center gap-2">
+          last Name
+          {sortParams.find((param) => param.field === "user.lastName") ? (
+            sortParams.find((param) => param.field === "user.lastName")!
+              .order === "asc" ? (
+              <FaSortUp
+                className="cursor-pointer text-blue-500"
+                onClick={() => handleSort("user.lastName")}
+              />
+            ) : (
+              <FaSortDown
+                className="cursor-pointer text-blue-500"
+                onClick={() => handleSort("user.lastName")}
+              />
+            )
+          ) : (
+            <FaSort
+              className="cursor-pointer text-gray-400"
+              onClick={() => handleSort("user.lastName")}
+            />
+          )}
+        </span>
+      ),
       dataIndex: "user",
       key: "lastName",
+      className: "font-workSans",
       render: ({ lastName }) => <a>{lastName}</a>,
       filterDropdown: (
         <div style={{ padding: 8 }}>
@@ -254,9 +347,33 @@ export default function DriverPage() {
       ),
     },
     {
-      title: "Email",
+      title: (
+        <span className="flex items-center gap-2">
+          Email
+          {sortParams.find((param) => param.field === "user.email") ? (
+            sortParams.find((param) => param.field === "user.email")!.order ===
+            "asc" ? (
+              <FaSortUp
+                className="cursor-pointer text-blue-500"
+                onClick={() => handleSort("user.email")}
+              />
+            ) : (
+              <FaSortDown
+                className="cursor-pointer text-blue-500"
+                onClick={() => handleSort("user.email")}
+              />
+            )
+          ) : (
+            <FaSort
+              className="cursor-pointer text-gray-400"
+              onClick={() => handleSort("user.email")}
+            />
+          )}
+        </span>
+      ),
       dataIndex: "user",
       key: "email",
+      className: "font-workSans text-blue-500",
       render: ({ email }) => <a>{email}</a>,
       filterDropdown: (
         <div style={{ padding: 8 }}>
@@ -303,9 +420,33 @@ export default function DriverPage() {
       ),
     },
     {
-      title: "Company Name",
+      title: (
+        <span className="flex items-center gap-2">
+          Company Name
+          {sortParams.find((param) => param.field === "user.company.name") ? (
+            sortParams.find((param) => param.field === "user.company.name")!
+              .order === "asc" ? (
+              <FaSortUp
+                className="cursor-pointer text-blue-500"
+                onClick={() => handleSort("user.company.name")}
+              />
+            ) : (
+              <FaSortDown
+                className="cursor-pointer text-blue-500"
+                onClick={() => handleSort("user.company.name")}
+              />
+            )
+          ) : (
+            <FaSort
+              className="cursor-pointer text-gray-400"
+              onClick={() => handleSort("user.company.name")}
+            />
+          )}
+        </span>
+      ),
       dataIndex: "user",
       key: "company",
+      className: "font-workSans",
       render: (company) => {
         if (company && company.company) {
           const { name } = company.company;
@@ -365,80 +506,81 @@ export default function DriverPage() {
       title: "Date of Birth",
       dataIndex: "user",
       key: "dateOfBirth",
+      className: "font-workSans",
       render: ({ dateOfBirth }) => {
         const date = new Date(dateOfBirth);
         return dateOfBirth ? date.toLocaleDateString("en-GB") : "";
       },
-      filterDropdown: (
-        <div style={{ padding: 8 }}>
-          <Input
-            placeholder="Search date of bIrth"
-            value={searchDob}
-            suffix={
-              <SearchOutlined style={{ color: searchDob ? "blue" : "gray" }} />
-            }
-            onChange={(e) => {
-              const newSearchValue = "dateOfBirth";
-              setSearchDob(e.target.value);
-              if (!searchRef.current.includes(newSearchValue)) {
-                searchRef.current.push(newSearchValue);
-              }
-              handleFilterChange("dateOfBirth", e.target.value);
-            }}
-          />
-          <div style={{ marginTop: 8 }}>
-            <Button
-              type="primary"
-              icon={<SearchOutlined />}
-              onClick={() => handleFilterChange("dateOfBirth", searchDob)}
-              style={{ marginRight: 8 }}
-            >
-              Search
-            </Button>
-            <Button
-              icon={<ReloadOutlined />}
-              onClick={() => {
-                setSearchDob(""); // Reset the search field
-                handleFilterChange("dateOfBirth", ""); // Reset filter
-              }}
-            >
-              Reset
-            </Button>
-          </div>
-        </div>
-      ),
-      filterIcon: () => (
-        <SearchOutlined style={{ color: searchDob ? "blue" : "gray" }} />
-      ),
+      // filterDropdown: (
+      //   <div style={{ padding: 8 }}>
+      //     <Input
+      //       placeholder="Search date of bIrth"
+      //       value={searchDob}
+      //       suffix={
+      //         <SearchOutlined style={{ color: searchDob ? "blue" : "gray" }} />
+      //       }
+      //       onChange={(e) => {
+      //         const newSearchValue = "dateOfBirth";
+      //         setSearchDob(e.target.value);
+      //         if (!searchRef.current.includes(newSearchValue)) {
+      //           searchRef.current.push(newSearchValue);
+      //         }
+      //         handleFilterChange("dateOfBirth", e.target.value);
+      //       }}
+      //     />
+      //     <div style={{ marginTop: 8 }}>
+      //       <Button
+      //         type="primary"
+      //         icon={<SearchOutlined />}
+      //         onClick={() => handleFilterChange("dateOfBirth", searchDob)}
+      //         style={{ marginRight: 8 }}
+      //       >
+      //         Search
+      //       </Button>
+      //       <Button
+      //         icon={<ReloadOutlined />}
+      //         onClick={() => {
+      //           setSearchDob(""); // Reset the search field
+      //           handleFilterChange("dateOfBirth", ""); // Reset filter
+      //         }}
+      //       >
+      //         Reset
+      //       </Button>
+      //     </div>
+      //   </div>
+      // ),
+      // filterIcon: () => (
+      //   <SearchOutlined style={{ color: searchDob ? "blue" : "gray" }} />
+      // ),
     },
     {
-      title: "Status",
+      title: (
+        <span className="flex items-center gap-2">
+          Status
+          {sortParams.find((param) => param.field === "status") ? (
+            sortParams.find((param) => param.field === "status")!.order ===
+            "asc" ? (
+              <FaSortUp
+                className="cursor-pointer text-blue-500"
+                onClick={() => handleSort("status")}
+              />
+            ) : (
+              <FaSortDown
+                className="cursor-pointer text-blue-500"
+                onClick={() => handleSort("status")}
+              />
+            )
+          ) : (
+            <FaSort
+              className="cursor-pointer text-gray-400"
+              onClick={() => handleSort("status")}
+            />
+          )}
+        </span>
+      ),
       dataIndex: "status",
       key: "status",
-      filterDropdown: (
-        <Checkbox.Group
-          options={[
-            { label: "Available", value: "AVAILABLE" },
-            { label: "On Leave", value: "ON_LEAVE" },
-            { label: "Suspended", value: "SUSPENDED" },
-            { label: "Off Duty", value: "OFF_DUTY" },
-            { label: "On Trip", value: "ON_TRIP" },
-          ]}
-          value={searchStatus}
-          onChange={(checkedValues) => {
-            setSearchStatus(checkedValues);
-            handleFilterChange("status", checkedValues);
-          }}
-          className="p-4"
-        />
-      ),
-      filterIcon: () => (
-        <FilterOutlined
-          style={{
-            color: searchStatus.length > 0 ? "blue" : "gray", // Change color based on selection
-          }}
-        />
-      ),
+      className: "font-workSans",
       render: (status: string) => {
         const statusColors: { [key: string]: string } = {
           AVAILABLE: "green",
@@ -458,6 +600,7 @@ export default function DriverPage() {
       title: "Contact",
       dataIndex: "user",
       key: "contacts",
+      className: "font-workSans",
       render: ({ contacts }) => <a>{contacts}</a>,
       filterDropdown: (
         <div style={{ padding: 8 }}>
@@ -507,62 +650,87 @@ export default function DriverPage() {
       title: "license Expiry Date",
       dataIndex: "licenseExpiryDate",
       key: "licenseExpiryDate",
+      className: "font-workSans",
       render: (text: string) => {
         const date = new Date(text);
         return text ? date.toLocaleDateString("en-GB") : ""; // "en-GB" is for "dd/mm/yyyy"
       },
-      filterDropdown: (
-        <div style={{ padding: 8 }}>
-          <Input
-            placeholder="Search licenseExpiryDate"
-            value={searchLicenseExpiryDate}
-            suffix={
-              <SearchOutlined
-                style={{ color: searchLicenseExpiryDate ? "blue" : "gray" }}
-              />
-            }
-            onChange={(e) => {
-              const searchValue = "licenseExpiryDate";
-              setSearchLicenseExpiryDate(e.target.value);
-              if (!searchRef.current.includes(searchValue)) {
-                searchRef.current.push(searchValue);
-              }
-              handleFilterChange("licenseExpiryDate", e.target.value);
-            }}
-          />
-          <div style={{ marginTop: 8 }}>
-            <Button
-              type="primary"
-              icon={<SearchOutlined />}
-              onClick={() =>
-                handleFilterChange("licenseExpiryDate", searchLicenseExpiryDate)
-              }
-              style={{ marginRight: 8 }}
-            >
-              Search
-            </Button>
-            <Button
-              icon={<ReloadOutlined />}
-              onClick={() => {
-                setSearchLicenseExpiryDate(""); // Reset the search field
-                handleFilterChange("licenseExpiryDate", ""); // Reset filter
-              }}
-            >
-              Reset
-            </Button>
-          </div>
-        </div>
-      ),
-      filterIcon: () => (
-        <SearchOutlined
-          style={{ color: searchLicenseExpiryDate ? "blue" : "gray" }}
-        />
-      ),
+      // filterDropdown: (
+      //   <div style={{ padding: 8 }}>
+      //     <Input
+      //       placeholder="Search licenseExpiryDate"
+      //       value={searchLicenseExpiryDate}
+      //       suffix={
+      //         <SearchOutlined
+      //           style={{ color: searchLicenseExpiryDate ? "blue" : "gray" }}
+      //         />
+      //       }
+      //       onChange={(e) => {
+      //         const searchValue = "licenseExpiryDate";
+      //         setSearchLicenseExpiryDate(e.target.value);
+      //         if (!searchRef.current.includes(searchValue)) {
+      //           searchRef.current.push(searchValue);
+      //         }
+      //         handleFilterChange("licenseExpiryDate", e.target.value);
+      //       }}
+      //     />
+      //     <div style={{ marginTop: 8 }}>
+      //       <Button
+      //         type="primary"
+      //         icon={<SearchOutlined />}
+      //         onClick={() =>
+      //           handleFilterChange("licenseExpiryDate", searchLicenseExpiryDate)
+      //         }
+      //         style={{ marginRight: 8 }}
+      //       >
+      //         Search
+      //       </Button>
+      //       <Button
+      //         icon={<ReloadOutlined />}
+      //         onClick={() => {
+      //           setSearchLicenseExpiryDate(""); // Reset the search field
+      //           handleFilterChange("licenseExpiryDate", ""); // Reset filter
+      //         }}
+      //       >
+      //         Reset
+      //       </Button>
+      //     </div>
+      //   </div>
+      // ),
+      // filterIcon: () => (
+      //   <SearchOutlined
+      //     style={{ color: searchLicenseExpiryDate ? "blue" : "gray" }}
+      //   />
+      // ),
     },
     {
-      title: "CNIC Number",
+      title: (
+        <span className="flex items-center gap-2">
+          CNIC Number
+          {sortParams.find((param) => param.field === "nic") ? (
+            sortParams.find((param) => param.field === "nic")!.order ===
+            "asc" ? (
+              <FaSortUp
+                className="cursor-pointer text-blue-500"
+                onClick={() => handleSort("nic")}
+              />
+            ) : (
+              <FaSortDown
+                className="cursor-pointer text-blue-500"
+                onClick={() => handleSort("nic")}
+              />
+            )
+          ) : (
+            <FaSort
+              className="cursor-pointer text-gray-400"
+              onClick={() => handleSort("nic")}
+            />
+          )}
+        </span>
+      ),
       dataIndex: "nic",
       key: "nic",
+      className: "font-workSans",
       filterDropdown: (
         <div style={{ padding: 8 }}>
           <Input
@@ -616,6 +784,7 @@ export default function DriverPage() {
     {
       title: "Action",
       key: "action",
+      className: "font-workSans",
       render: (_, record) => (
         <Button type="link" onClick={() => handleEdit(record)}>
           Edit
@@ -721,22 +890,64 @@ export default function DriverPage() {
   const handlePaginationChange = (page: number, pageSize: number) => {
     setPagination({ current: page, pageSize, total: pagination.total });
   };
+  const rowSelection = {
+    onChange: (selectedRowKeys: React.Key[], selectedRows: Driver[]) => {
+      console.log(
+        `Selected row keys: ${selectedRowKeys}`,
+        "Selected rows: ",
+        selectedRows
+      );
+    },
+  };
 
   return (
-    <div className="p-6">
-      <div className="mb-6 flex justify-between items-center">
-        <h1 className="text-2xl font-semibold">Driver Management</h1>
-        <Button
-          type="primary"
-          size="large"
-          icon={<UserAddOutlined />}
-          onClick={handleAddDriver}
-        >
-          Add Driver
-        </Button>
+    <div>
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold font-montserrat">Drivers</h1>
+      </div>
+      <div className="flex items-center gap-4 mb-2 font-workSans text-sm">
+        <div className="flex items-center gap-1">
+          <div className="font-medium">All</div>
+          <div className="text-gray-700">({pagination.total})</div>
+        </div>
+        <div className="flex items-center gap-1">
+          <div className="text-blue-700 font-medium">New</div>
+          <div className="text-gray-700">(6)</div>
+        </div>
+        <div className="flex items-center gap-1">
+          <div className="text-blue-700 font-medium">Inactive</div>
+          <div className="text-gray-700">(8)</div>
+        </div>
+        <div className="flex items-center gap-1">
+          <div className="text-blue-700 font-medium">Active</div>
+          <div className="text-gray-700">(12)</div>
+        </div>
+      </div>
+      <div className="flex justify-between items-center mb-4">
+        <div>
+          <SearchFiltersDriver onFilterChange={handleGeneralSearch} />
+        </div>
+        <div>
+          <div className="flex items-center gap-4">
+            {/* <ExportTablePdf /> */}
+            <Button
+              type="primary"
+              size="large"
+              icon={<UserAddOutlined />}
+              onClick={handleAddDriver}
+              className="font-sansInter"
+            >
+              Add Driver
+            </Button>
+          </div>
+        </div>
       </div>
 
       <Table
+        rowSelection={{
+          type: "checkbox",
+          ...rowSelection,
+        }}
         columns={columns}
         dataSource={drivers}
         loading={loading}
