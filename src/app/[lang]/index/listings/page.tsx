@@ -35,11 +35,14 @@ import { usePathname } from "next/navigation";
 import { Car, Cars } from "@/lib/definitions";
 import CarForm from "@/components/CarForm";
 import { FaEdit } from "react-icons/fa";
+// import { getCars } from "@/lib/data";
 
 const { Option } = Select;
 
 export default function ListingsPage() {
   const { cars, setCars } = useCar();
+  const [filteredCars, setFilteredCars] = useState(cars?.data || []);
+  const [filters, setFilters] = useState<Record<string, string[]>>({});
   const router = useRouter();
   const pathname = usePathname();
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
@@ -48,6 +51,44 @@ export default function ListingsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [car, setCar] = useState<Car[]>([]);
   const [selectedCar, setSelectedCar] = useState<Car | null>(null);
+
+  const fetchFilteredCars = async () => {
+    setLoading(true);
+    try {
+      const { rating = [], capacity = [], year = [] } = filters;
+      const queryParams = new URLSearchParams({
+        filters: JSON.stringify({
+          ...filters,
+          rating: rating.map(Number),
+          capacity: capacity.map(Number),
+          year: year.map(Number),
+        }),
+      });
+      console.log("queryparams", queryParams);
+      const keys = ["brand", "carFuelType", "category"];
+      // Object.entries(filters).forEach(([key, values]) => {
+      //   if (Array.isArray(values) && values.length) {
+      //     values.forEach((value) => {
+      //       queryParams.append(keys.includes(key) ? `${key}.name` : key, value);
+      //     });
+      //   }
+      // });
+      const response = await fetch(
+        `/api/cars/listCars?${queryParams.toString()}`
+      );
+      const data = await response.json();
+      setCars(data);
+      setFilteredCars(data.data);
+    } catch (error) {
+      console.error("Error fetching filtered cars:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchFilteredCars();
+  }, [filters]);
 
   const capitalizeFirstLetter = (str: string = "") => {
     return str
@@ -85,7 +126,7 @@ export default function ListingsPage() {
     if (selectedCar) {
       // Update user
       try {
-        const response = await fetch("/api/updateCar", {
+        const response = await fetch("/api/cars/updateCar", {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
@@ -157,7 +198,7 @@ export default function ListingsPage() {
         setSelectedCar({
           ...data.data,
           brand: data.data.brand.name,
-          model: data.data.model.name,
+          model: data.data?.model?.name,
           category: data.data.category.name,
           carFuelType: data.data.carFuelType.name,
           registrationNumber: data.data.registrationNumber,
@@ -194,7 +235,7 @@ export default function ListingsPage() {
     <div className="p-6">
       {/* Search Section */}
       <div className="flex gap-4">
-        <CarFilters />
+        <CarFilters setFilters={setFilters} />
         <Button
           type="primary"
           icon={<UserAddOutlined />}
@@ -203,7 +244,7 @@ export default function ListingsPage() {
           Add Car
         </Button>
       </div>
-      <Card className="mb-8">
+      {/* <Card className="mb-8">
         <Row gutter={[16, 16]}>
           <Col xs={24} sm={24} md={6}>
             <Input
@@ -248,7 +289,7 @@ export default function ListingsPage() {
             </Button>
           </Col>
         </Row>
-      </Card>
+      </Card> */}
 
       {/* Filters and View Toggle */}
       <div className="mb-6 flex justify-between items-center">
@@ -282,7 +323,7 @@ export default function ListingsPage() {
 
       {/* Car Listings */}
       <Row gutter={[16, 16]}>
-        {cars?.data?.map((car) => (
+        {filteredCars.map((car) => (
           <Col
             key={car.id}
             xs={24}

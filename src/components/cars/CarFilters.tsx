@@ -1,10 +1,12 @@
 import React, { useState } from "react";
-import { Drawer, Checkbox, Collapse, Button, Space } from "antd";
+import { Drawer, Checkbox, Collapse, Button } from "antd";
 import { FilterOutlined } from "@ant-design/icons";
 
 const { Panel } = Collapse;
 
-const FiltersSidebar: React.FC = () => {
+const FiltersSidebar: React.FC<{
+  setFilters: (filters: Record<string, string[]>) => void;
+}> = ({ setFilters }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedFilters, setSelectedFilters] = useState<
     Record<string, string[]>
@@ -36,6 +38,24 @@ const FiltersSidebar: React.FC = () => {
     </div>
   );
 
+  const filterOptions = {
+    status: ["AVAILABLE", "IN_USE", "MAINTENANCE"],
+    year: Array.from({ length: 35 }, (_, i) => (2024 - i).toString()),
+    brand: ["Toyota", "Honda", "BMW", "Tesla"],
+    category: ["SUV", "Sedan", "Truck", "Hatchback"],
+    carFuelType: ["Petrol", "Diesel", "Electric"],
+    transmission: ["AUTOMATIC", "MANUAL", "SEMI_AUTOMATIC"],
+    rating: ["1", "2", "3", "4", "5"],
+    color: ["Red", "Blue", "Black", "White", "Gray"],
+    capacity: ["2", "4", "6", "8"],
+    // mileage: ["0-10", "10-20", "20+"],
+  };
+
+  const handleApplyFilters = () => {
+    setFilters(selectedFilters);
+    toggleDrawer();
+  };
+
   return (
     <div>
       {/* Filter Button */}
@@ -55,53 +75,19 @@ const FiltersSidebar: React.FC = () => {
         onClose={toggleDrawer}
         open={isOpen}
         width={300}
+        footer={
+          <Button type="primary" block onClick={handleApplyFilters}>
+            Apply Filters
+          </Button>
+        }
       >
         {/* Collapsible Filter Groups */}
         <Collapse defaultActiveKey={["1"]} ghost>
-          {/* Car Availability */}
-          <Panel header="Car Availability" key="1">
-            {renderCheckboxGroup("availability", ["Active", "Inactive"])}
-          </Panel>
-
-          {/* Car Years */}
-          <Panel header="Car Years" key="2">
-            {renderCheckboxGroup("years", ["2020", "2021", "2022", "2023"])}
-          </Panel>
-
-          {/* Car Brands */}
-          <Panel header="Car Brands" key="3">
-            {renderCheckboxGroup("brands", ["Toyota", "Honda", "BMW", "Tesla"])}
-          </Panel>
-
-          {/* Car Category */}
-          <Panel header="Car Category" key="4">
-            {renderCheckboxGroup("categories", [
-              "SUV",
-              "Sedan",
-              "Truck",
-              "Hatchback",
-            ])}
-          </Panel>
-
-          {/* Car Fuel Type */}
-          <Panel header="Car Fuel Type" key="5">
-            <Space size="middle" className="flex flex-wrap mt-2">
-              {["Petrol", "Diesel", "Electric"].map((fuel) => (
-                <Button
-                  key={fuel}
-                  type={
-                    selectedFilters["fuelType"]?.includes(fuel)
-                      ? "primary"
-                      : "default"
-                  }
-                  onClick={() => handleCheckboxChange("fuelType", fuel)}
-                  style={{ margin: "0 0.5rem 0.5rem 0" }}
-                >
-                  {fuel}
-                </Button>
-              ))}
-            </Space>
-          </Panel>
+          {Object.entries(filterOptions).map(([category, options], index) => (
+            <Panel header={category.toUpperCase()} key={index}>
+              {renderCheckboxGroup(category, options)}
+            </Panel>
+          ))}
         </Collapse>
       </Drawer>
     </div>
