@@ -1,16 +1,17 @@
 import React, { useState } from "react";
-import { Drawer, Checkbox, Collapse, Button } from "antd";
+import { Drawer, Checkbox, Collapse, Button, Input } from "antd";
 import { FilterOutlined } from "@ant-design/icons";
 
 const { Panel } = Collapse;
 
 const FiltersSidebar: React.FC<{
-  setFilters: (filters: Record<string, string[]>) => void;
+  setFilters: (filters: Record<string, any>) => void;
 }> = ({ setFilters }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedFilters, setSelectedFilters] = useState<
     Record<string, string[]>
   >({});
+  const [mileage, setMileage] = useState({ from: "", to: "" });
 
   const toggleDrawer = () => setIsOpen(!isOpen);
 
@@ -25,12 +26,13 @@ const FiltersSidebar: React.FC<{
   };
 
   const renderCheckboxGroup = (category: string, options: string[]) => (
-    <div className="flex flex-col space-y-2 mt-2">
+    <div className="flex flex-col space-y-2">
       {options.map((option) => (
         <Checkbox
           key={option}
           onChange={() => handleCheckboxChange(category, option)}
           checked={selectedFilters[category]?.includes(option)}
+          className="font-sansInter text-xs"
         >
           {option}
         </Checkbox>
@@ -48,11 +50,18 @@ const FiltersSidebar: React.FC<{
     rating: ["1", "2", "3", "4", "5"],
     color: ["Red", "Blue", "Black", "White", "Gray"],
     capacity: ["2", "4", "6", "8"],
-    // mileage: ["0-10", "10-20", "20+"],
+  };
+
+  const handleMileageChange = (type: "from" | "to", value: string) => {
+    setMileage((prev) => ({ ...prev, [type]: value }));
   };
 
   const handleApplyFilters = () => {
-    setFilters(selectedFilters);
+    const updatedFilters = {
+      ...selectedFilters,
+      mileage,
+    };
+    setFilters(updatedFilters);
     toggleDrawer();
   };
 
@@ -82,12 +91,32 @@ const FiltersSidebar: React.FC<{
         }
       >
         {/* Collapsible Filter Groups */}
-        <Collapse defaultActiveKey={["1"]} ghost>
+        <Collapse
+          defaultActiveKey={["1"]}
+          ghost
+          className="[&_.ant-collapse-header]:text-xs [&_.ant-collapse-header]:font-bold"
+        >
           {Object.entries(filterOptions).map(([category, options], index) => (
             <Panel header={category.toUpperCase()} key={index}>
               {renderCheckboxGroup(category, options)}
             </Panel>
           ))}
+          <Panel header="MILEAGE" key="mileage">
+            <div className="flex items-center">
+              <Input
+                placeholder="From"
+                value={mileage.from}
+                onChange={(e) => handleMileageChange("from", e.target.value)}
+                className="rounded-r-none"
+              />
+              <Input
+                placeholder="To"
+                value={mileage.to}
+                onChange={(e) => handleMileageChange("to", e.target.value)}
+                className="rounded-l-none"
+              />
+            </div>
+          </Panel>
         </Collapse>
       </Drawer>
     </div>

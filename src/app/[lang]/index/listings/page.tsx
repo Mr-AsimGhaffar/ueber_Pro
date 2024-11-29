@@ -30,7 +30,7 @@ const { Option } = Select;
 export default function ListingsPage() {
   const { cars, setCars } = useCar();
   const [filteredCars, setFilteredCars] = useState(cars?.data || []);
-  const [filters, setFilters] = useState<Record<string, string[]>>({});
+  const [filters, setFilters] = useState<Record<string, any>>({});
   const router = useRouter();
   const pathname = usePathname();
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
@@ -42,17 +42,34 @@ export default function ListingsPage() {
   const fetchFilteredCars = async () => {
     setLoading(true);
     try {
-      const { rating = [], capacity = [], year = [] } = filters;
+      const {
+        rating = [],
+        capacity = [],
+        year = [],
+        brand,
+        carFuelType,
+        category,
+        mileage,
+        ...remFilters
+      } = filters;
       const queryParams = new URLSearchParams({
+        ...remFilters,
         filters: JSON.stringify({
-          ...filters,
           rating: rating.map(Number),
           capacity: capacity.map(Number),
           year: year.map(Number),
+          mileage: mileage
+            ? {
+                // gte: Number(mileage.from) || 1,
+                ...(mileage.from ? { gte: Number(mileage.from) } : {}),
+                ...(mileage.to ? { lt: Number(mileage.to) } : {}),
+              }
+            : undefined,
+          "brand.name": brand,
+          "carFuelType.name": carFuelType,
+          "category.name": category,
         }),
       });
-      console.log("queryparams", queryParams);
-      const keys = ["brand", "carFuelType", "category"];
       const response = await fetch(
         `/api/cars/listCars?${queryParams.toString()}`
       );
@@ -125,6 +142,7 @@ export default function ListingsPage() {
                 car.id === result.data.id ? result.data : car
               ) || [], // Default to an empty array if cars is null
           });
+          await fetchFilteredCars();
           message.success(result.message);
           setIsModalOpen(false);
         } else {
@@ -151,6 +169,7 @@ export default function ListingsPage() {
           setCars({
             data: [result.data, ...(cars?.data || [])],
           });
+          await fetchFilteredCars();
           message.success("Successfully added car");
           setIsModalOpen(false);
         } else {
@@ -177,9 +196,9 @@ export default function ListingsPage() {
         const data = await response.json();
         setSelectedCar({
           ...data.data,
-          brand: data.data.brand.name,
-          model: data.data?.model?.name,
-          category: data.data.category.name,
+          carBrand: data.data.brand.name,
+          carModel: data.data?.model?.name,
+          carCategory: data.data.category.name,
           carFuelType: data.data.carFuelType.name,
           registrationNumber: data.data.registrationNumber,
           year: data.data.year,
@@ -336,43 +355,43 @@ export default function ListingsPage() {
                     {capitalizeFirstLetter(car?.model?.name)}
                   </h3>
                   <div className="text-xl font-bold text-red-500">
-                    {capitalizeFirstLetter(car.brand.name)}
+                    {capitalizeFirstLetter(car?.brand?.name)}
                     {/* <span className="text-sm text-gray-500">/day</span> */}
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <Rate
                     disabled
-                    defaultValue={car.rating}
+                    defaultValue={car?.rating || 0}
                     className="text-sm"
                   />
                   <span className="text-gray-500">
-                    ({car.brand.name} Reviews)
+                    ({car?.brand?.name || "No"} Reviews)
                   </span>
                 </div>
                 <div className="grid grid-cols-2 gap-2 mt-2">
                   <div className="flex items-center gap-2 text-sm text-gray-600">
                     <span className="flex items-center gap-1">
                       <BsFillFuelPumpFill />
-                      {car.carFuelType.name}
+                      {car?.carFuelType?.name}
                     </span>
                   </div>
                   <div className="flex items-center gap-2 text-sm text-gray-600">
                     <span className="flex items-center gap-1">
                       <MdEventAvailable />
-                      {car.status.replace("_", " ")}
+                      {car?.status?.replace("_", " ")}
                     </span>
                   </div>
                   <div className="flex items-center gap-2 text-sm text-gray-600">
                     <span className="flex items-center gap-1">
                       <CiCalendar />
-                      {car.year}
+                      {car?.year}
                     </span>
                   </div>
                   <div className="flex items-center gap-2 text-sm text-gray-600">
                     <span className="flex items-center gap-1">
                       <MdCarRental />
-                      {car.rentalType}
+                      {car?.rentalType}
                     </span>
                   </div>
                 </div>
