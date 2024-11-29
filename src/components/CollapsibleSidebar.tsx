@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useSidebar } from "@/hooks/context/SidebarContext";
 
 interface CollapsibleSidebarProps {
   children: React.ReactNode;
@@ -11,11 +11,7 @@ export default function CollapsibleSidebar({
   children,
   collapseChildren,
 }: CollapsibleSidebarProps) {
-  const [isCollapsed, setIsCollapsed] = useState(false);
-
-  const toggleSidebar = () => {
-    setIsCollapsed(!isCollapsed);
-  };
+  const { isCollapsed, toggleSidebar } = useSidebar();
 
   return (
     <div
