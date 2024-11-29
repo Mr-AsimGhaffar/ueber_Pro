@@ -12,6 +12,7 @@ import { headers } from "next/headers";
 import { Inter, Work_Sans, Montserrat } from "next/font/google";
 
 import "@/app/globals.css";
+import { SidebarProvider } from "@/hooks/context/SidebarContext";
 
 export const metadata = {
   title: "Next.js i18n Dashboard Template",
