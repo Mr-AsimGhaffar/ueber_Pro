@@ -6,16 +6,18 @@ export default async function handler(
 ) {
   if (req.method === "POST") {
     const {
+      carId,
+      pricingModelId,
       startLocation,
       endLocation,
+      waypoints,
       startTime,
       endTime,
-      createdAt,
       pickupLat,
       pickupLong,
       dropoffLat,
       dropoffLong,
-      status,
+      cost,
     } = req.body;
 
     try {
@@ -23,6 +25,26 @@ export default async function handler(
 
       if (!accessToken) {
         throw new Error("Token not found. Please log in.");
+      }
+      const requestBody: any = {
+        carId,
+        pricingModelId,
+        startLocation,
+        endLocation,
+        startTime,
+        endTime,
+        pickupLat,
+        pickupLong,
+        dropoffLat,
+        dropoffLong,
+        clientType: "web",
+      };
+
+      if (cost !== undefined && cost !== null) {
+        requestBody.cost = String(cost);
+      }
+      if (waypoints !== undefined && waypoints !== null) {
+        requestBody.waypoints = waypoints;
       }
       // Send credentials to external API
       const response = await fetch(
@@ -33,19 +55,7 @@ export default async function handler(
             "Content-Type": "application/json",
             Authorization: `Bearer ${accessToken}`,
           },
-          body: JSON.stringify({
-            startLocation,
-            endLocation,
-            startTime,
-            endTime,
-            createdAt,
-            pickupLat,
-            pickupLong,
-            dropoffLat,
-            dropoffLong,
-            status,
-            clientType: "web",
-          }),
+          body: JSON.stringify(requestBody),
         }
       );
 

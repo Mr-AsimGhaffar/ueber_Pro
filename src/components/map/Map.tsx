@@ -313,7 +313,7 @@ export default function Map({
         )}
         {waypoints.map((waypoint, index) => (
           <Marker
-            key={waypoint.id}
+            key={index}
             position={{ lat: waypoint.lat, lng: waypoint.lng }}
             icon={{
               url: createNumberedMarker(index + 1),

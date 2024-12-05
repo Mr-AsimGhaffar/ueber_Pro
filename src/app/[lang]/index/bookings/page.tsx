@@ -13,6 +13,7 @@ import SearchFiltersTrips from "../../components/SearchFiltersTrips";
 import ExportTablePdf from "../../components/ExportTablePdf";
 import { FaSort, FaSortDown, FaSortUp } from "react-icons/fa";
 import TripForm from "@/components/TripForm";
+import dayjs from "dayjs";
 
 interface Trip {
   key: string;
@@ -39,8 +40,14 @@ export default function CompanyPage() {
   const [searchStartTime, setSearchStartTime] = useState("");
   const [searchEndTime, setSearchEndTime] = useState("");
   const [searchCreatedAt, setSearchCreatedAt] = useState("");
+  const [searchDriverCompanyName, setSearchDriverCompanyName] = useState("");
+  const [searchCarCompanyName, setSearchCarCompanyName] = useState("");
+  const [searchUnixId, setSearchUnixId] = useState("");
+  const [searchCost, setSearchCost] = useState("");
   const searchRef = useRef<string[]>([]);
   const [filters, setFilters] = useState({
+    "driverCompany.name": "",
+    "car.company.name": "",
     startLocation: "",
     endLocation: "",
     startTime: "",
@@ -51,6 +58,8 @@ export default function CompanyPage() {
     dropoffLat: "",
     dropoffLong: "",
     status: [] as string[],
+    unixId: "",
+    cost: "",
     search: "",
   });
   const [pagination, setPagination] = useState({
@@ -83,6 +92,14 @@ export default function CompanyPage() {
         ...(currentFilters.createdAt && {
           createdAt: currentFilters.createdAt,
         }),
+        ...(currentFilters["driverCompany.name"]
+          ? { "driverCompany.name": currentFilters["driverCompany.name"] }
+          : {}),
+        ...(currentFilters["car.company.name"]
+          ? { "car.company.name": currentFilters["car.company.name"] }
+          : {}),
+        ...(currentFilters.unixId && { unixId: currentFilters.unixId }),
+        ...(currentFilters.cost && { cost: currentFilters.cost }),
       };
       const sort = sortParams
         .map((param) => `${param.field}:${param.order}`)
@@ -93,7 +110,8 @@ export default function CompanyPage() {
         sort,
         filters: JSON.stringify(filtersObject),
         search,
-        searchFields: "startLocation,endLocation,startTime,endTime,createdAt",
+        searchFields:
+          "startLocation,endLocation,startTime,endTime,createdAt,driverCompany.name,car.company.name,unixId,cost",
       }).toString();
       const response = await fetch(`/api/listTrips?${query}`, {
         method: "GET",
@@ -179,6 +197,80 @@ export default function CompanyPage() {
     {
       title: (
         <span className="flex items-center gap-2">
+          Id
+          {sortParams.find((param) => param.field === "unixId") ? (
+            sortParams.find((param) => param.field === "unixId")!.order ===
+            "asc" ? (
+              <FaSortUp
+                className="cursor-pointer text-blue-500"
+                onClick={() => handleSort("unixId")}
+              />
+            ) : (
+              <FaSortDown
+                className="cursor-pointer text-blue-500"
+                onClick={() => handleSort("unixId")}
+              />
+            )
+          ) : (
+            <FaSort
+              className="cursor-pointer text-gray-400"
+              onClick={() => handleSort("startLocation")}
+            />
+          )}
+        </span>
+      ),
+      dataIndex: "unixId",
+      key: "unixId",
+      className: "font-workSans font-semibold",
+      render: (text) => <a>{text}</a>,
+      filterDropdown: (
+        <div style={{ padding: 8 }}>
+          <Input
+            placeholder="Search Unix Id"
+            value={searchUnixId}
+            suffix={
+              <SearchOutlined
+                style={{ color: searchUnixId ? "blue" : "gray" }}
+              />
+            }
+            onChange={(e) => {
+              const newSearchValue = "unixId";
+              setSearchUnixId(e.target.value);
+              if (!searchRef.current.includes(newSearchValue)) {
+                searchRef.current.push(newSearchValue);
+              }
+              handleFilterChange("unixId", e.target.value);
+            }}
+            style={{ width: "200px" }}
+          />
+          <div style={{ marginTop: 8 }}>
+            <Button
+              type="primary"
+              icon={<SearchOutlined />}
+              onClick={() => handleFilterChange("unixId", searchUnixId)}
+              style={{ marginRight: 8 }}
+            >
+              Search
+            </Button>
+            <Button
+              icon={<ReloadOutlined />}
+              onClick={() => {
+                setSearchUnixId(""); // Reset the search field
+                handleFilterChange("unixId", ""); // Reset filter
+              }}
+            >
+              Reset
+            </Button>
+          </div>
+        </div>
+      ),
+      filterIcon: () => (
+        <SearchOutlined style={{ color: searchUnixId ? "blue" : "gray" }} />
+      ),
+    },
+    {
+      title: (
+        <span className="flex items-center gap-2">
           Start Location
           {sortParams.find((param) => param.field === "startLocation") ? (
             sortParams.find((param) => param.field === "startLocation")!
@@ -203,7 +295,7 @@ export default function CompanyPage() {
       ),
       dataIndex: "startLocation",
       key: "startLocation",
-      className: "font-workSans font-semibold",
+      className: "font-workSans",
       render: (text) => <a>{text}</a>,
       filterDropdown: (
         <div style={{ padding: 8 }}>
@@ -333,6 +425,175 @@ export default function CompanyPage() {
     {
       title: (
         <span className="flex items-center gap-2">
+          Driver Company
+          {sortParams.find((param) => param.field === "driverCompany.name") ? (
+            sortParams.find((param) => param.field === "driverCompany.name")!
+              .order === "asc" ? (
+              <FaSortUp
+                className="cursor-pointer text-blue-500"
+                onClick={() => handleSort("driverCompany.name")}
+              />
+            ) : (
+              <FaSortDown
+                className="cursor-pointer text-blue-500"
+                onClick={() => handleSort("driverCompany.name")}
+              />
+            )
+          ) : (
+            <FaSort
+              className="cursor-pointer text-gray-400"
+              onClick={() => handleSort("driverCompany.name")}
+            />
+          )}
+        </span>
+      ),
+      dataIndex: "driverCompany",
+      key: "driverCompany",
+      className: "font-workSans",
+      render: (driverCompany) => {
+        if (driverCompany && driverCompany) {
+          const { name } = driverCompany;
+          return <p>{name}</p>;
+        }
+        return <p>Driver Company not available</p>;
+      },
+      filterDropdown: (
+        <div style={{ padding: 8 }}>
+          <Input
+            placeholder="Search Driver Company Name"
+            value={searchDriverCompanyName}
+            suffix={
+              <SearchOutlined
+                style={{ color: searchDriverCompanyName ? "blue" : "gray" }}
+              />
+            }
+            onChange={(e) => {
+              const newSearchValue = "driverCompany";
+              setSearchDriverCompanyName(e.target.value);
+              if (!searchRef.current.includes(newSearchValue)) {
+                searchRef.current.push(newSearchValue);
+              }
+              handleFilterChange("driverCompany.name", e.target.value);
+            }}
+          />
+          <div style={{ marginTop: 8 }}>
+            <Button
+              type="primary"
+              icon={<SearchOutlined />}
+              onClick={() =>
+                handleFilterChange(
+                  "driverCompany.name",
+                  searchDriverCompanyName
+                )
+              }
+              style={{ marginRight: 8 }}
+            >
+              Search
+            </Button>
+            <Button
+              icon={<ReloadOutlined />}
+              onClick={() => {
+                setSearchDriverCompanyName(""); // Reset the search field
+                handleFilterChange("driverCompany.name", ""); // Reset filter
+              }}
+            >
+              Reset
+            </Button>
+          </div>
+        </div>
+      ),
+      filterIcon: () => (
+        <SearchOutlined
+          style={{ color: searchDriverCompanyName ? "blue" : "gray" }}
+        />
+      ),
+    },
+    {
+      title: (
+        <span className="flex items-center gap-2">
+          Car Company
+          {sortParams.find((param) => param.field === "car.company.name") ? (
+            sortParams.find((param) => param.field === "car.company.name")!
+              .order === "asc" ? (
+              <FaSortUp
+                className="cursor-pointer text-blue-500"
+                onClick={() => handleSort("car.company.name")}
+              />
+            ) : (
+              <FaSortDown
+                className="cursor-pointer text-blue-500"
+                onClick={() => handleSort("car.company.name")}
+              />
+            )
+          ) : (
+            <FaSort
+              className="cursor-pointer text-gray-400"
+              onClick={() => handleSort("car.company.name")}
+            />
+          )}
+        </span>
+      ),
+      dataIndex: "car",
+      key: "car",
+      className: "font-workSans",
+      render: (carCompany) => {
+        if (carCompany && carCompany) {
+          const { name } = carCompany.company;
+          return <p>{name}</p>;
+        }
+        return <p>Car Company not available</p>;
+      },
+      filterDropdown: (
+        <div style={{ padding: 8 }}>
+          <Input
+            placeholder="Search Company Name"
+            value={searchCarCompanyName}
+            suffix={
+              <SearchOutlined
+                style={{ color: searchCarCompanyName ? "blue" : "gray" }}
+              />
+            }
+            onChange={(e) => {
+              const newSearchValue = "car";
+              setSearchCarCompanyName(e.target.value);
+              if (!searchRef.current.includes(newSearchValue)) {
+                searchRef.current.push(newSearchValue);
+              }
+              handleFilterChange("car.company.name", e.target.value);
+            }}
+          />
+          <div style={{ marginTop: 8 }}>
+            <Button
+              type="primary"
+              icon={<SearchOutlined />}
+              onClick={() =>
+                handleFilterChange("car.company.name", searchCarCompanyName)
+              }
+              style={{ marginRight: 8 }}
+            >
+              Search
+            </Button>
+            <Button
+              icon={<ReloadOutlined />}
+              onClick={() => {
+                setSearchCarCompanyName(""); // Reset the search field
+                handleFilterChange("car.company.name", ""); // Reset filter
+              }}
+            >
+              Reset
+            </Button>
+          </div>
+        </div>
+      ),
+      filterIcon: () => (
+        <SearchOutlined
+          style={{ color: searchCarCompanyName ? "blue" : "gray" }}
+        />
+      ),
+    },
+    {
+      title: (
+        <span className="flex items-center gap-2">
           Status
           {sortParams.find((param) => param.field === "status") ? (
             sortParams.find((param) => param.field === "status")!.order ===
@@ -360,8 +621,17 @@ export default function CompanyPage() {
       className: "font-workSans",
       render: (status: string) => {
         const statusColors: { [key: string]: string } = {
-          ACTIVE: "green",
-          IN_ACTIVE: "yellow",
+          SCHEDULED: "blue",
+          ASSIGNED: "teal",
+          NOT_ASSIGNED: "gray",
+          ON_THE_WAY: "orange",
+          ARRIVED: "lime",
+          LOADING_IN_PROGRESS: "purple",
+          LOADING_COMPLETE: "green",
+          ON_THE_WAY_DESTINATION: "cyan",
+          ARRIVED_DESTINATION: "indigo",
+          COMPLETED: "green",
+          CANCELLED: "red",
         };
         return (
           <Tag color={statusColors[status] || "default"}>
@@ -397,7 +667,10 @@ export default function CompanyPage() {
       ),
       dataIndex: "startTime",
       key: "startTime",
-      className: "font-workSans text-blue-500",
+      className: "font-workSans",
+      render: (startTime: string) => (
+        <span>{dayjs(startTime).format("MM/DD/YYYY, hh:mm:ss A")}</span>
+      ),
       filterDropdown: (
         <div style={{ padding: 8 }}>
           <Input
@@ -442,78 +715,81 @@ export default function CompanyPage() {
         <SearchOutlined style={{ color: searchStartTime ? "blue" : "gray" }} />
       ),
     },
-    {
-      title: (
-        <span className="flex items-center gap-2">
-          End Time
-          {sortParams.find((param) => param.field === "endTime") ? (
-            sortParams.find((param) => param.field === "endTime")!.order ===
-            "asc" ? (
-              <FaSortUp
-                className="cursor-pointer text-blue-500"
-                onClick={() => handleSort("endTime")}
-              />
-            ) : (
-              <FaSortDown
-                className="cursor-pointer text-blue-500"
-                onClick={() => handleSort("endTime")}
-              />
-            )
-          ) : (
-            <FaSort
-              className="cursor-pointer text-gray-400"
-              onClick={() => handleSort("endTime")}
-            />
-          )}
-        </span>
-      ),
-      dataIndex: "endTime",
-      key: "endTime",
-      className: "font-workSans",
-      filterDropdown: (
-        <div style={{ padding: 8 }}>
-          <Input
-            placeholder="Search End Time"
-            value={searchEndTime}
-            suffix={
-              <SearchOutlined
-                style={{ color: searchEndTime ? "blue" : "gray" }}
-              />
-            }
-            onChange={(e) => {
-              const searchValue = "endTime";
-              setSearchEndTime(e.target.value);
-              if (!searchRef.current.includes(searchValue)) {
-                searchRef.current.push(searchValue);
-              }
-              handleFilterChange("endTime", e.target.value);
-            }}
-          />
-          <div style={{ marginTop: 8 }}>
-            <Button
-              type="primary"
-              icon={<SearchOutlined />}
-              onClick={() => handleFilterChange("endTime", searchEndTime)}
-              style={{ marginRight: 8 }}
-            >
-              Search
-            </Button>
-            <Button
-              icon={<ReloadOutlined />}
-              onClick={() => {
-                setSearchEndTime(""); // Reset the search field
-                handleFilterChange("endTime", ""); // Reset filter
-              }}
-            >
-              Reset
-            </Button>
-          </div>
-        </div>
-      ),
-      filterIcon: () => (
-        <SearchOutlined style={{ color: searchEndTime ? "blue" : "gray" }} />
-      ),
-    },
+    // {
+    //   title: (
+    //     <span className="flex items-center gap-2">
+    //       End Time
+    //       {sortParams.find((param) => param.field === "endTime") ? (
+    //         sortParams.find((param) => param.field === "endTime")!.order ===
+    //         "asc" ? (
+    //           <FaSortUp
+    //             className="cursor-pointer text-blue-500"
+    //             onClick={() => handleSort("endTime")}
+    //           />
+    //         ) : (
+    //           <FaSortDown
+    //             className="cursor-pointer text-blue-500"
+    //             onClick={() => handleSort("endTime")}
+    //           />
+    //         )
+    //       ) : (
+    //         <FaSort
+    //           className="cursor-pointer text-gray-400"
+    //           onClick={() => handleSort("endTime")}
+    //         />
+    //       )}
+    //     </span>
+    //   ),
+    //   dataIndex: "endTime",
+    //   key: "endTime",
+    //   className: "font-workSans",
+    //   render: (endTime: string) => (
+    //     <span>{dayjs(endTime).format("MM/DD/YYYY, hh:mm:ss A")}</span>
+    //   ),
+    //   filterDropdown: (
+    //     <div style={{ padding: 8 }}>
+    //       <Input
+    //         placeholder="Search End Time"
+    //         value={searchEndTime}
+    //         suffix={
+    //           <SearchOutlined
+    //             style={{ color: searchEndTime ? "blue" : "gray" }}
+    //           />
+    //         }
+    //         onChange={(e) => {
+    //           const searchValue = "endTime";
+    //           setSearchEndTime(e.target.value);
+    //           if (!searchRef.current.includes(searchValue)) {
+    //             searchRef.current.push(searchValue);
+    //           }
+    //           handleFilterChange("endTime", e.target.value);
+    //         }}
+    //       />
+    //       <div style={{ marginTop: 8 }}>
+    //         <Button
+    //           type="primary"
+    //           icon={<SearchOutlined />}
+    //           onClick={() => handleFilterChange("endTime", searchEndTime)}
+    //           style={{ marginRight: 8 }}
+    //         >
+    //           Search
+    //         </Button>
+    //         <Button
+    //           icon={<ReloadOutlined />}
+    //           onClick={() => {
+    //             setSearchEndTime(""); // Reset the search field
+    //             handleFilterChange("endTime", ""); // Reset filter
+    //           }}
+    //         >
+    //           Reset
+    //         </Button>
+    //       </div>
+    //     </div>
+    //   ),
+    //   filterIcon: () => (
+    //     <SearchOutlined style={{ color: searchEndTime ? "blue" : "gray" }} />
+    //   ),
+    // },
     {
       title: (
         <span className="flex items-center gap-2">
@@ -542,6 +818,9 @@ export default function CompanyPage() {
       dataIndex: "createdAt",
       key: "createdAt",
       className: "font-workSans",
+      render: (createdAt: string) => (
+        <span>{dayjs(createdAt).format("MM/DD/YYYY, hh:mm:ss A")}</span>
+      ),
       filterDropdown: (
         <div style={{ padding: 8 }}>
           <Input
@@ -586,15 +865,78 @@ export default function CompanyPage() {
         <SearchOutlined style={{ color: searchCreatedAt ? "blue" : "gray" }} />
       ),
     },
-
-    // {
-    //   title: "Logo",
-    //   dataIndex: "logo",
-    //   key: "logo",
-    //   render: (logo: string) => (
-    //     <img src={logo} alt="Company Logo" style={{ objectFit: "cover" }} />
-    //   ),
-    // },
+    {
+      title: (
+        <span className="flex items-center gap-2">
+          Cost
+          {sortParams.find((param) => param.field === "cost") ? (
+            sortParams.find((param) => param.field === "cost")!.order ===
+            "asc" ? (
+              <FaSortUp
+                className="cursor-pointer text-blue-500"
+                onClick={() => handleSort("cost")}
+              />
+            ) : (
+              <FaSortDown
+                className="cursor-pointer text-blue-500"
+                onClick={() => handleSort("cost")}
+              />
+            )
+          ) : (
+            <FaSort
+              className="cursor-pointer text-gray-400"
+              onClick={() => handleSort("cost")}
+            />
+          )}
+        </span>
+      ),
+      dataIndex: "cost",
+      key: "cost",
+      className: "font-workSans",
+      render: (text) => <span>${(text / 100).toFixed(2)}</span>,
+      filterDropdown: (
+        <div style={{ padding: 8 }}>
+          <Input
+            placeholder="Search Cost"
+            value={searchCost}
+            suffix={
+              <SearchOutlined style={{ color: searchCost ? "blue" : "gray" }} />
+            }
+            onChange={(e) => {
+              const newSearchValue = "cost";
+              setSearchCost(e.target.value);
+              if (!searchRef.current.includes(newSearchValue)) {
+                searchRef.current.push(newSearchValue);
+              }
+              handleFilterChange("cost", e.target.value);
+            }}
+            style={{ width: "200px" }}
+          />
+          <div style={{ marginTop: 8 }}>
+            <Button
+              type="primary"
+              icon={<SearchOutlined />}
+              onClick={() => handleFilterChange("cost", searchCost)}
+              style={{ marginRight: 8 }}
+            >
+              Search
+            </Button>
+            <Button
+              icon={<ReloadOutlined />}
+              onClick={() => {
+                setSearchCost(""); // Reset the search field
+                handleFilterChange("cost", ""); // Reset filter
+              }}
+            >
+              Reset
+            </Button>
+          </div>
+        </div>
+      ),
+      filterIcon: () => (
+        <SearchOutlined style={{ color: searchCost ? "blue" : "gray" }} />
+      ),
+    },
     {
       title: "Action",
       key: "action",
@@ -613,9 +955,9 @@ export default function CompanyPage() {
   };
 
   // Handle edit button click
-  const handleEdit = async (company: Trip) => {
+  const handleEdit = async (trip: Trip) => {
     try {
-      const response = await fetch(`/api/getCompanyById?id=${company.id}`, {
+      const response = await fetch(`/api/getTripsById?id=${trip.id}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -640,13 +982,13 @@ export default function CompanyPage() {
     if (selectedTrip) {
       // Update company
       try {
-        const response = await fetch("/api/updateCompany", {
+        const response = await fetch("/api/updateTrips", {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            id: selectedTrip.id,
+            tripId: selectedTrip.id,
             ...values,
           }),
         });
@@ -671,7 +1013,7 @@ export default function CompanyPage() {
     } else {
       // Add company
       try {
-        const response = await fetch("/api/createCompany", {
+        const response = await fetch("/api/createTrips", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

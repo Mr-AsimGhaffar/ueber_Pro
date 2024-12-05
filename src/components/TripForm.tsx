@@ -1,7 +1,10 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Form, Input, Upload, Button, Switch, Select } from "antd";
+import { Form, Input, Upload, Button, Switch, Select, DatePicker } from "antd";
 import { LockOutlined, UploadOutlined } from "@ant-design/icons";
 import type { UploadFile } from "antd/es/upload/interface";
+import TripMap from "@/components/map/TripMap";
+import { useCar } from "@/hooks/context/AuthContextCars";
+import dayjs from "dayjs";
 
 interface UserTripProps {
   onSubmit: (values: any) => void;
@@ -9,25 +12,48 @@ interface UserTripProps {
   initialValues?: any;
 }
 
-interface Trip {
+interface PricingModel {
   id: number;
-  name: string;
+  model: string;
 }
 
-export default function UserForm({
+interface Location {
+  id: string;
+  place: string;
+  lat: number;
+  lng: number;
+  type: "start" | "end" | "waypoint";
+}
+
+export default function TripForm({
   onSubmit,
   onCancel,
   initialValues,
 }: UserTripProps) {
   const [form] = Form.useForm();
-  const [tripName, setTripName] = useState<Trip[]>([]);
+  const [mapData, setMapData] = useState<{
+    startLocation: Location | null;
+    endLocation: Location | null;
+    waypoints: Location[];
+  }>({
+    startLocation: null,
+    endLocation: null,
+    waypoints: [],
+  });
+  const handleMapLocationsChange = (locations: any) => {
+    setMapData(locations);
+  };
+
+  const [tripModelName, setTripModelName] = useState<PricingModel[]>([]);
   const [loading, setLoading] = useState(false);
+  const { cars } = useCar();
+  const [showPriceField, setShowPriceField] = useState(true);
 
   useEffect(() => {
-    const fetchCompanies = async () => {
+    const fetchPricingModel = async () => {
       setLoading(true);
       try {
-        const response = await fetch("/api/listCompanies", {
+        const response = await fetch("/api/getAllTripPricingModel", {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -36,50 +62,109 @@ export default function UserForm({
 
         if (response.ok) {
           const data = await response.json();
-          setTripName(data.data); // Assuming API response has `data` with company list
+          setTripModelName(data.data); // Assuming API response has `data` with company list
         } else {
-          console.error("Failed to fetch companies");
+          console.error("Failed to fetch trips pricing model");
         }
       } catch (error) {
-        console.error("Error fetching companies:", error);
+        console.error("Error fetching trips pricing model:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchCompanies();
+    fetchPricingModel();
   }, []);
 
   // Set the form's fields to initialValues when editing
   useEffect(() => {
     if (initialValues) {
+      const startTime = dayjs(initialValues.startTime);
       form.setFieldsValue({
         ...initialValues,
-        dateOfBirth: initialValues.dateOfBirth
-          ? new Date(initialValues.dateOfBirth).toISOString().split("T")[0]
-          : undefined,
         profilePictureId: initialValues?.profilePictureId || "",
-        contacts: initialValues.contacts ? String(initialValues.contacts) : "",
+        startTime: startTime.isValid() ? startTime : undefined,
       });
+      const { startLocation, endLocation } = initialValues;
+      if (startLocation && endLocation) {
+        setMapData({
+          startLocation: {
+            id: "start",
+            place: startLocation,
+            lat: initialValues.pickupLat,
+            lng: initialValues.pickupLong,
+            type: "start",
+          },
+          endLocation: {
+            id: "end",
+            place: endLocation,
+            lat: initialValues.dropoffLat,
+            lng: initialValues.dropoffLong,
+            type: "end",
+          },
+          waypoints: initialValues.waypoints.map((wp: any) => ({
+            place: wp.location,
+            lng: wp.longitude,
+            lat: wp.latitude,
+            type: "waypoint",
+          })), // You can handle waypoints similarly if available in initialValues
+        });
+      }
     } else {
-      form.resetFields(); // Reset the form when initialValues is null (add new company)
+      form.resetFields();
+      setMapData({
+        startLocation: null,
+        endLocation: null,
+        waypoints: [],
+      }); // Reset the form when initialValues is null (add new company)
     }
   }, [initialValues, form]);
 
   const handleSubmit = async () => {
     try {
       const values = await form.validateFields();
-      values.dateOfBirth = values.dateOfBirth
-        ? new Date(values.dateOfBirth).toISOString()
-        : undefined;
+      const { startLocation, endLocation, waypoints } = mapData;
+
+      if (!startLocation || !endLocation) {
+        throw new Error("Start and end locations are required.");
+      }
       if (values.profilePictureId?.file) {
         values.profilePictureId =
           values.profilePictureId.file.response?.url || ""; // Adjust based on your file upload API response
       }
-      onSubmit(values);
+      const waypointsPlaces = waypoints.map((wp, index) => ({
+        location: wp.place,
+        sequence: index + 1,
+        longitude: wp.lng,
+        latitude: wp.lat,
+      }));
+      const costInCents = Math.round(values.cost * 100);
+      onSubmit({
+        ...values,
+        cost: costInCents,
+        startLocation: startLocation.place,
+        endLocation: endLocation.place,
+        waypoints: waypointsPlaces,
+        pickupLat: startLocation.lat,
+        pickupLong: startLocation.lng,
+        dropoffLat: endLocation.lat,
+        dropoffLong: endLocation.lng,
+      });
     } catch (error) {
       console.error("Validation failed:", error);
     }
+  };
+
+  const pricingModelMap: { [key: string]: string } = {
+    FIXED_PRICE: "Fixed Price",
+    OPEN_BIDDING: "Open Bidding",
+    BROKERAGE: "Brokerage",
+    // Add other pricing models if needed
+  };
+
+  const handlePricingModelChange = (value: number) => {
+    const selectedModel = tripModelName.find((model) => model.id === value);
+    setShowPriceField(selectedModel?.model !== "OPEN_BIDDING");
   };
 
   return (
@@ -89,162 +174,32 @@ export default function UserForm({
       initialValues={initialValues}
       onFinish={handleSubmit}
       preserve={true}
+      onValuesChange={(changedValues) => {
+        if (changedValues.pricingModelId !== undefined) {
+          handlePricingModelChange(changedValues.pricingModelId);
+        }
+      }}
     >
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Company Information */}
         <div className="md:col-span-2 text-center">
           <h1 className="font-medium text-base">
             {" "}
-            {initialValues ? "Edit User" : "Add New User"}
+            {initialValues ? "Edit Trip" : "Add New Trip"}
           </h1>
         </div>
 
         <Form.Item
-          name="firstName"
-          label="First Name"
-          rules={[
-            { required: true, message: "Please enter firstName name" },
-            {
-              min: 2,
-              message: "First name must be at least 2 characters long",
-            },
-            {
-              max: 50,
-              message: "First name must be at most 50 characters long",
-            },
-            {
-              pattern: /^[a-zA-Z ]+$/,
-              message: "First name must contain only letters",
-            },
-          ]}
-        >
-          <Input placeholder="Enter firstName name" />
-        </Form.Item>
-
-        <Form.Item
-          name="lastName"
-          label="Last Name"
-          rules={[
-            { required: true, message: "Please enter lastName name" },
-            { min: 2, message: "Last name must be at least 2 characters long" },
-            {
-              max: 50,
-              message: "Last name must be at most 50 characters long",
-            },
-            {
-              pattern: /^[a-zA-Z ]+$/,
-              message: "Last name must contain only letters",
-            },
-          ]}
-        >
-          <Input placeholder="Enter lastName name" />
-        </Form.Item>
-
-        <Form.Item
-          name="email"
-          label="Email"
-          rules={[
-            { required: true, message: "Please enter email" },
-            { type: "email", message: "Please enter a valid email address" },
-          ]}
-        >
-          <Input placeholder="Enter email" />
-        </Form.Item>
-
-        {!initialValues && (
-          <>
-            <Form.Item
-              name="password"
-              label="Password"
-              rules={[
-                { required: true, message: "Please input your Password!" },
-                {
-                  min: 8,
-                  message: "Password must be at least 8 characters long",
-                },
-                {
-                  pattern: /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*?&]{8,}$/,
-                  message:
-                    "Password must contain at least one letter and one number",
-                },
-              ]}
-            >
-              <Input.Password
-                prefix={<LockOutlined />}
-                placeholder="Password"
-              />
-            </Form.Item>
-
-            <Form.Item
-              name="confirmPassword"
-              label="Confirm Password"
-              dependencies={["password"]}
-              rules={[
-                {
-                  required: true,
-                  message: "Please input your Confirm Password!",
-                },
-                ({ getFieldValue }) => ({
-                  validator(_, value) {
-                    if (!value || getFieldValue("password") === value) {
-                      return Promise.resolve();
-                    }
-                    return Promise.reject(new Error("Passwords don't match"));
-                  },
-                }),
-              ]}
-            >
-              <Input.Password
-                prefix={<LockOutlined />}
-                placeholder="Confirm Password"
-              />
-            </Form.Item>
-          </>
-        )}
-
-        <Form.Item
-          name="contacts"
-          label="Contact Number"
-          rules={[
-            { required: true, message: "Please enter contact number" },
-            {
-              pattern: /^[0-9]{10}$/,
-              message: "Please enter a valid 10-digit contact number",
-            },
-          ]}
-        >
-          <Input placeholder="Enter contact number" />
-        </Form.Item>
-
-        <Form.Item
-          name="dateOfBirth"
-          label="Date of Birth"
-          rules={[
-            {
-              validator: (_, value) =>
-                value && new Date(value) > new Date()
-                  ? Promise.reject(
-                      new Error("Date of birth cannot be in the future")
-                    )
-                  : Promise.resolve(),
-            },
-          ]}
-        >
-          <Input type="date" />
-        </Form.Item>
-
-        <Form.Item
-          name="companyId"
-          label="Company Name"
-          rules={[{ required: true, message: "Please select a company" }]}
+          name="pricingModelId"
+          label="Pricing Model"
+          rules={[{ required: true, message: "Please select pricing model" }]}
         >
           <Select
             showSearch
-            placeholder="Select a company"
+            placeholder="Select a pricing model"
             loading={loading}
-            options={tripName.map((trip) => ({
-              value: trip.id,
-              label: trip.name,
+            options={tripModelName.map((priceModal) => ({
+              value: priceModal.id,
+              label: pricingModelMap[priceModal.model] || priceModal.model,
             }))}
             filterOption={(input, option) =>
               (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
@@ -252,16 +207,49 @@ export default function UserForm({
           />
         </Form.Item>
 
+        {/* {showPriceField && ( */}
         <Form.Item
-          name="status"
-          label="Status"
-          rules={[{ required: true, message: "Please select a status" }]}
+          name="cost"
+          label="Price"
+          rules={[{ required: true, message: "Please enter a price" }]}
         >
-          <Select placeholder="Select Status">
-            <Select.Option value="ACTIVE">Active</Select.Option>
-            <Select.Option value="IN_ACTIVE">Inactive</Select.Option>
-            <Select.Option value="SUSPENDED">Suspended</Select.Option>
-          </Select>
+          <Input type="number" placeholder="Enter price" />
+        </Form.Item>
+        {/* )} */}
+
+        <Form.Item
+          name="carId"
+          label="Cars Name"
+          rules={[{ required: true, message: "Please select a car" }]}
+        >
+          <Select
+            showSearch
+            placeholder="Select a car"
+            loading={loading}
+            options={cars?.data.map((car) => ({
+              value: car.id,
+              label: car.model.name,
+            }))}
+            filterOption={(input, option) =>
+              (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
+            }
+          />
+        </Form.Item>
+
+        {/* Start Time */}
+        {/* <Form.Item
+          name="startTime"
+          label="Start Time"
+          rules={[{ required: true, message: "Please select a start time" }]}
+        >
+          <DatePicker showTime className="w-[100%]" />
+        </Form.Item> */}
+
+        <Form.Item label="Route" className="col-span-2">
+          <TripMap
+            initialLocations={mapData}
+            onLocationsChange={handleMapLocationsChange}
+          />
         </Form.Item>
 
         {/* Document Upload */}
@@ -292,7 +280,7 @@ export default function UserForm({
       <div className="flex justify-end gap-4 mt-6">
         <Button onClick={onCancel}>Cancel</Button>
         <Button type="primary" onClick={handleSubmit}>
-          {initialValues ? "Update User" : "Add User"}
+          {initialValues ? "Update Trip" : "Add Trip"}
         </Button>
       </div>
     </Form>
