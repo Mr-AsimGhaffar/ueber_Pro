@@ -71,15 +71,28 @@ export async function getUser(): Promise<User> {
   return user.data;
 }
 
-export async function getCars(): Promise<Cars> {
+export async function getCars(
+  filters: Record<string, string[]> = {}
+): Promise<Cars> {
   const accessToken = await getAccessToken();
 
-  const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/car/`, {
-    method: "GET",
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
+  const queryParams = new URLSearchParams();
+
+  Object.entries(filters).forEach(([key, values]) => {
+    if (values.length) {
+      queryParams.append(key, values.join(","));
+    }
   });
+
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_API_BASE_URL}/car/?${queryParams.toString()}`,
+    {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    }
+  );
 
   if (!response.ok) {
     if (response.status === 401) {

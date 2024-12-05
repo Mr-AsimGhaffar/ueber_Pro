@@ -2,25 +2,17 @@
 
 import React, { useEffect, useState } from "react";
 import {
-  Input,
   Select,
-  DatePicker,
-  TimePicker,
   Button,
   Card,
   Rate,
-  Space,
   Row,
   Col,
   Spin,
+  message,
+  Modal,
 } from "antd";
-import {
-  SearchOutlined,
-  HeartOutlined,
-  UnorderedListOutlined,
-  AppstoreOutlined,
-  EnvironmentOutlined,
-} from "@ant-design/icons";
+import { HeartOutlined, UserAddOutlined } from "@ant-design/icons";
 import CarFilters from "@/components/cars/CarFilters";
 import { useCar } from "@/hooks/context/AuthContextCars";
 import { BsFillFuelPumpFill } from "react-icons/bs";
@@ -29,16 +21,71 @@ import { MdCarRental, MdEventAvailable } from "react-icons/md";
 import { TbListDetails } from "react-icons/tb";
 import { useRouter } from "next/navigation";
 import { usePathname } from "next/navigation";
+import { Car } from "@/lib/definitions";
+import CarForm from "@/components/CarForm";
+import { FaEdit } from "react-icons/fa";
 
 const { Option } = Select;
 
 export default function ListingsPage() {
-  const { cars } = useCar();
+  const { cars, setCars } = useCar();
+  const [filteredCars, setFilteredCars] = useState(cars?.data || []);
+  const [filters, setFilters] = useState<Record<string, any>>({});
   const router = useRouter();
   const pathname = usePathname();
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [loading, setLoading] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedCar, setSelectedCar] = useState<Car | null>(null);
+
+  const fetchFilteredCars = async () => {
+    setLoading(true);
+    try {
+      const {
+        rating = [],
+        capacity = [],
+        year = [],
+        brand,
+        carFuelType,
+        category,
+        mileage,
+        ...remFilters
+      } = filters;
+      const queryParams = new URLSearchParams({
+        ...remFilters,
+        filters: JSON.stringify({
+          rating: rating.map(Number),
+          capacity: capacity.map(Number),
+          year: year.map(Number),
+          mileage: mileage
+            ? {
+                // gte: Number(mileage.from) || 1,
+                ...(mileage.from ? { gte: Number(mileage.from) } : {}),
+                ...(mileage.to ? { lt: Number(mileage.to) } : {}),
+              }
+            : undefined,
+          "brand.name": brand,
+          "carFuelType.name": carFuelType,
+          "category.name": category,
+        }),
+      });
+      const response = await fetch(
+        `/api/cars/listCars?${queryParams.toString()}`
+      );
+      const data = await response.json();
+      setCars(data);
+      setFilteredCars(data.data);
+    } catch (error) {
+      console.error("Error fetching filtered cars:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchFilteredCars();
+  }, [filters]);
 
   const capitalizeFirstLetter = (str: string = "") => {
     return str
@@ -72,11 +119,131 @@ export default function ListingsPage() {
     return null; // Prevent rendering the component until it is mounted
   }
 
+  const handleModalOk = async (values: any) => {
+    if (selectedCar) {
+      // Update user
+      try {
+        const response = await fetch("/api/cars/updateCar", {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            id: selectedCar.id,
+            ...values,
+          }),
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          setCars({
+            data:
+              cars?.data.map((car) =>
+                car.id === result.data.id ? result.data : car
+              ) || [], // Default to an empty array if cars is null
+          });
+          await fetchFilteredCars();
+          message.success(result.message);
+          setIsModalOpen(false);
+        } else {
+          const error = await response.json();
+          message.error(error.message || "Failed to update car");
+        }
+      } catch (error) {
+        console.error("Error updating car:", error);
+        message.error("An error occurred while updating the car");
+      }
+    } else {
+      // Add user
+      try {
+        const response = await fetch("/api/cars/createCar", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(values),
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          setCars({
+            data: [result.data, ...(cars?.data || [])],
+          });
+          await fetchFilteredCars();
+          message.success("Successfully added car");
+          setIsModalOpen(false);
+        } else {
+          const error = await response.json();
+          message.error(error.message || "Failed to add car");
+        }
+      } catch (error) {
+        console.error("Error adding car:", error);
+        message.error("An error occurred while adding the car");
+      }
+    }
+  };
+
+  const getCarDetails = async (id: string) => {
+    try {
+      const response = await fetch(`/api/cars/getCarById?id=${id}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setSelectedCar({
+          ...data.data,
+          carBrand: data.data.brand.name,
+          carModel: data.data?.model?.name,
+          carCategory: data.data.category.name,
+          carFuelType: data.data.carFuelType.name,
+          registrationNumber: data.data.registrationNumber,
+          year: data.data.year,
+          description: data.data.description,
+          mileage: data.data.mileage,
+          specification: data.data.specification,
+          // color: data.data.color.hex,
+          capacity: data.data.capacity,
+          transmission: data.data.transmission,
+          rating: data.data.rating,
+          status: data.data.status,
+        });
+        setIsModalOpen(true);
+      } else {
+        const error = await response.json();
+        message.error(error.message || "Failed to fetch car details");
+      }
+    } catch (error) {
+      console.error("Error fetching car data:", error);
+      message.error("An error occurred while fetching car details");
+    }
+  };
+
+  const handleAddCar = () => {
+    setSelectedCar(null);
+    setIsModalOpen(true);
+  };
+  const handleModalCancel = () => {
+    setIsModalOpen(false);
+  };
+
   return (
     <div className="p-6">
       {/* Search Section */}
-      <CarFilters />
-      <Card className="mb-8">
+      <div className="flex gap-4">
+        <CarFilters setFilters={setFilters} />
+        <Button
+          type="primary"
+          icon={<UserAddOutlined />}
+          onClick={handleAddCar}
+        >
+          Add Car
+        </Button>
+      </div>
+      {/* <Card className="mb-8">
         <Row gutter={[16, 16]}>
           <Col xs={24} sm={24} md={6}>
             <Input
@@ -121,10 +288,10 @@ export default function ListingsPage() {
             </Button>
           </Col>
         </Row>
-      </Card>
+      </Card> */}
 
       {/* Filters and View Toggle */}
-      <div className="mb-6 flex justify-between items-center">
+      {/* <div className="mb-6 flex justify-between items-center">
         <div className="flex items-center gap-4">
           <span>Show: </span>
           <Select defaultValue="5" style={{ width: 80 }}>
@@ -151,11 +318,11 @@ export default function ListingsPage() {
             onClick={() => setViewMode("list")}
           />
         </div>
-      </div>
+      </div> */}
 
       {/* Car Listings */}
       <Row gutter={[16, 16]}>
-        {cars?.data?.map((car) => (
+        {filteredCars.map((car) => (
           <Col
             key={car.id}
             xs={24}
@@ -163,7 +330,7 @@ export default function ListingsPage() {
             lg={viewMode === "grid" ? 6 : 24}
           >
             <Card
-              onClick={() => handleRouter(car.id)}
+              // onClick={() => handleRouter(car.id)}
               cover={
                 <div className="relative cursor-pointer overflow-hidden">
                   <div className="overflow-hidden">
@@ -188,47 +355,47 @@ export default function ListingsPage() {
                     {capitalizeFirstLetter(car?.model?.name)}
                   </h3>
                   <div className="text-xl font-bold text-red-500">
-                    {capitalizeFirstLetter(car.brand.name)}
+                    {capitalizeFirstLetter(car?.brand?.name)}
                     {/* <span className="text-sm text-gray-500">/day</span> */}
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <Rate
                     disabled
-                    defaultValue={car.rating}
+                    defaultValue={car?.rating || 0}
                     className="text-sm"
                   />
                   <span className="text-gray-500">
-                    ({car.brand.name} Reviews)
+                    ({car?.brand?.name || "No"} Reviews)
                   </span>
                 </div>
                 <div className="grid grid-cols-2 gap-2 mt-2">
                   <div className="flex items-center gap-2 text-sm text-gray-600">
                     <span className="flex items-center gap-1">
                       <BsFillFuelPumpFill />
-                      {car.carFuelType.name}
+                      {car?.carFuelType?.name}
                     </span>
                   </div>
                   <div className="flex items-center gap-2 text-sm text-gray-600">
                     <span className="flex items-center gap-1">
                       <MdEventAvailable />
-                      {car.status.replace("_", " ")}
+                      {car?.status?.replace("_", " ")}
                     </span>
                   </div>
                   <div className="flex items-center gap-2 text-sm text-gray-600">
                     <span className="flex items-center gap-1">
                       <CiCalendar />
-                      {car.year}
+                      {car?.year}
                     </span>
                   </div>
                   <div className="flex items-center gap-2 text-sm text-gray-600">
                     <span className="flex items-center gap-1">
                       <MdCarRental />
-                      {car.rentalType}
+                      {car?.rentalType}
                     </span>
                   </div>
                 </div>
-                <div className="mt-4">
+                <div className="flex items-center justify-between gap-2 mt-4">
                   <Button
                     type="primary"
                     block
@@ -237,6 +404,16 @@ export default function ListingsPage() {
                     <div className="flex items-center gap-2">
                       <TbListDetails />
                       View Details
+                    </div>
+                  </Button>
+                  <Button
+                    type="primary"
+                    block
+                    onClick={() => getCarDetails(car.id.toString())}
+                  >
+                    <div className="flex items-center gap-2">
+                      <FaEdit />
+                      Edit Car
                     </div>
                   </Button>
                 </div>
@@ -250,6 +427,18 @@ export default function ListingsPage() {
           <Spin size="large" />
         </div>
       )}
+      <Modal
+        open={isModalOpen}
+        onCancel={handleModalCancel}
+        footer={null}
+        width={720}
+      >
+        <CarForm
+          initialValues={selectedCar}
+          onSubmit={handleModalOk}
+          onCancel={handleModalCancel}
+        />
+      </Modal>
     </div>
   );
 }
