@@ -13,7 +13,6 @@ import { Inter, Work_Sans, Montserrat } from "next/font/google";
 
 import "@/app/globals.css";
 import { SidebarProvider } from "@/hooks/context/SidebarContext";
-import Script from "next/script";
 
 export const metadata = {
   title: "Next.js i18n Dashboard Template",
@@ -43,6 +42,7 @@ interface Props {
 
 export default async function Root({ params, children }: Props) {
   const headerList = headers();
+  const role = headerList.get("role") || null;
 
   const pathname: string = headerList.get("x-current-path") || "";
   const user = await getUser();
@@ -56,23 +56,19 @@ export default async function Root({ params, children }: Props) {
       lang={params.lang}
       className={`${inter.variable} ${workSans.variable} ${montserrat.variable}`}
     >
-      <head>
-        <Script
-          src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places`}
-          strategy="beforeInteractive"
-        />
-      </head>
       <body className="relative min-h-screen overflow-y-auto bg-gray-50">
         <ConfigProvider>
           <UserProvider initialUser={user}>
             <CarProvider initialCar={cars || { data: [] }}>
-              {!isAuthPage && (
-                <>
-                  <Navbar locale={params.lang} />
-                  <Sidebar locale={params.lang} />
-                </>
-              )}
-              {isAuthPage ? children : <Content>{children}</Content>}
+              <SidebarProvider>
+                {!isAuthPage && (
+                  <>
+                    <Navbar locale={params.lang} />
+                    <Sidebar locale={params.lang} />
+                  </>
+                )}
+                {isAuthPage ? children : <Content>{children}</Content>}
+              </SidebarProvider>
             </CarProvider>
           </UserProvider>
         </ConfigProvider>
