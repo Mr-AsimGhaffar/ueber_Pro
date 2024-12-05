@@ -212,51 +212,47 @@ export default function ListingsMapPage() {
 
       {/* Map */}
       <div className="col-span-1 h-96 lg:h-auto">
-        <LoadScript googleMapsApiKey="AIzaSyBpkAMvFJ8K9K1AEMA2UXTcWC-Gy17bd78">
-          <GoogleMap
-            mapContainerStyle={mapContainerStyle}
-            center={center}
-            zoom={13}
-          >
-            {carListings.map((car) => (
-              <Marker
-                key={car.id}
-                position={car.position}
-                onClick={() => setSelectedCar(car)}
-              />
-            ))}
+        <GoogleMap
+          mapContainerStyle={mapContainerStyle}
+          center={center}
+          zoom={13}
+        >
+          {carListings.map((car) => (
+            <Marker
+              key={car.id}
+              position={car.position}
+              onClick={() => setSelectedCar(car)}
+            />
+          ))}
 
-            {selectedCar && (
-              <InfoWindow
-                position={selectedCar.position}
-                onCloseClick={() => setSelectedCar(null)}
-              >
-                <div className="p-2">
-                  <img
-                    src={selectedCar.image}
-                    alt={selectedCar.name}
-                    className="w-full h-24 object-cover rounded py-2"
-                  />
-                  <h3 className="font-semibold">{selectedCar.name}</h3>
-                  <p className="text-sm text-gray-600">
-                    {selectedCar.location}
-                  </p>
-                  <p className="text-lg font-bold text-red-500">
-                    ${selectedCar.price}/day
-                  </p>
-                  <Button
-                    type="primary"
-                    icon={<SearchOutlined />}
-                    block
-                    onClick={handleAddBooking}
-                  >
-                    Book Now
-                  </Button>
-                </div>
-              </InfoWindow>
-            )}
-          </GoogleMap>
-        </LoadScript>
+          {selectedCar && (
+            <InfoWindow
+              position={selectedCar.position}
+              onCloseClick={() => setSelectedCar(null)}
+            >
+              <div className="p-2">
+                <img
+                  src={selectedCar.image}
+                  alt={selectedCar.name}
+                  className="w-full h-24 object-cover rounded py-2"
+                />
+                <h3 className="font-semibold">{selectedCar.name}</h3>
+                <p className="text-sm text-gray-600">{selectedCar.location}</p>
+                <p className="text-lg font-bold text-red-500">
+                  ${selectedCar.price}/day
+                </p>
+                <Button
+                  type="primary"
+                  icon={<SearchOutlined />}
+                  block
+                  onClick={handleAddBooking}
+                >
+                  Book Now
+                </Button>
+              </div>
+            </InfoWindow>
+          )}
+        </GoogleMap>
       </div>
     </div>
   );
