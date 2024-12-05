@@ -5,10 +5,17 @@ export type User = {
   firstName: string;
   lastName: string;
   email: string;
-  role: string;
+  role: {
+    name: string;
+  };
   status: string;
   contacts: string;
   profilePicture: string;
+  company: {
+    id: string;
+    name: string;
+    type: string;
+  };
 };
 export type Car = {
   id: number;

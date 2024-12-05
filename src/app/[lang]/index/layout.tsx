@@ -43,7 +43,6 @@ interface Props {
 
 export default async function Root({ params, children }: Props) {
   const headerList = headers();
-  const role = headerList.get("role") || null;
 
   const pathname: string = headerList.get("x-current-path") || "";
   const user = await getUser();
@@ -67,15 +66,13 @@ export default async function Root({ params, children }: Props) {
         <ConfigProvider>
           <UserProvider initialUser={user}>
             <CarProvider initialCar={cars || { data: [] }}>
-              <SidebarProvider>
-                {!isAuthPage && (
-                  <>
-                    <Navbar locale={params.lang} />
-                    <Sidebar locale={params.lang} role={role} />
-                  </>
-                )}
-                {isAuthPage ? children : <Content>{children}</Content>}
-              </SidebarProvider>
+              {!isAuthPage && (
+                <>
+                  <Navbar locale={params.lang} />
+                  <Sidebar locale={params.lang} />
+                </>
+              )}
+              {isAuthPage ? children : <Content>{children}</Content>}
             </CarProvider>
           </UserProvider>
         </ConfigProvider>
