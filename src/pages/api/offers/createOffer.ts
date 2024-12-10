@@ -18,8 +18,6 @@ export default async function handler(
         offeredPrice,
       };
 
-      console.log("offerprice", offeredPrice);
-
       requestBody.offeredPrice = String(offeredPrice);
 
       // Send credentials to external API

@@ -5,7 +5,7 @@ export default async function handler(
   res: NextApiResponse
 ) {
   if (req.method === "DELETE") {
-    const { OfferId } = req.body;
+    const { offerId } = req.body;
 
     try {
       const accessToken = req.cookies.accessToken;
@@ -14,12 +14,12 @@ export default async function handler(
         throw new Error("Token not found. Please log in.");
       }
       const requestBody: any = {
-        OfferId,
+        offerId,
       };
 
       // Send credentials to external API
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/trips/offers/${OfferId}`,
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/trips/offers/${offerId}`,
         {
           method: "DELETE",
           headers: {

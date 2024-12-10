@@ -18,12 +18,11 @@ export default async function handler(
         sort = "",
         search = "",
         searchFields = "",
-        type = "",
       } = req.query;
 
       // Send credentials to external API
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/trips/?page=${page}&limit=${limit}&filters=${filters}&sort=${sort}&search=${search}&searchFields=${searchFields}&type=${type}`,
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/trips/offers/?page=${page}&limit=${limit}&filters=${filters}&sort=${sort}&search=${search}&searchFields=${searchFields}`,
         {
           method: "GET",
           headers: {
@@ -34,16 +33,17 @@ export default async function handler(
       );
 
       if (response.ok) {
-        const tripsResponse = await response.json();
+        const offersResponse = await response.json();
+
         return res.status(200).json({
-          ...tripsResponse,
-          message: "Successfully fetched trips",
+          ...offersResponse,
+          message: "Successfully added offers",
         });
       } else {
         const errorData = await response.json();
         return res
           .status(response.status)
-          .json({ message: errorData.message || "Failed to fetched trips" });
+          .json({ message: errorData.message || "Failed to add offers" });
       }
     } catch (error) {
       console.error("Error authenticating:", error);

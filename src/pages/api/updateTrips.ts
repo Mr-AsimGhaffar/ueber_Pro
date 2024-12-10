@@ -8,6 +8,7 @@ export default async function handler(
     const {
       tripId,
       carId,
+      driverId,
       pricingModelId,
       startLocation,
       endLocation,
@@ -31,6 +32,7 @@ export default async function handler(
       const requestBody: any = {
         carId,
         tripId,
+        driverId,
         pricingModelId,
         startLocation,
         endLocation,
