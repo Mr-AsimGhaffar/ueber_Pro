@@ -48,7 +48,7 @@ export default async function handler(
       return res.status(500).json({ message: "Internal Server Error" });
     }
   } else {
-    res.setHeader("Allow", ["POST"]);
+    res.setHeader("Allow", ["DELETE"]);
     res.status(405).end(`Method ${req.method} Not Allowed`);
   }
 }

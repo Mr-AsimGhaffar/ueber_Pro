@@ -1038,6 +1038,7 @@ export default function CompanyPage() {
   };
 
   const handleModalCancel = () => {
+    setSelectedTrip(null);
     setIsModalOpen(false);
   };
 

@@ -67,7 +67,11 @@ const ConfirmOffers = ({
       cancelText="Cancel"
       disabled={hasOffer}
     >
-      <Button disabled={hasOffer} type="link">
+      <Button
+        className="text-blue-500 font-semibold"
+        disabled={hasOffer}
+        type="link"
+      >
         Offers
       </Button>
     </Popconfirm>

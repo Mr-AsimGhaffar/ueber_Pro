@@ -41,10 +41,10 @@ const CancelOffers = ({
       title="Are you sure you want to cancel this offer?"
       onConfirm={handleCancelOffer}
       okButtonProps={{ loading }}
-      okText="Ok"
-      cancelText="Cancel"
+      okText="Yes"
+      cancelText="No"
     >
-      <Button className="text-red-400 font-semibold" type="link">
+      <Button className="text-red-500 font-semibold" type="link">
         Cancel Offer
       </Button>
     </Popconfirm>
