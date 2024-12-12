@@ -22,7 +22,7 @@ export default async function handler(
 
       // Send credentials to external API
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/company?page=${page}&limit=${limit}&filters=${filters}&sort=${sort}&search=${search}&searchFields=${searchFields}`,
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/companies?page=${page}&limit=${limit}&filters=${filters}&sort=${sort}&search=${search}&searchFields=${searchFields}`,
         {
           method: "GET",
           headers: {

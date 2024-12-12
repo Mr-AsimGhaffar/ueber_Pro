@@ -16,7 +16,7 @@ export default async function handler(
 
       // Send credentials to external API
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/companies/${id}`,
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/trips/offers/${id}`,
         {
           method: "GET",
           headers: {
@@ -27,19 +27,19 @@ export default async function handler(
       );
 
       if (response.ok) {
-        const companyResponse = await response.json();
+        const tripResponse = await response.json();
         return res.status(200).json({
-          data: companyResponse.data,
-          message: "Successfully fetched company data",
+          data: tripResponse.data,
+          message: "Successfully fetched trips data",
         });
       } else {
         const errorData = await response.json();
         return res.status(response.status).json({
-          message: errorData.message || "Failed to fetch company data",
+          message: errorData.message || "Failed to fetch trips data",
         });
       }
     } catch (error) {
-      console.error("Error fetching company:", error);
+      console.error("Error fetching trip:", error);
       return res.status(500).json({ message: "Internal Server Error" });
     }
   } else {

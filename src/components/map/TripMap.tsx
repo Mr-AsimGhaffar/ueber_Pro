@@ -260,11 +260,11 @@ export default function Home({
                 <div className="flex items-center gap-4">
                   <div className="flex items-center gap-2">
                     <MdTimer className="text-blue-500" />
-                    <span>{routeDetails.duration}</span>
+                    <span>{routeDetails?.duration}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <MdLocationOn className="text-blue-500" />
-                    <span>{routeDetails.distance}</span>
+                    <span>{routeDetails?.distance}</span>
                   </div>
                 </div>
               </div>
@@ -287,7 +287,7 @@ export default function Home({
                             }}
                           />
                           <div className="text-sm text-gray-500 mt-1">
-                            {step.distance} · {step.duration}
+                            {step?.distance} · {step?.duration}
                           </div>
                         </div>
                       </div>

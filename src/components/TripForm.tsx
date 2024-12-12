@@ -1,7 +1,5 @@
-import React, { useEffect, useRef, useState } from "react";
-import { Form, Input, Upload, Button, Switch, Select, DatePicker } from "antd";
-import { LockOutlined, UploadOutlined } from "@ant-design/icons";
-import type { UploadFile } from "antd/es/upload/interface";
+import React, { useEffect, useState } from "react";
+import { Form, Input, Button, Select, DatePicker } from "antd";
 import TripMap from "@/components/map/TripMap";
 import { useCar } from "@/hooks/context/AuthContextCars";
 import dayjs from "dayjs";
@@ -166,7 +164,7 @@ export default function TripForm({
     const selectedModel = tripModelName.find((model) => model.id === value);
     setShowPriceField(selectedModel?.model !== "OPEN_BIDDING");
   };
-
+  // console.log("Map data", mapData);
   return (
     <Form
       form={form}
@@ -207,15 +205,15 @@ export default function TripForm({
           />
         </Form.Item>
 
-        {/* {showPriceField && ( */}
-        <Form.Item
-          name="cost"
-          label="Price"
-          rules={[{ required: true, message: "Please enter a price" }]}
-        >
-          <Input type="number" placeholder="Enter price" />
-        </Form.Item>
-        {/* )} */}
+        {showPriceField && (
+          <Form.Item
+            name="cost"
+            label="Price"
+            rules={[{ required: true, message: "Please enter a price" }]}
+          >
+            <Input type="number" placeholder="Enter price" />
+          </Form.Item>
+        )}
 
         <Form.Item
           name="carId"
@@ -237,13 +235,13 @@ export default function TripForm({
         </Form.Item>
 
         {/* Start Time */}
-        {/* <Form.Item
+        <Form.Item
           name="startTime"
           label="Start Time"
           rules={[{ required: true, message: "Please select a start time" }]}
         >
           <DatePicker showTime className="w-[100%]" />
-        </Form.Item> */}
+        </Form.Item>
 
         <Form.Item label="Route" className="col-span-2">
           <TripMap
@@ -251,29 +249,6 @@ export default function TripForm({
             onLocationsChange={handleMapLocationsChange}
           />
         </Form.Item>
-
-        {/* Document Upload */}
-        {/* <div className="md:col-span-2">
-          <h3 className="font-medium mb-4 mt-4">Documents</h3>
-        </div> */}
-
-        {/* Uncomment and extend validation for company logo upload */}
-        {/* <Form.Item
-      name="companyLogo"
-      label="Logo"
-      valuePropName="fileList"
-      getValueFromEvent={(e) => (Array.isArray(e) ? e : e?.fileList)}
-      rules={[{ required: true, message: "Please upload company logo" }]}
-    >
-      <Upload
-        name="logo"
-        listType="picture"
-        // action="/api/upload" // Adjust to your file upload API
-        maxCount={1}
-      >
-        <Button icon={<UploadOutlined />}>Upload Company Logo</Button>
-      </Upload>
-    </Form.Item> */}
       </div>
 
       {/* Form Actions */}

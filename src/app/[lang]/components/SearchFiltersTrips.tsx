@@ -28,7 +28,9 @@ const FilterBar: React.FC<SearchFiltersTripsProps> = ({ onFilterChange }) => {
   // };
   const handleSearch = (value: string) => {
     setSearchValue(value);
-    onFilterChange(value, { status: selectedStatus });
+    onFilterChange(value, {
+      status: selectedStatus,
+    });
   };
 
   const handleStatusChange = (selectedKeys: React.Key[]) => {

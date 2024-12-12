@@ -16,7 +16,7 @@ export default async function handler(
 
       // Send credentials to external API
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/car/${id}`,
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/cars/${id}`,
         {
           method: "GET",
           headers: {

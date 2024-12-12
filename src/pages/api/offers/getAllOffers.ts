@@ -5,18 +5,24 @@ export default async function handler(
   res: NextApiResponse
 ) {
   if (req.method === "GET") {
-    const { id } = req.query;
-
     try {
       const accessToken = req.cookies.accessToken;
 
       if (!accessToken) {
         throw new Error("Token not found. Please log in.");
       }
+      const {
+        page = 1,
+        limit = 10,
+        filters = "",
+        sort = "",
+        search = "",
+        searchFields = "",
+      } = req.query;
 
       // Send credentials to external API
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/companies/${id}`,
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/trips/offers/?page=${page}&limit=${limit}&filters=${filters}&sort=${sort}&search=${search}&searchFields=${searchFields}`,
         {
           method: "GET",
           headers: {
@@ -27,19 +33,20 @@ export default async function handler(
       );
 
       if (response.ok) {
-        const companyResponse = await response.json();
+        const offersResponse = await response.json();
+
         return res.status(200).json({
-          data: companyResponse.data,
-          message: "Successfully fetched company data",
+          ...offersResponse,
+          message: "Successfully added offers",
         });
       } else {
         const errorData = await response.json();
-        return res.status(response.status).json({
-          message: errorData.message || "Failed to fetch company data",
-        });
+        return res
+          .status(response.status)
+          .json({ message: errorData.message || "Failed to add offers" });
       }
     } catch (error) {
-      console.error("Error fetching company:", error);
+      console.error("Error authenticating:", error);
       return res.status(500).json({ message: "Internal Server Error" });
     }
   } else {

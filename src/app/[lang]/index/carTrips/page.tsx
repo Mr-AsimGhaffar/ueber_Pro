@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { Button, Table, Tag, Modal, message, Input, Checkbox } from "antd";
+import { Button, Table, Tag, message, Input, Modal } from "antd";
 import {
   ReloadOutlined,
   SearchOutlined,
@@ -9,11 +9,16 @@ import {
 } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 import debounce from "lodash.debounce";
-import SearchFiltersTrips from "../../components/SearchFiltersTrips";
+import SearchFiltersTripsDriver from "../../components/SearchFiltersTripsDriver";
 import ExportTablePdf from "../../components/ExportTablePdf";
 import { FaSort, FaSortDown, FaSortUp } from "react-icons/fa";
-import TripForm from "@/components/TripForm";
 import dayjs from "dayjs";
+import { useUser } from "@/hooks/context/AuthContext";
+import ConfirmOffers from "@/components/ConfirmOffers";
+import AssignDriver from "@/components/AssignDriver";
+import SelectTrip from "@/components/SelectTrip";
+import TripForm from "@/components/TripForm";
+import { useRouter } from "next/navigation";
 
 interface Trip {
   key: string;
@@ -28,9 +33,29 @@ interface Trip {
   pickupLong: number;
   dropoffLat: number;
   dropoffLong: number;
+  pricingModel: {
+    id: number;
+    model: string;
+  };
+  hasOffer: boolean;
+  driverCompanyOffers: [];
+  brokerFee: string;
+}
+export interface DriverName {
+  id: number;
+  user: {
+    firstName: string;
+    lastName: string;
+  };
 }
 
-export default function CompanyPage() {
+export default function CarOffers({
+  params: { lang },
+}: {
+  params: { lang: string };
+}) {
+  const router = useRouter();
+  const { user } = useUser();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [trips, setTrips] = useState<Trip[]>([]);
   const [selectedTrip, setSelectedTrip] = useState<Trip | null>(null);
@@ -44,8 +69,13 @@ export default function CompanyPage() {
   const [searchCarCompanyName, setSearchCarCompanyName] = useState("");
   const [searchUnixId, setSearchUnixId] = useState("");
   const [searchCost, setSearchCost] = useState("");
+  const [DriverName, setDriverName] = useState<DriverName[]>([]);
   const searchRef = useRef<string[]>([]);
+  const [selectedType, setSelectedType] = useState<
+    "ASSIGNED_TO_MY_COMPANY" | "CREATED_BY_MY_COMPANY" | "AVAILABLE"
+  >(user?.company.type === "DRIVERS" ? "AVAILABLE" : "CREATED_BY_MY_COMPANY");
   const [filters, setFilters] = useState({
+    id: "",
     "driverCompany.name": "",
     "car.company.name": "",
     startLocation: "",
@@ -57,6 +87,7 @@ export default function CompanyPage() {
     pickupLong: "",
     dropoffLat: "",
     dropoffLong: "",
+    "pricingModel.model": [] as string[],
     status: [] as string[],
     unixId: "",
     cost: "",
@@ -72,12 +103,12 @@ export default function CompanyPage() {
   >([]);
 
   const [search, setSearch] = useState("");
-  const [searchField, setSearchField] = useState("");
 
-  const fetchTrips = async (currentFilters = filters) => {
+  const fetchTrips = async (currentFilters = filters, type = selectedType) => {
     setLoading(true);
     try {
       const filtersObject = {
+        ...(currentFilters.id && { id: Number(currentFilters.id) }),
         ...(currentFilters.status.length && { status: currentFilters.status }),
         ...(currentFilters.startLocation.length && {
           startLocation: currentFilters.startLocation,
@@ -98,6 +129,9 @@ export default function CompanyPage() {
         ...(currentFilters["car.company.name"]
           ? { "car.company.name": currentFilters["car.company.name"] }
           : {}),
+        ...(currentFilters["pricingModel.model"]
+          ? { "pricingModel.model": currentFilters["pricingModel.model"] }
+          : {}),
         ...(currentFilters.unixId && { unixId: currentFilters.unixId }),
         ...(currentFilters.cost && { cost: currentFilters.cost }),
       };
@@ -110,8 +144,9 @@ export default function CompanyPage() {
         sort,
         filters: JSON.stringify(filtersObject),
         search,
+        type,
         searchFields:
-          "startLocation,endLocation,startTime,endTime,createdAt,driverCompany.name,car.company.name,unixId,cost",
+          "startLocation,endLocation,startTime,endTime,createdAt,driverCompany.name,car.company.name,pricingModel.model,unixId,cost",
       }).toString();
       const response = await fetch(`/api/listTrips?${query}`, {
         method: "GET",
@@ -126,6 +161,7 @@ export default function CompanyPage() {
           data.data.map((item: Trip) => ({
             ...item,
             key: item.id.toString(),
+            hasOffer: item.hasOffer,
           }))
         );
         setPagination((prev) => ({
@@ -158,7 +194,7 @@ export default function CompanyPage() {
   };
   const handleGeneralSearch = (
     value: string,
-    newFilters: { status: string[] }
+    newFilters: { status: string[]; "pricingModel.model": string[] }
   ) => {
     setSearch(value);
     setFilters((prevFilters) => ({
@@ -214,7 +250,7 @@ export default function CompanyPage() {
           ) : (
             <FaSort
               className="cursor-pointer text-gray-400"
-              onClick={() => handleSort("startLocation")}
+              onClick={() => handleSort("unixId")}
             />
           )}
         </span>
@@ -594,6 +630,47 @@ export default function CompanyPage() {
     {
       title: (
         <span className="flex items-center gap-2">
+          Pricing Model
+          {sortParams.find((param) => param.field === "pricingModel.model") ? (
+            sortParams.find((param) => param.field === "pricingModel.model")!
+              .order === "asc" ? (
+              <FaSortUp
+                className="cursor-pointer text-blue-500"
+                onClick={() => handleSort("pricingModel.model")}
+              />
+            ) : (
+              <FaSortDown
+                className="cursor-pointer text-blue-500"
+                onClick={() => handleSort("pricingModel.model")}
+              />
+            )
+          ) : (
+            <FaSort
+              className="cursor-pointer text-gray-400"
+              onClick={() => handleSort("pricingModel.model")}
+            />
+          )}
+        </span>
+      ),
+      dataIndex: "pricingModel",
+      key: "pricingModel",
+      className: "font-workSans",
+      render: (pricingModel: any) => {
+        const pricingModelColors: { [key: string]: string } = {
+          FIXED_PRICE: "green",
+          OPEN_BIDDING: "blue",
+          BROKERAGE: "yellow",
+        };
+        return (
+          <Tag color={pricingModelColors[pricingModel.model] || "default"}>
+            {pricingModel.model.replace("_", " ")}
+          </Tag>
+        );
+      },
+    },
+    {
+      title: (
+        <span className="flex items-center gap-2">
           Status
           {sortParams.find((param) => param.field === "status") ? (
             sortParams.find((param) => param.field === "status")!.order ===
@@ -941,6 +1018,20 @@ export default function CompanyPage() {
       title: "Action",
       key: "action",
       className: "font-workSans",
+      render: (trip: Trip) => (
+        <Button
+          className="text-yellow-500 font-semibold"
+          type="link"
+          onClick={() => handleCarTripClick(trip.id)}
+        >
+          Show Offers
+        </Button>
+      ),
+    },
+    {
+      title: "Action",
+      key: "action",
+      className: "font-workSans",
       render: (_, record) => (
         <Button type="link" onClick={() => handleEdit(record)}>
           Edit
@@ -949,12 +1040,10 @@ export default function CompanyPage() {
     },
   ];
 
-  const handleAddCompany = () => {
-    setSelectedTrip(null);
-    setIsModalOpen(true);
+  const handleCarTripClick = (tripId: number) => {
+    router.push(`/${lang}/index/carOffers?tripId=${tripId}`);
   };
 
-  // Handle edit button click
   const handleEdit = async (trip: Trip) => {
     try {
       const response = await fetch(`/api/getTripsById?id=${trip.id}`, {
@@ -1038,7 +1127,6 @@ export default function CompanyPage() {
   };
 
   const handleModalCancel = () => {
-    setSelectedTrip(null);
     setIsModalOpen(false);
   };
 
@@ -1055,10 +1143,54 @@ export default function CompanyPage() {
     },
   };
 
+  const handleTypeChange = (
+    type: "ASSIGNED_TO_MY_COMPANY" | "CREATED_BY_MY_COMPANY" | "AVAILABLE"
+  ) => {
+    setSelectedType(type);
+    fetchTrips({ ...filters }, type);
+  };
+
+  const handleAddCompany = () => {
+    setSelectedTrip(null);
+    setIsModalOpen(true);
+  };
+
   return (
     <div>
       <div className="mb-6">
         <h1 className="text-3xl font-bold font-montserrat">Trips</h1>
+      </div>
+      <div className="mb-4">
+        {user?.company?.type === "DRIVERS" && (
+          <div className="flex gap-4">
+            <Button
+              type={selectedType === "AVAILABLE" ? "primary" : "default"}
+              onClick={() => handleTypeChange("AVAILABLE")}
+            >
+              Available
+            </Button>
+            <Button
+              type={
+                selectedType === "ASSIGNED_TO_MY_COMPANY"
+                  ? "primary"
+                  : "default"
+              }
+              onClick={() => handleTypeChange("ASSIGNED_TO_MY_COMPANY")}
+            >
+              Assigned to My Company
+            </Button>
+          </div>
+        )}
+        {user?.company?.type === "CARS" && (
+          <Button
+            type={
+              selectedType === "CREATED_BY_MY_COMPANY" ? "primary" : "default"
+            }
+            onClick={() => handleTypeChange("CREATED_BY_MY_COMPANY")}
+          >
+            Created by My Company
+          </Button>
+        )}
       </div>
       <div className="flex items-center gap-4 mb-2 font-workSans text-sm cursor-pointer">
         <div className="flex items-center gap-1">
@@ -1082,7 +1214,10 @@ export default function CompanyPage() {
       </div>
       <div className="flex justify-between items-center  mb-4">
         <div>
-          <SearchFiltersTrips onFilterChange={handleGeneralSearch} />
+          <SearchFiltersTripsDriver
+            onFilterChange={handleGeneralSearch}
+            selectedType={selectedType}
+          />
         </div>
         <div>
           <div className="flex items-center gap-4">
@@ -1120,7 +1255,6 @@ export default function CompanyPage() {
             `${range[0]}-${range[1]} of ${total} items`,
         }}
       />
-
       <Modal
         open={isModalOpen}
         onCancel={handleModalCancel}

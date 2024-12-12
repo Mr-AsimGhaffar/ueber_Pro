@@ -85,7 +85,7 @@ export async function getCars(
   });
 
   const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_BASE_URL}/car/?${queryParams.toString()}`,
+    `${process.env.NEXT_PUBLIC_API_BASE_URL}/cars/?${queryParams.toString()}`,
     {
       method: "GET",
       headers: {
