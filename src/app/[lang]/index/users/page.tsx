@@ -963,6 +963,7 @@ export default function UserPage() {
         onCancel={handleModalCancel}
         footer={null}
         width={720}
+        destroyOnClose
       >
         <UserForm
           initialValues={selectedUser}

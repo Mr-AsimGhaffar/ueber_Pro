@@ -969,6 +969,7 @@ export default function DriverPage() {
         onCancel={handleModalCancel}
         footer={null}
         width={720}
+        destroyOnClose
       >
         <DriverForm
           initialValues={selectedDriver}

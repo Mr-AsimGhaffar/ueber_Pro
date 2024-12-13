@@ -1126,6 +1126,7 @@ export default function CompanyPage() {
         onCancel={handleModalCancel}
         footer={null}
         width={720}
+        destroyOnClose
       >
         <TripForm
           initialValues={selectedTrip}
