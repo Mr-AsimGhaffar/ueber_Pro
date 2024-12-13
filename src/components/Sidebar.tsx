@@ -255,6 +255,27 @@ export default function Sidebar({ locale }: Props) {
                 />
               </svg>
             </SidebarLink>
+            <SidebarLink href={`/${locale}/index/invoices`}>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth="1.5"
+                stroke="currentColor"
+                className="size-6"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M7 3h10a2 2 0 012 2v14a2 2 0 01-2 2H7a2 2 0 01-2-2V5a2 2 0 012-2z"
+                />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M9 7h6M9 11h6M9 15h4"
+                />
+              </svg>
+            </SidebarLink>
             <SidebarLink href={`/${locale}/index/settings`}>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -539,6 +560,28 @@ export default function Sidebar({ locale }: Props) {
               />
             </svg>
             <div className="mx-4">Accounts</div>
+          </SidebarLink>
+          <SidebarLink href={`/${locale}/index/invoices`}>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth="1.5"
+              stroke="currentColor"
+              className="size-6"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M7 3h10a2 2 0 012 2v14a2 2 0 01-2 2H7a2 2 0 01-2-2V5a2 2 0 012-2z"
+              />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M9 7h6M9 11h6M9 15h4"
+              />
+            </svg>
+            <div className="mx-4">Invoices</div>
           </SidebarLink>
           <SidebarLink href={`/${locale}/index/settings`}>
             <svg
