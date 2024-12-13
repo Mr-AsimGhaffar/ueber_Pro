@@ -1,52 +1,47 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { Button, Table, Tag, Modal, message, Input, Checkbox } from "antd";
+import { Button, Table, Modal, message, Input } from "antd";
 import {
   ReloadOutlined,
   SearchOutlined,
   UserAddOutlined,
 } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
-import CompanyForm from "@/components/CompanyForm";
 import debounce from "lodash.debounce";
-import SearchFilters from "../../components/SearchFilters";
+import SearchFiltersAccounts from "../../components/SearchFiltersAccounts";
 import ExportTablePdf from "../../components/ExportTablePdf";
 import { FaSort, FaSortDown, FaSortUp } from "react-icons/fa";
+import AccountForm from "@/components/AccountForm";
 
-interface Company {
+interface Account {
   key: string;
   id: number;
-  name: string;
-  type: string;
-  address: string;
-  status: string;
-  email: string;
-  contact: string;
+  companyId: number;
+  accountNumber: string;
+  bankName: string;
+  accountHolderName: string;
+  createdAt: string;
   createdBy: number;
-  logo: string;
 }
 
-export default function CompanyPage() {
+export default function AccountPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [companies, setCompanies] = useState<Company[]>([]);
-  const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
+  const [accounts, setAccounts] = useState<Account[]>([]);
+  const [selectedAccount, setSelectedAccount] = useState<Account | null>(null);
   const [loading, setLoading] = useState(false);
-  const [searchName, setSearchName] = useState("");
-  const [searchEmail, setSearchEmail] = useState("");
-  const [searchAddress, setSearchAddress] = useState("");
-  const [searchContact, setSearchContact] = useState("");
+  const [searchAccountNumber, setSearchAccountNumber] = useState("");
+  const [searchBankName, setSearchBankName] = useState("");
+  const [searchAccountHolderName, setSearchAccountHolderName] = useState("");
+  const [searchCreatedAt, setSearchCreatedAt] = useState("");
   const [searchCreatedBy, setSearchCreatedBy] = useState("");
   const searchRef = useRef<string[]>([]);
   const [filters, setFilters] = useState({
-    name: "",
-    type: [] as string[],
-    address: "",
-    status: [] as string[],
-    email: "",
-    contact: "",
+    accountNumber: "",
+    bankName: "",
+    accountHolderName: "",
+    createdAt: "",
     createdBy: "",
-    logo: "",
     search: "",
   });
   const [pagination, setPagination] = useState({
@@ -59,21 +54,26 @@ export default function CompanyPage() {
   >([]);
 
   const [search, setSearch] = useState("");
-  const [searchField, setSearchField] = useState("");
 
-  const fetchCompanies = async (currentFilters = filters) => {
+  const fetchAccounts = async (currentFilters = filters) => {
     setLoading(true);
     try {
       const filtersObject = {
+        ...(currentFilters.accountNumber && {
+          accountNumber: currentFilters.accountNumber,
+        }),
+        ...(currentFilters.bankName && {
+          bankName: currentFilters.bankName,
+        }),
+        ...(currentFilters.accountHolderName && {
+          accountHolderName: currentFilters.accountHolderName,
+        }),
+        ...(currentFilters.createdAt && {
+          createdAt: currentFilters.createdAt,
+        }),
         ...(currentFilters.createdBy && {
           "createdByUser.name": currentFilters.createdBy,
         }),
-        ...(currentFilters.status.length && { status: currentFilters.status }),
-        ...(currentFilters.type.length && { type: currentFilters.type }),
-        ...(currentFilters.name && { name: currentFilters.name }),
-        ...(currentFilters.email && { email: currentFilters.email }),
-        ...(currentFilters.address && { address: currentFilters.address }),
-        ...(currentFilters.contact && { contact: currentFilters.contact }),
       };
       const sort = sortParams
         .map((param) => `${param.field}:${param.order}`)
@@ -84,9 +84,10 @@ export default function CompanyPage() {
         sort,
         filters: JSON.stringify(filtersObject),
         search,
-        searchFields: "name,email,address,contact,createdByUser.name",
+        searchFields:
+          "accountNumber,bankName,accountHolderName,createdAt,createdByUser.name",
       }).toString();
-      const response = await fetch(`/api/listCompanies?${query}`, {
+      const response = await fetch(`/api/account/listAccount?${query}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -95,8 +96,8 @@ export default function CompanyPage() {
       });
       if (response.ok) {
         const data = await response.json();
-        setCompanies(
-          data.data.map((item: Company) => ({
+        setAccounts(
+          data.data.map((item: Account) => ({
             ...item,
             key: item.id.toString(),
           }))
@@ -118,7 +119,7 @@ export default function CompanyPage() {
   };
 
   const debouncedFetchCompanies = debounce(
-    (currentFilters) => fetchCompanies(currentFilters),
+    (currentFilters) => fetchAccounts(currentFilters),
     500,
     { leading: true, trailing: false } // Leading ensures the first call executes immediately
   );
@@ -129,14 +130,10 @@ export default function CompanyPage() {
     setPagination((prev) => ({ ...prev, current: 1 })); // Reset to first page
     debouncedFetchCompanies(updatedFilters);
   };
-  const handleGeneralSearch = (
-    value: string,
-    newFilters: { type: string[]; status: string[] }
-  ) => {
+  const handleGeneralSearch = (value: string) => {
     setSearch(value);
     setFilters((prevFilters) => ({
       ...prevFilters,
-      ...newFilters,
     }));
     setPagination((prev) => ({ ...prev, current: 1 }));
   };
@@ -163,54 +160,56 @@ export default function CompanyPage() {
   };
 
   useEffect(() => {
-    fetchCompanies();
+    fetchAccounts();
   }, [pagination.current, pagination.pageSize, sortParams, search, filters]);
 
-  const columns: ColumnsType<Company> = [
+  const columns: ColumnsType<Account> = [
     {
       title: (
         <span className="flex items-center gap-2">
-          Name
-          {sortParams.find((param) => param.field === "name") ? (
-            sortParams.find((param) => param.field === "name")!.order ===
-            "asc" ? (
+          Account Number
+          {sortParams.find((param) => param.field === "accountNumber") ? (
+            sortParams.find((param) => param.field === "accountNumber")!
+              .order === "asc" ? (
               <FaSortUp
                 className="cursor-pointer text-blue-500"
-                onClick={() => handleSort("name")}
+                onClick={() => handleSort("accountNumber")}
               />
             ) : (
               <FaSortDown
                 className="cursor-pointer text-blue-500"
-                onClick={() => handleSort("name")}
+                onClick={() => handleSort("accountNumber")}
               />
             )
           ) : (
             <FaSort
               className="cursor-pointer text-gray-400"
-              onClick={() => handleSort("name")}
+              onClick={() => handleSort("accountNumber")}
             />
           )}
         </span>
       ),
-      dataIndex: "name",
-      key: "name",
+      dataIndex: "accountNumber",
+      key: "accountNumber",
       className: "font-workSans font-semibold",
       render: (text) => <a>{text}</a>,
       filterDropdown: (
         <div style={{ padding: 8 }}>
           <Input
-            placeholder="Search Name"
-            value={searchName}
+            placeholder="Search Account Number"
+            value={searchAccountNumber}
             suffix={
-              <SearchOutlined style={{ color: searchName ? "blue" : "gray" }} />
+              <SearchOutlined
+                style={{ color: searchAccountNumber ? "blue" : "gray" }}
+              />
             }
             onChange={(e) => {
-              const newSearchValue = "name";
-              setSearchName(e.target.value);
+              const newSearchValue = "searchAccountNumber";
+              setSearchAccountNumber(e.target.value);
               if (!searchRef.current.includes(newSearchValue)) {
                 searchRef.current.push(newSearchValue);
               }
-              handleFilterChange("name", e.target.value);
+              handleFilterChange("accountNumber", e.target.value);
             }}
             style={{ width: "200px" }}
           />
@@ -218,7 +217,9 @@ export default function CompanyPage() {
             <Button
               type="primary"
               icon={<SearchOutlined />}
-              onClick={() => handleFilterChange("name", searchName)}
+              onClick={() =>
+                handleFilterChange("accountNumber", searchAccountNumber)
+              }
               style={{ marginRight: 8 }}
             >
               Search
@@ -226,8 +227,8 @@ export default function CompanyPage() {
             <Button
               icon={<ReloadOutlined />}
               onClick={() => {
-                setSearchName(""); // Reset the search field
-                handleFilterChange("name", ""); // Reset filter
+                setSearchAccountNumber(""); // Reset the search field
+                handleFilterChange("accountNumber", ""); // Reset filter
               }}
             >
               Reset
@@ -236,90 +237,63 @@ export default function CompanyPage() {
         </div>
       ),
       filterIcon: () => (
-        <SearchOutlined style={{ color: searchName ? "blue" : "gray" }} />
+        <SearchOutlined
+          style={{ color: searchAccountNumber ? "blue" : "gray" }}
+        />
       ),
     },
     {
       title: (
         <span className="flex items-center gap-2">
-          Type
-          {sortParams.find((param) => param.field === "type") ? (
-            sortParams.find((param) => param.field === "type")!.order ===
+          Bank Name
+          {sortParams.find((param) => param.field === "bankName") ? (
+            sortParams.find((param) => param.field === "bankName")!.order ===
             "asc" ? (
               <FaSortUp
                 className="cursor-pointer text-blue-500"
-                onClick={() => handleSort("type")}
+                onClick={() => handleSort("bankName")}
               />
             ) : (
               <FaSortDown
                 className="cursor-pointer text-blue-500"
-                onClick={() => handleSort("type")}
+                onClick={() => handleSort("bankName")}
               />
             )
           ) : (
             <FaSort
               className="cursor-pointer text-gray-400"
-              onClick={() => handleSort("type")}
+              onClick={() => handleSort("bankName")}
             />
           )}
         </span>
       ),
-      dataIndex: "type",
-      key: "type",
-      className: "font-workSans",
-    },
-    {
-      title: (
-        <span className="flex items-center gap-2">
-          Address
-          {sortParams.find((param) => param.field === "address") ? (
-            sortParams.find((param) => param.field === "address")!.order ===
-            "asc" ? (
-              <FaSortUp
-                className="cursor-pointer text-blue-500"
-                onClick={() => handleSort("address")}
-              />
-            ) : (
-              <FaSortDown
-                className="cursor-pointer text-blue-500"
-                onClick={() => handleSort("address")}
-              />
-            )
-          ) : (
-            <FaSort
-              className="cursor-pointer text-gray-400"
-              onClick={() => handleSort("address")}
-            />
-          )}
-        </span>
-      ),
-      dataIndex: "address",
-      key: "address",
+      dataIndex: "bankName",
+      key: "bankName",
       className: "font-workSans",
       filterDropdown: (
         <div style={{ padding: 8 }}>
           <Input
-            placeholder="Search Address"
-            value={searchAddress}
+            placeholder="Search Bank Name"
+            value={searchBankName}
             suffix={
               <SearchOutlined
-                style={{ color: searchAddress ? "blue" : "gray" }}
+                style={{ color: searchBankName ? "blue" : "gray" }}
               />
             }
             onChange={(e) => {
-              const searchValue = "address";
-              setSearchAddress(e.target.value);
+              const searchValue = "bankName";
+              setSearchBankName(e.target.value);
               if (!searchRef.current.includes(searchValue)) {
                 searchRef.current.push(searchValue);
               }
-              handleFilterChange("address", e.target.value);
+              handleFilterChange("bankName", e.target.value);
             }}
           />
           <div style={{ marginTop: 8 }}>
             <Button
               type="primary"
               icon={<SearchOutlined />}
-              onClick={() => handleFilterChange("address", searchAddress)}
+              onClick={() => handleFilterChange("bankName", searchBankName)}
               style={{ marginRight: 8 }}
             >
               Search
@@ -327,8 +301,8 @@ export default function CompanyPage() {
             <Button
               icon={<ReloadOutlined />}
               onClick={() => {
-                setSearchAddress(""); // Reset the search field
-                handleFilterChange("address", ""); // Reset filter
+                setSearchBankName(""); // Reset the search field
+                handleFilterChange("bankName", ""); // Reset filter
               }}
             >
               Reset
@@ -337,101 +311,63 @@ export default function CompanyPage() {
         </div>
       ),
       filterIcon: () => (
-        <SearchOutlined style={{ color: searchAddress ? "blue" : "gray" }} />
+        <SearchOutlined style={{ color: searchBankName ? "blue" : "gray" }} />
       ),
     },
     {
       title: (
         <span className="flex items-center gap-2">
-          Status
-          {sortParams.find((param) => param.field === "status") ? (
-            sortParams.find((param) => param.field === "status")!.order ===
-            "asc" ? (
+          Account Holder Name
+          {sortParams.find((param) => param.field === "accountHolderName") ? (
+            sortParams.find((param) => param.field === "accountHolderName")!
+              .order === "asc" ? (
               <FaSortUp
                 className="cursor-pointer text-blue-500"
-                onClick={() => handleSort("status")}
+                onClick={() => handleSort("accountHolderName")}
               />
             ) : (
               <FaSortDown
                 className="cursor-pointer text-blue-500"
-                onClick={() => handleSort("status")}
+                onClick={() => handleSort("accountHolderName")}
               />
             )
           ) : (
             <FaSort
               className="cursor-pointer text-gray-400"
-              onClick={() => handleSort("status")}
+              onClick={() => handleSort("accountHolderName")}
             />
           )}
         </span>
       ),
-      dataIndex: "status",
-      key: "status",
-      className: "font-workSans",
-      render: (status: string) => {
-        const statusColors: { [key: string]: string } = {
-          ACTIVE: "green",
-          IN_ACTIVE: "yellow",
-        };
-        return (
-          <Tag color={statusColors[status] || "default"}>
-            {status.replace("_", " ")}
-          </Tag>
-        );
-      },
-    },
-    {
-      title: (
-        <span className="flex items-center gap-2">
-          Email
-          {sortParams.find((param) => param.field === "email") ? (
-            sortParams.find((param) => param.field === "email")!.order ===
-            "asc" ? (
-              <FaSortUp
-                className="cursor-pointer text-blue-500"
-                onClick={() => handleSort("email")}
-              />
-            ) : (
-              <FaSortDown
-                className="cursor-pointer text-blue-500"
-                onClick={() => handleSort("email")}
-              />
-            )
-          ) : (
-            <FaSort
-              className="cursor-pointer text-gray-400"
-              onClick={() => handleSort("email")}
-            />
-          )}
-        </span>
-      ),
-      dataIndex: "email",
-      key: "email",
+      dataIndex: "accountHolderName",
+      key: "accountHolderName",
       className: "font-workSans text-blue-500",
       filterDropdown: (
         <div style={{ padding: 8 }}>
           <Input
-            placeholder="Search Email"
-            value={searchEmail}
+            placeholder="Search Account Holder Name"
+            value={searchAccountHolderName}
             suffix={
               <SearchOutlined
-                style={{ color: searchEmail ? "blue" : "gray" }}
+                style={{ color: searchAccountHolderName ? "blue" : "gray" }}
               />
             }
             onChange={(e) => {
-              const searchValue = "email";
-              setSearchEmail(e.target.value);
+              const searchValue = "accountHolderName";
+              setSearchAccountHolderName(e.target.value);
               if (!searchRef.current.includes(searchValue)) {
                 searchRef.current.push(searchValue);
               }
-              handleFilterChange("email", e.target.value);
+              handleFilterChange("accountHolderName", e.target.value);
             }}
           />
           <div style={{ marginTop: 8 }}>
             <Button
               type="primary"
               icon={<SearchOutlined />}
-              onClick={() => handleFilterChange("email", searchEmail)}
+              onClick={() =>
+                handleFilterChange("accountHolderName", searchAccountHolderName)
+              }
               style={{ marginRight: 8 }}
             >
               Search
@@ -439,8 +375,8 @@ export default function CompanyPage() {
             <Button
               icon={<ReloadOutlined />}
               onClick={() => {
-                setSearchEmail(""); // Reset the search field
-                handleFilterChange("email", ""); // Reset filter
+                setSearchAccountHolderName(""); // Reset the search field
+                handleFilterChange("accountHolderName", ""); // Reset filter
               }}
             >
               Reset
@@ -449,61 +385,63 @@ export default function CompanyPage() {
         </div>
       ),
       filterIcon: () => (
-        <SearchOutlined style={{ color: searchEmail ? "blue" : "gray" }} />
+        <SearchOutlined
+          style={{ color: searchAccountHolderName ? "blue" : "gray" }}
+        />
       ),
     },
     {
       title: (
         <span className="flex items-center gap-2">
-          Contact
-          {sortParams.find((param) => param.field === "contact") ? (
-            sortParams.find((param) => param.field === "contact")!.order ===
+          Created Date
+          {sortParams.find((param) => param.field === "createdAt") ? (
+            sortParams.find((param) => param.field === "createdAt")!.order ===
             "asc" ? (
               <FaSortUp
                 className="cursor-pointer text-blue-500"
-                onClick={() => handleSort("contact")}
+                onClick={() => handleSort("createdAt")}
               />
             ) : (
               <FaSortDown
                 className="cursor-pointer text-blue-500"
-                onClick={() => handleSort("contact")}
+                onClick={() => handleSort("createdAt")}
               />
             )
           ) : (
             <FaSort
               className="cursor-pointer text-gray-400"
-              onClick={() => handleSort("contact")}
+              onClick={() => handleSort("createdAt")}
             />
           )}
         </span>
       ),
-      dataIndex: "contact",
-      key: "contact",
+      dataIndex: "createdAt",
+      key: "createdAt",
       className: "font-workSans",
       filterDropdown: (
         <div style={{ padding: 8 }}>
           <Input
-            placeholder="Search contact"
-            value={searchContact}
+            placeholder="Search Created Date"
+            value={searchCreatedAt}
             suffix={
               <SearchOutlined
-                style={{ color: searchContact ? "blue" : "gray" }}
+                style={{ color: searchCreatedAt ? "blue" : "gray" }}
               />
             }
             onChange={(e) => {
-              const searchValue = "contact";
-              setSearchContact(e.target.value);
+              const searchValue = "createdAt";
+              setSearchCreatedAt(e.target.value);
               if (!searchRef.current.includes(searchValue)) {
                 searchRef.current.push(searchValue);
               }
-              handleFilterChange("contact", e.target.value);
+              handleFilterChange("createdAt", e.target.value);
             }}
           />
           <div style={{ marginTop: 8 }}>
             <Button
               type="primary"
               icon={<SearchOutlined />}
-              onClick={() => handleFilterChange("contact", searchContact)}
+              onClick={() => handleFilterChange("createdAt", searchCreatedAt)}
               style={{ marginRight: 8 }}
             >
               Search
@@ -511,8 +449,8 @@ export default function CompanyPage() {
             <Button
               icon={<ReloadOutlined />}
               onClick={() => {
-                setSearchContact(""); // Reset the search field
-                handleFilterChange("contact", ""); // Reset filter
+                setSearchCreatedAt(""); // Reset the search field
+                handleFilterChange("createdAt", ""); // Reset filter
               }}
             >
               Reset
@@ -521,7 +459,7 @@ export default function CompanyPage() {
         </div>
       ),
       filterIcon: () => (
-        <SearchOutlined style={{ color: searchContact ? "blue" : "gray" }} />
+        <SearchOutlined style={{ color: searchCreatedAt ? "blue" : "gray" }} />
       ),
     },
     {
@@ -603,14 +541,6 @@ export default function CompanyPage() {
         <SearchOutlined style={{ color: searchCreatedBy ? "blue" : "gray" }} />
       ),
     },
-    // {
-    //   title: "Logo",
-    //   dataIndex: "logo",
-    //   key: "logo",
-    //   render: (logo: string) => (
-    //     <img src={logo} alt="Company Logo" style={{ objectFit: "cover" }} />
-    //   ),
-    // },
     {
       title: "Action",
       key: "action",
@@ -623,24 +553,27 @@ export default function CompanyPage() {
     },
   ];
 
-  const handleAddCompany = () => {
-    setSelectedCompany(null);
+  const handleAddAccount = () => {
+    setSelectedAccount(null);
     setIsModalOpen(true);
   };
 
   // Handle edit button click
-  const handleEdit = async (company: Company) => {
+  const handleEdit = async (account: Account) => {
     try {
-      const response = await fetch(`/api/getCompanyById?id=${company.id}`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      const response = await fetch(
+        `/api/account/getAccountById?id=${account.id}&companyId=${account.companyId}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
       if (response.ok) {
         const data = await response.json();
-        setSelectedCompany(data.data);
+        setSelectedAccount(data.data);
         setIsModalOpen(true);
       } else {
         const error = await response.json();
@@ -653,41 +586,43 @@ export default function CompanyPage() {
   };
 
   const handleModalOk = async (values: any) => {
-    if (selectedCompany) {
+    if (selectedAccount) {
       // Update company
       try {
-        const response = await fetch("/api/updateCompany", {
+        const response = await fetch("/api/account/updateAccount", {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            id: selectedCompany.id,
+            id: selectedAccount.id,
+            companyId: selectedAccount.companyId,
             ...values,
           }),
         });
 
         if (response.ok) {
           const result = await response.json();
-          setCompanies((prevCompanies) =>
-            prevCompanies.map((company) =>
-              company.id === result.data.id ? result.data : company
+          setAccounts((prevAccounts) =>
+            prevAccounts.map((account) =>
+              account.id === result.data.id ? result.data : account
             )
           );
+          fetchAccounts();
           message.success(result.message);
           setIsModalOpen(false);
         } else {
           const error = await response.json();
-          message.error(error.message || "Failed to update company");
+          message.error(error.message || "Failed to update account");
         }
       } catch (error) {
-        console.error("Error updating company:", error);
-        message.error("An error occurred while updating the company");
+        console.error("Error updating account:", error);
+        message.error("An error occurred while updating the account");
       }
     } else {
       // Add company
       try {
-        const response = await fetch("/api/createCompany", {
+        const response = await fetch("/api/account/createAccount", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -697,16 +632,17 @@ export default function CompanyPage() {
 
         if (response.ok) {
           const result = await response.json();
-          setCompanies((prevCompanies) => [result.data, ...prevCompanies]);
-          message.success("Successfully added company");
+          setAccounts((prevAccounts) => [result.data, ...prevAccounts]);
+          fetchAccounts();
+          message.success("Successfully added account");
           setIsModalOpen(false);
         } else {
           const error = await response.json();
-          message.error(error.message || "Failed to add company");
+          message.error(error.message || "Failed to add account");
         }
       } catch (error) {
-        console.error("Error adding company:", error);
-        message.error("An error occurred while adding the company");
+        console.error("Error adding account:", error);
+        message.error("An error occurred while adding the account");
       }
     }
   };
@@ -719,7 +655,7 @@ export default function CompanyPage() {
     setPagination({ current: page, pageSize, total: pagination.total });
   };
   const rowSelection = {
-    onChange: (selectedRowKeys: React.Key[], selectedRows: Company[]) => {
+    onChange: (selectedRowKeys: React.Key[], selectedRows: Account[]) => {
       console.log(
         `Selected row keys: ${selectedRowKeys}`,
         "Selected rows: ",
@@ -731,7 +667,7 @@ export default function CompanyPage() {
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-3xl font-bold font-montserrat">Companies</h1>
+        <h1 className="text-3xl font-bold font-montserrat">Accounts</h1>
       </div>
       <div className="flex items-center gap-4 mb-2 font-workSans text-sm cursor-pointer">
         <div className="flex items-center gap-1">
@@ -763,7 +699,7 @@ export default function CompanyPage() {
       </div>
       <div className="flex justify-between items-center  mb-4">
         <div>
-          <SearchFilters onFilterChange={handleGeneralSearch} />
+          <SearchFiltersAccounts onFilterChange={handleGeneralSearch} />
         </div>
         <div>
           <div className="flex items-center gap-4">
@@ -772,10 +708,10 @@ export default function CompanyPage() {
               type="primary"
               size="large"
               icon={<UserAddOutlined />}
-              onClick={handleAddCompany}
+              onClick={handleAddAccount}
               className="font-sansInter"
             >
-              Add Company
+              Add Account
             </Button>
           </div>
         </div>
@@ -787,7 +723,7 @@ export default function CompanyPage() {
           ...rowSelection,
         }}
         columns={columns}
-        dataSource={companies}
+        dataSource={accounts}
         loading={loading}
         scroll={{ x: "max-content" }}
         pagination={{
@@ -809,8 +745,8 @@ export default function CompanyPage() {
         width={720}
         destroyOnClose
       >
-        <CompanyForm
-          initialValues={selectedCompany}
+        <AccountForm
+          initialValues={selectedAccount}
           onSubmit={handleModalOk}
           onCancel={handleModalCancel}
         />

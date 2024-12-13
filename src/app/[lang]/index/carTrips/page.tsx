@@ -1260,6 +1260,7 @@ export default function CarOffers({
         onCancel={handleModalCancel}
         footer={null}
         width={720}
+        destroyOnClose
       >
         <TripForm
           initialValues={selectedTrip}

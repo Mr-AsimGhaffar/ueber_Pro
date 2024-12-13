@@ -432,6 +432,7 @@ export default function ListingsPage() {
         onCancel={handleModalCancel}
         footer={null}
         width={720}
+        destroyOnClose
       >
         <CarForm
           initialValues={selectedCar}
