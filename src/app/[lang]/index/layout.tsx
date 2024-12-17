@@ -14,6 +14,7 @@ import { Inter, Work_Sans, Montserrat } from "next/font/google";
 import "@/app/globals.css";
 import { SidebarProvider } from "@/hooks/context/SidebarContext";
 import Script from "next/script";
+import { NotificationProvider } from "@/hooks/context/NotificationContext";
 
 export const metadata = {
   title: "Next.js i18n Dashboard Template",
@@ -67,15 +68,17 @@ export default async function Root({ params, children }: Props) {
         <ConfigProvider>
           <UserProvider initialUser={user}>
             <CarProvider initialCar={cars || { data: [] }}>
-              <SidebarProvider>
-                {!isAuthPage && (
-                  <>
-                    <Navbar locale={params.lang} />
-                    <Sidebar locale={params.lang} />
-                  </>
-                )}
-                {isAuthPage ? children : <Content>{children}</Content>}
-              </SidebarProvider>
+              <NotificationProvider>
+                <SidebarProvider>
+                  {!isAuthPage && (
+                    <>
+                      <Navbar locale={params.lang} />
+                      <Sidebar locale={params.lang} />
+                    </>
+                  )}
+                  {isAuthPage ? children : <Content>{children}</Content>}
+                </SidebarProvider>
+              </NotificationProvider>
             </CarProvider>
           </UserProvider>
         </ConfigProvider>

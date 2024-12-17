@@ -235,13 +235,13 @@ export default function TripForm({
         </Form.Item>
 
         {/* Start Time */}
-        <Form.Item
+        {/* <Form.Item
           name="startTime"
           label="Start Time"
           rules={[{ required: true, message: "Please select a start time" }]}
         >
           <DatePicker showTime className="w-[100%]" />
-        </Form.Item>
+        </Form.Item> */}
 
         <Form.Item label="Route" className="col-span-2">
           <TripMap
