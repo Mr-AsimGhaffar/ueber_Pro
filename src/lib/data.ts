@@ -105,6 +105,35 @@ export async function getCars(
   return cars;
 }
 
+export async function getActivities(): Promise<Activity> {
+  const accessToken = await getAccessToken();
+  const id = cookies().get("id")?.value;
+
+  if (!id) {
+    throw new Error("User ID not found. Please log in.");
+  }
+
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_API_BASE_URL}/activities/`,
+    {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    }
+  );
+
+  if (!response.ok) {
+    if (response.status === 401) {
+      throw new Error("Unauthorized. Please log in again.");
+    }
+    throw new Error("Failed to fetch activities data");
+  }
+
+  const activity = await response.json();
+  return activity.data;
+}
+
 export async function getReports(): Promise<Report[]> {
   return new Promise((resolve) => {
     const reports: Report[] = [];
@@ -168,38 +197,5 @@ export async function getTeamMembers(): Promise<TeamMember[]> {
     ];
 
     setTimeout(() => resolve(teamMembers), 500);
-  });
-}
-
-export async function getActivities(): Promise<Activity[]> {
-  return new Promise((resolve) => {
-    const activities: Activity[] = [
-      {
-        firstName: "Dries",
-        lastName: "Vincent",
-        action: "COMMENT",
-        ts: 1717514696008,
-      },
-      {
-        firstName: "Whitney",
-        lastName: "Francis",
-        action: "COMMENT",
-        ts: 1717427841000,
-      },
-      {
-        firstName: "Floyd",
-        lastName: "Miles",
-        action: "ACTIVATE",
-        ts: 1717340641000,
-      },
-      {
-        firstName: "Emily",
-        lastName: "Selman",
-        action: "STOP",
-        ts: 1717253241000,
-      },
-    ];
-
-    setTimeout(() => resolve(activities), 500);
   });
 }
