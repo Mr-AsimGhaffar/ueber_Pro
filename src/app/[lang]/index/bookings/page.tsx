@@ -1,7 +1,16 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { Button, Table, Tag, Modal, message, Input, Checkbox } from "antd";
+import {
+  Button,
+  Table,
+  Tag,
+  Modal,
+  message,
+  Input,
+  Checkbox,
+  notification,
+} from "antd";
 import {
   ReloadOutlined,
   SearchOutlined,
@@ -14,6 +23,8 @@ import ExportTablePdf from "../../components/ExportTablePdf";
 import { FaSort, FaSortDown, FaSortUp } from "react-icons/fa";
 import TripForm from "@/components/TripForm";
 import dayjs from "dayjs";
+import { useNotification } from "@/hooks/context/NotificationContext";
+import { v4 as uuidv4 } from "uuid";
 
 interface Trip {
   key: string;
@@ -31,6 +42,7 @@ interface Trip {
 }
 
 export default function CompanyPage() {
+  const { addNotification } = useNotification();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [trips, setTrips] = useState<Trip[]>([]);
   const [selectedTrip, setSelectedTrip] = useState<Trip | null>(null);
@@ -1000,14 +1012,30 @@ export default function CompanyPage() {
               trips.id === result.data.id ? result.data : trips
             )
           );
+          addNotification({
+            id: uuidv4(),
+            message: "Trip updated successfully.",
+            type: "success",
+            link: `/index/bookings/`,
+          });
           message.success(result.message);
           setIsModalOpen(false);
         } else {
           const error = await response.json();
+          addNotification({
+            id: uuidv4(),
+            message: error.message || "Failed to update trip",
+            type: "error",
+          });
           message.error(error.message || "Failed to update trips");
         }
       } catch (error) {
-        console.error("Error updating trips:", error);
+        console.error("Error updating trip:", error);
+        addNotification({
+          id: uuidv4(),
+          message: "An error occurred while updating the trip",
+          type: "error",
+        });
         message.error("An error occurred while updating the trips");
       }
     } else {
@@ -1024,14 +1052,30 @@ export default function CompanyPage() {
         if (response.ok) {
           const result = await response.json();
           setTrips((prevTrips) => [result.data, ...prevTrips]);
+          addNotification({
+            id: uuidv4(),
+            message: "Trip created successfully",
+            type: "success",
+            link: `/index/bookings`,
+          });
           message.success("Successfully added trips");
           setIsModalOpen(false);
         } else {
           const error = await response.json();
+          addNotification({
+            id: uuidv4(),
+            message: error.message || "Failed to create trip",
+            type: "error",
+          });
           message.error(error.message || "Failed to add trips");
         }
       } catch (error) {
-        console.error("Error adding trips:", error);
+        console.error("Error creating trip:", error);
+        addNotification({
+          id: uuidv4(),
+          message: "An error occurred while creating the trip",
+          type: "error",
+        });
         message.error("An error occurred while adding the trips");
       }
     }
