@@ -78,6 +78,34 @@ export type Cars = {
   data: Car[];
 };
 
+export type Activity = {
+  id: number;
+  createdAt: string; // ISO string
+  action: string; // Assuming only "UPDATE" is used here, you can extend this if needed
+  table: string; // e.g., "Trip"
+  endpoint: string; // e.g., "/trips/"
+  payload: {
+    cost: string;
+    carId: number;
+    tripId: number;
+    pickupLat: number;
+    waypoints: any[]; // You can refine this type depending on what the waypoints array contains
+    dropoffLat: number;
+    pickupLong: number;
+    dropoffLong: number;
+    endLocation: string;
+    startLocation: string;
+  };
+  resourceId: number;
+  deletedAt: string | null;
+  userId: number;
+  User: {
+    firstName: string;
+    lastName: string;
+    id: number;
+  };
+};
+
 export type Report = {
   filename: string;
   url: string;
@@ -88,13 +116,6 @@ export type TeamMember = {
   lastName: string;
   username: string;
   profileImage: string;
-};
-
-export type Activity = {
-  firstName: string;
-  lastName: string;
-  action: "COMMENT" | "ACTIVATE" | "STOP";
-  ts: number;
 };
 
 export type Locale = (typeof i18n)["locales"][number];

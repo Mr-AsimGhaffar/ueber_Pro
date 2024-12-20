@@ -3,10 +3,11 @@ import Navbar from "@/components/Navbar";
 import Content from "@/components/Content";
 import Sidebar from "@/components/Sidebar";
 
-import { getCars, getUser } from "@/lib/data";
+import { getActivities, getCars, getUser } from "@/lib/data";
 import { Locale } from "@/lib/definitions";
 import { UserProvider } from "@/hooks/context/AuthContext";
 import { CarProvider } from "@/hooks/context/AuthContextCars";
+import { ActivityProvider } from "@/hooks/context/ActivityContext";
 import { i18n } from "../../../../i18n-config";
 import { headers } from "next/headers";
 import { Inter, Work_Sans, Montserrat } from "next/font/google";
@@ -48,6 +49,7 @@ export default async function Root({ params, children }: Props) {
   const pathname: string = headerList.get("x-current-path") || "";
   const user = await getUser();
   const cars = await getCars();
+  const activity = await getActivities();
   const isAuthPage =
     params.lang &&
     ["login", "register"].some((route) => pathname.includes(route));
@@ -67,15 +69,17 @@ export default async function Root({ params, children }: Props) {
         <ConfigProvider>
           <UserProvider initialUser={user}>
             <CarProvider initialCar={cars || { data: [] }}>
-              <SidebarProvider>
-                {!isAuthPage && (
-                  <>
-                    <Navbar locale={params.lang} />
-                    <Sidebar locale={params.lang} />
-                  </>
-                )}
-                {isAuthPage ? children : <Content>{children}</Content>}
-              </SidebarProvider>
+              <ActivityProvider initialActivity={activity}>
+                <SidebarProvider>
+                  {!isAuthPage && (
+                    <>
+                      <Navbar locale={params.lang} />
+                      <Sidebar locale={params.lang} />
+                    </>
+                  )}
+                  {isAuthPage ? children : <Content>{children}</Content>}
+                </SidebarProvider>
+              </ActivityProvider>
             </CarProvider>
           </UserProvider>
         </ConfigProvider>
