@@ -255,6 +255,27 @@ export default function Sidebar({ locale }: Props) {
                 />
               </svg>
             </SidebarLink>
+            <SidebarLink href={`/${locale}/index/invoices`}>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth="1.5"
+                stroke="currentColor"
+                className="size-6"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M7 3h10a2 2 0 012 2v14a2 2 0 01-2 2H7a2 2 0 01-2-2V5a2 2 0 012-2z"
+                />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M9 7h6M9 11h6M9 15h4"
+                />
+              </svg>
+            </SidebarLink>
             <SidebarLink href={`/${locale}/index/settings`}>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -288,7 +309,24 @@ export default function Sidebar({ locale }: Props) {
                 />
               </svg>
             </SidebarLink>
-
+            {user?.company?.type === "SUPER_ADMIN" && (
+              <SidebarLink href={`/${locale}/index/activities`}>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth="1.5"
+                  stroke="currentColor"
+                  className="size-6"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M12 6.75l-1.5 1.5h-4.5a1.5 1.5 0 0 0-1.5 1.5v7.5a1.5 1.5 0 0 0 1.5 1.5h13.5a1.5 1.5 0 0 0 1.5-1.5v-7.5a1.5 1.5 0 0 0-1.5-1.5h-4.5L12 6.75zM12 6.75V3.75m0 0l-1.5 1.5M12 3.75l1.5 1.5M7.5 12h9m-6 3v-3"
+                  />
+                </svg>
+              </SidebarLink>
+            )}
             {user?.role?.name !== "ADMIN" && (
               <>
                 <SidebarLink href={`/${locale}/index/reports`}>
@@ -540,6 +578,28 @@ export default function Sidebar({ locale }: Props) {
             </svg>
             <div className="mx-4">Accounts</div>
           </SidebarLink>
+          <SidebarLink href={`/${locale}/index/invoices`}>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth="1.5"
+              stroke="currentColor"
+              className="size-6"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M7 3h10a2 2 0 012 2v14a2 2 0 01-2 2H7a2 2 0 01-2-2V5a2 2 0 012-2z"
+              />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M9 7h6M9 11h6M9 15h4"
+              />
+            </svg>
+            <div className="mx-4">Invoices</div>
+          </SidebarLink>
           <SidebarLink href={`/${locale}/index/settings`}>
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -575,7 +635,25 @@ export default function Sidebar({ locale }: Props) {
             </svg>
             <div className="mx-4">Messages</div>
           </SidebarLink>
-
+          {user?.role?.name === "SUPER_ADMIN" && (
+            <SidebarLink href={`/${locale}/index/activities`}>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth="1.5"
+                stroke="currentColor"
+                className="size-6"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M12 6.75l-1.5 1.5h-4.5a1.5 1.5 0 0 0-1.5 1.5v7.5a1.5 1.5 0 0 0 1.5 1.5h13.5a1.5 1.5 0 0 0 1.5-1.5v-7.5a1.5 1.5 0 0 0-1.5-1.5h-4.5L12 6.75zM12 6.75V3.75m0 0l-1.5 1.5M12 3.75l1.5 1.5M7.5 12h9m-6 3v-3"
+                />
+              </svg>
+              <div className="mx-4">Activites</div>
+            </SidebarLink>
+          )}
           {user?.role?.name !== "ADMIN" && (
             <>
               <SidebarLink href={`/${locale}/index/reports`}>
