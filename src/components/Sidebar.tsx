@@ -180,7 +180,7 @@ export default function Sidebar({ locale }: Props) {
                 </svg>
               </SidebarLink>
             )}
-            {user?.company?.type !== "DRIVERS" && (
+            {/* {user?.company?.type !== "DRIVERS" && (
               <SidebarLink href={`/${locale}/index/listings/map`}>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -202,7 +202,7 @@ export default function Sidebar({ locale }: Props) {
                   />
                 </svg>
               </SidebarLink>
-            )}
+            )} */}
             {user?.company?.type === "DRIVERS" && (
               <SidebarLink href={`/${locale}/index/driverOffers`}>
                 <svg
@@ -499,7 +499,7 @@ export default function Sidebar({ locale }: Props) {
               <div className="mx-4">Cars</div>
             </SidebarLink>
           )}
-          {user?.company?.type !== "DRIVERS" && (
+          {/* {user?.company?.type !== "DRIVERS" && (
             <SidebarLink href={`/${locale}/index/listings/map`}>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -522,7 +522,7 @@ export default function Sidebar({ locale }: Props) {
               </svg>
               <div className="mx-4">Map View</div>
             </SidebarLink>
-          )}
+          )} */}
           {user?.company?.type === "DRIVERS" && (
             <SidebarLink href={`/${locale}/index/driverOffers`}>
               <svg

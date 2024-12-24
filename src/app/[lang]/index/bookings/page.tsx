@@ -28,6 +28,10 @@ interface Trip {
   pickupLong: number;
   dropoffLat: number;
   dropoffLong: number;
+  pricingModel: {
+    id: number;
+    model: string;
+  };
 }
 
 export default function CompanyPage() {
@@ -57,6 +61,7 @@ export default function CompanyPage() {
     pickupLong: "",
     dropoffLat: "",
     dropoffLong: "",
+    "pricingModel.model": [] as string[],
     status: [] as string[],
     unixId: "",
     cost: "",
@@ -79,6 +84,9 @@ export default function CompanyPage() {
     try {
       const filtersObject = {
         ...(currentFilters.status.length && { status: currentFilters.status }),
+        ...(currentFilters["pricingModel.model"]
+          ? { "pricingModel.model": currentFilters["pricingModel.model"] }
+          : {}),
         ...(currentFilters.startLocation.length && {
           startLocation: currentFilters.startLocation,
         }),
@@ -111,7 +119,7 @@ export default function CompanyPage() {
         filters: JSON.stringify(filtersObject),
         search,
         searchFields:
-          "startLocation,endLocation,startTime,endTime,createdAt,driverCompany.name,car.company.name,unixId,cost",
+          "startLocation,endLocation,startTime,endTime,createdAt,driverCompany.name,car.company.name,pricingModel.model,unixId,cost",
       }).toString();
       const response = await fetch(`/api/listTrips?${query}`, {
         method: "GET",
@@ -158,7 +166,7 @@ export default function CompanyPage() {
   };
   const handleGeneralSearch = (
     value: string,
-    newFilters: { status: string[] }
+    newFilters: { status: string[]; "pricingModel.model": string[] }
   ) => {
     setSearch(value);
     setFilters((prevFilters) => ({
@@ -590,6 +598,47 @@ export default function CompanyPage() {
           style={{ color: searchCarCompanyName ? "blue" : "gray" }}
         />
       ),
+    },
+    {
+      title: (
+        <span className="flex items-center gap-2">
+          Pricing Model
+          {sortParams.find((param) => param.field === "pricingModel.model") ? (
+            sortParams.find((param) => param.field === "pricingModel.model")!
+              .order === "asc" ? (
+              <FaSortUp
+                className="cursor-pointer text-blue-500"
+                onClick={() => handleSort("pricingModel.model")}
+              />
+            ) : (
+              <FaSortDown
+                className="cursor-pointer text-blue-500"
+                onClick={() => handleSort("pricingModel.model")}
+              />
+            )
+          ) : (
+            <FaSort
+              className="cursor-pointer text-gray-400"
+              onClick={() => handleSort("pricingModel.model")}
+            />
+          )}
+        </span>
+      ),
+      dataIndex: "pricingModel",
+      key: "pricingModel",
+      className: "font-workSans",
+      render: (pricingModel: any) => {
+        const pricingModelColors: { [key: string]: string } = {
+          FIXED_PRICE: "green",
+          OPEN_BIDDING: "blue",
+          BROKERAGE: "yellow",
+        };
+        return (
+          <Tag color={pricingModelColors[pricingModel?.model] || "default"}>
+            {pricingModel?.model.replace("_", " ")}
+          </Tag>
+        );
+      },
     },
     {
       title: (

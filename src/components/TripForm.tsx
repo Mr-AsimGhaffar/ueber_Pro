@@ -77,11 +77,17 @@ export default function TripForm({
   // Set the form's fields to initialValues when editing
   useEffect(() => {
     if (initialValues) {
-      const startTime = dayjs(initialValues.startTime);
+      const startTime = initialValues.startTime
+        ? dayjs(initialValues.startTime)
+        : undefined;
+      const selectedModel = tripModelName.find(
+        (model) => model.id === initialValues.pricingModelId
+      );
+      setShowPriceField(selectedModel?.model !== "OPEN_BIDDING");
       form.setFieldsValue({
         ...initialValues,
         profilePictureId: initialValues?.profilePictureId || "",
-        startTime: startTime.isValid() ? startTime : undefined,
+        startTime: startTime?.isValid() ? startTime : undefined,
       });
       const { startLocation, endLocation } = initialValues;
       if (startLocation && endLocation) {
@@ -116,13 +122,12 @@ export default function TripForm({
         waypoints: [],
       }); // Reset the form when initialValues is null (add new company)
     }
-  }, [initialValues, form]);
+  }, [initialValues, form, tripModelName]);
 
   const handleSubmit = async () => {
     try {
       const values = await form.validateFields();
       const { startLocation, endLocation, waypoints } = mapData;
-
       if (!startLocation || !endLocation) {
         throw new Error("Start and end locations are required.");
       }
@@ -169,7 +174,7 @@ export default function TripForm({
     <Form
       form={form}
       layout="vertical"
-      initialValues={initialValues}
+      // initialValues={initialValues}
       onFinish={handleSubmit}
       preserve={true}
       onValuesChange={(changedValues) => {
@@ -235,13 +240,13 @@ export default function TripForm({
         </Form.Item>
 
         {/* Start Time */}
-        {/* <Form.Item
+        <Form.Item
           name="startTime"
           label="Start Time"
           rules={[{ required: true, message: "Please select a start time" }]}
         >
           <DatePicker showTime className="w-[100%]" />
-        </Form.Item> */}
+        </Form.Item>
 
         <Form.Item label="Route" className="col-span-2">
           <TripMap
