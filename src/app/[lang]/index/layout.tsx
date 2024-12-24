@@ -71,18 +71,18 @@ export default async function Root({ params, children }: Props) {
           <UserProvider initialUser={user}>
             <CarProvider initialCar={cars || { data: [] }}>
               <NotificationProvider>
-              <ActivityProvider initialActivity={activity}>
-                <SidebarProvider>
-                  {!isAuthPage && (
-                    <>
-                      <Navbar locale={params.lang} />
-                      <Sidebar locale={params.lang} />
-                    </>
-                  )}
-                  {isAuthPage ? children : <Content>{children}</Content>}
-                </SidebarProvider>
+                <ActivityProvider initialActivity={activity}>
+                  <SidebarProvider>
+                    {!isAuthPage && (
+                      <>
+                        <Navbar locale={params.lang} />
+                        <Sidebar locale={params.lang} />
+                      </>
+                    )}
+                    {isAuthPage ? children : <Content>{children}</Content>}
+                  </SidebarProvider>
+                </ActivityProvider>
               </NotificationProvider>
-              </ActivityProvider>
             </CarProvider>
           </UserProvider>
         </ConfigProvider>
