@@ -21,6 +21,7 @@ interface Props {
 
 export default function NavbarContent({ locale, messages }: Props) {
   const { user } = useUser();
+  const [refreshTrigger, setRefreshTrigger] = useState(false);
   // const [selectedUser, setSelectedUser] = useState<any>(null);
   const pathname = usePathname();
   const router = useRouter();
@@ -34,6 +35,10 @@ export default function NavbarContent({ locale, messages }: Props) {
   const [appMenuOpen, setAppMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [langSwitcherMenuOpen, setLangSwitcherMenuOpen] = useState(false);
+
+  const handleIconClick = () => {
+    setRefreshTrigger((prev) => !prev); // Toggle the state to trigger refresh
+  };
 
   const showLoader = () => {
     setLoading(true);
@@ -272,8 +277,12 @@ export default function NavbarContent({ locale, messages }: Props) {
 
             {/* Notifications */}
             <div className="relative mx-1">
-              <Dropdown overlay={<NotificationList />} trigger={["click"]}>
+              <Dropdown
+                overlay={<NotificationList refreshTrigger={refreshTrigger} />}
+                trigger={["click"]}
+              >
                 <button
+                  onClick={handleIconClick}
                   type="button"
                   className="rounded-full p-1 text-gray-500 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-600"
                 >
