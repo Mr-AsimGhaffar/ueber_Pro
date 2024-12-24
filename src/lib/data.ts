@@ -98,7 +98,7 @@ export async function getCars(
     if (response.status === 401) {
       throw new Error("Unauthorized. Please log in again.");
     }
-    throw new Error("Failed to fetch user data");
+    throw new Error("Failed to fetch cars data");
   }
 
   const cars = await response.json();

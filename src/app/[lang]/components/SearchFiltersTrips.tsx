@@ -3,13 +3,19 @@ import { SearchOutlined, DownOutlined } from "@ant-design/icons";
 import { useState } from "react";
 
 interface SearchFiltersTripsProps {
-  onFilterChange: (value: string, filters: { status: string[] }) => void;
+  onFilterChange: (
+    value: string,
+    filters: { status: string[]; "pricingModel.model": string[] }
+  ) => void;
 }
 
 const FilterBar: React.FC<SearchFiltersTripsProps> = ({ onFilterChange }) => {
   // const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchValue, setSearchValue] = useState("");
   const [selectedStatus, setSelectedStatus] = useState<string[]>([]);
+  const [selectedPricingModel, setSelectedPricingModel] = useState<string[]>(
+    []
+  );
   // const [filters, setFilters] = useState({
   //   type: [] as string[],
   //   status: [] as string[],
@@ -30,6 +36,7 @@ const FilterBar: React.FC<SearchFiltersTripsProps> = ({ onFilterChange }) => {
     setSearchValue(value);
     onFilterChange(value, {
       status: selectedStatus,
+      "pricingModel.model": selectedPricingModel,
     });
   };
 
@@ -37,8 +44,21 @@ const FilterBar: React.FC<SearchFiltersTripsProps> = ({ onFilterChange }) => {
     setSelectedStatus(selectedKeys as string[]);
     onFilterChange(searchValue, {
       status: selectedKeys as string[],
+      "pricingModel.model": selectedPricingModel,
     });
   };
+  const handlePricingModelChange = (selectedKeys: React.Key[]) => {
+    setSelectedPricingModel(selectedKeys as string[]);
+    onFilterChange(searchValue, {
+      status: selectedStatus,
+      "pricingModel.model": selectedKeys as string[],
+    });
+  };
+  const menuPricingModel = [
+    { key: "FIXED_PRICE", label: "Fixed Price" },
+    { key: "OPEN_BIDDING", label: "Open Bidding" },
+    { key: "BROKERAGE", label: "Brokerage" },
+  ];
   // const handleFilterChange = (key: string, value: any) => {
   //   setFilters((prev) => ({ ...prev, [key]: value }));
   //   onFilterChange(key, value);
@@ -86,6 +106,18 @@ const FilterBar: React.FC<SearchFiltersTripsProps> = ({ onFilterChange }) => {
               label: item.label,
               value: item.key,
             }))}
+          />
+          <Select
+            mode="multiple"
+            placeholder="Select Pricing Model"
+            value={selectedPricingModel}
+            onChange={handlePricingModelChange}
+            style={{ width: 220 }}
+            options={menuPricingModel.map((item) => ({
+              label: item.label,
+              value: item.key,
+            }))}
+            className="placeholder:text-red-400"
           />
 
           {/* More Filters */}
