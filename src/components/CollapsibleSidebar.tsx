@@ -39,7 +39,7 @@ export default function CollapsibleSidebar({
                 height={70}
               />
               <span className="ml-2 font-sansInter text-xl tracking-wider text-gray-200">
-                Rider Pro
+                Ride Pro
               </span>
             </>
           )}

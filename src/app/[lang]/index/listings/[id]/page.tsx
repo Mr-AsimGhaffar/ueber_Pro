@@ -173,7 +173,7 @@ export default function CarDetailPage() {
                     </span>
                     <span className="flex items-center gap-1">
                       <MdCarRental className="text-cyan-700" />
-                      {selectedCar?.rentalType}
+                      {selectedCar?.mileage || "No Mileage"}
                     </span>
                     <span className="flex items-center gap-1">
                       <GiGearStickPattern className="text-cyan-700" />
@@ -181,7 +181,7 @@ export default function CarDetailPage() {
                     </span>
                     <span className="flex items-center gap-1">
                       <MdOutlineReduceCapacity className="text-cyan-700" />
-                      {selectedCar?.capacity}
+                      {selectedCar?.capacity || "No Capacity"}
                     </span>
                   </div>
                 </div>
@@ -194,7 +194,7 @@ export default function CarDetailPage() {
                   <div className="p-4 bg-gray-50 rounded-lg flex items-center justify-between text-sm text-gray-600 font-medium">
                     <div className="flex items-center gap-1">
                       <GiPathDistance className="text-cyan-700" />
-                      {selectedCar?.mileage}
+                      {selectedCar?.mileage || "No Mileage"}
                     </div>
                     <div className="flex items-center gap-1">
                       <IoCarSportOutline className="text-cyan-700" />
@@ -206,7 +206,7 @@ export default function CarDetailPage() {
                     </div>
                     <div className="flex items-center gap-1">
                       <MdOutlineReduceCapacity className="text-cyan-700" />
-                      {selectedCar?.capacity}
+                      {selectedCar?.capacity || "No Capacity"}
                     </div>
                   </div>
                 </div>

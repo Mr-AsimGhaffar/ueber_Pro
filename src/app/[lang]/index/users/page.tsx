@@ -555,6 +555,9 @@ export default function UserPage() {
       key: "dateOfBirth",
       className: "font-workSans",
       render: (text: string) => {
+        if (!text) {
+          return "No Birthday Found";
+        }
         const date = new Date(text);
         return text ? date.toLocaleDateString("en-GB") : "";
       },
@@ -723,7 +726,7 @@ export default function UserPage() {
           const { firstName, lastName } = createdByUser;
           return <p>{formatString(firstName + " " + lastName)}</p>;
         }
-        return null;
+        return <p>No Admin Found</p>;
       },
       filterDropdown: (
         <div style={{ padding: 8 }}>

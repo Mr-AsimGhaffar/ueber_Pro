@@ -3,25 +3,30 @@ import { cookies } from "next/headers";
 import Cookies from "js-cookie";
 
 const refreshAccessToken = async (refreshToken: string): Promise<string> => {
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/refresh-token`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ refreshToken }),
+  try {
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/refresh-token`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ refreshToken }),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Refresh token expired. Please log in again.");
     }
-  );
 
-  if (!response.ok) {
-    throw new Error("Refresh token expired. Please log in again.");
+    const data = await response.json();
+    const newAccessToken = data.data.token.token;
+    Cookies.set("accessToken", newAccessToken, { expires: 1 }); // Save new access token in cookies
+    return newAccessToken;
+  } catch (error) {
+    console.error("Error refreshing access token:", error);
+    throw error;
   }
-
-  const data = await response.json();
-  const newAccessToken = data.data.token.token;
-  Cookies.set("accessToken", newAccessToken, { expires: 1 }); // Save new access token in cookies
-  return newAccessToken;
 };
 
 const getAccessToken = async (): Promise<string> => {
@@ -41,68 +46,105 @@ const getAccessToken = async (): Promise<string> => {
   return accessToken;
 };
 
-export async function getUser(): Promise<User> {
-  const accessToken = await getAccessToken();
-  const id = cookies().get("id")?.value;
-
-  if (!id) {
-    throw new Error("User ID not found. Please log in.");
-  }
-
+async function getUserWithNewAccessToken(
+  newAccessToken: string,
+  userId: string
+): Promise<User> {
   const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_BASE_URL}/users/${id}`,
+    `${process.env.NEXT_PUBLIC_API_BASE_URL}/users/${userId}`,
     {
       method: "GET",
       headers: {
-        Authorization: `Bearer ${accessToken}`,
+        Authorization: `Bearer ${newAccessToken}`,
       },
-      // body: JSON.stringify({ clientType: "web" }),
     }
   );
 
   if (!response.ok) {
-    if (response.status === 401) {
-      throw new Error("Unauthorized. Please log in again.");
-    }
-    throw new Error("Failed to fetch user data");
+    throw new Error("Failed to fetch user data after refreshing token.");
   }
 
   const user = await response.json();
   return user.data;
 }
 
+export async function getUser(): Promise<User> {
+  try {
+    const accessToken = await getAccessToken();
+    const id = cookies().get("id")?.value;
+
+    if (!id) {
+      throw new Error("User ID not found. Please log in.");
+    }
+
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_BASE_URL}/users/${id}`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+        // body: JSON.stringify({ clientType: "web" }),
+      }
+    );
+
+    if (!response.ok) {
+      if (response.status === 401) {
+        const refreshToken = cookies().get("refreshToken")?.value;
+        if (refreshToken) {
+          const newAccessToken = await refreshAccessToken(refreshToken);
+          return await getUserWithNewAccessToken(newAccessToken, id);
+        }
+        throw new Error("Unauthorized. Please log in again.");
+      }
+      throw new Error("Failed to fetch user data");
+    }
+
+    const user = await response.json();
+    return user.data;
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+    throw error;
+  }
+}
+
 export async function getCars(
   filters: Record<string, string[]> = {}
 ): Promise<Cars> {
-  const accessToken = await getAccessToken();
+  try {
+    const accessToken = await getAccessToken();
 
-  const queryParams = new URLSearchParams();
+    const queryParams = new URLSearchParams();
 
-  Object.entries(filters).forEach(([key, values]) => {
-    if (values.length) {
-      queryParams.append(key, values.join(","));
+    Object.entries(filters).forEach(([key, values]) => {
+      if (values.length) {
+        queryParams.append(key, values.join(","));
+      }
+    });
+
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_BASE_URL}/cars/?${queryParams.toString()}`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      if (response.status === 401) {
+        throw new Error("Unauthorized. Please log in again.");
+      }
+      throw new Error("Failed to fetch cars data");
     }
-  });
 
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_BASE_URL}/cars/?${queryParams.toString()}`,
-    {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    }
-  );
-
-  if (!response.ok) {
-    if (response.status === 401) {
-      throw new Error("Unauthorized. Please log in again.");
-    }
-    throw new Error("Failed to fetch cars data");
+    const cars = await response.json();
+    return cars;
+  } catch (error) {
+    console.error("Error fetching car data:", error);
+    throw error;
   }
-
-  const cars = await response.json();
-  return cars;
 }
 
 export async function getActivities(): Promise<Activity> {

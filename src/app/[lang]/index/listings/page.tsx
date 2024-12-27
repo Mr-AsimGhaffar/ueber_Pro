@@ -47,28 +47,42 @@ export default function ListingsPage() {
         capacity = [],
         year = [],
         brand,
-        carFuelType,
+        fuelTypes,
         category,
         mileage,
+        model,
+        colors = [],
+        specifications,
         ...remFilters
       } = filters;
-      const queryParams = new URLSearchParams({
-        ...remFilters,
-        filters: JSON.stringify({
-          rating: rating.map(Number),
-          capacity: capacity.map(Number),
-          year: year.map(Number),
-          mileage: mileage
-            ? {
-                // gte: Number(mileage.from) || 1,
+      const encodedColors = colors.map((color: any) =>
+        encodeURIComponent(color)
+      );
+      const apiFilters = {
+        ...(rating.length ? { rating: rating.map(Number) } : {}),
+        ...(capacity.length ? { capacity: capacity.map(Number) } : {}),
+        ...(year.length ? { year: year.map(Number) } : {}),
+        ...(mileage
+          ? {
+              mileage: {
                 ...(mileage.from ? { gte: Number(mileage.from) } : {}),
                 ...(mileage.to ? { lt: Number(mileage.to) } : {}),
-              }
-            : undefined,
-          "brand.name": brand,
-          "carFuelType.name": carFuelType,
-          "category.name": category,
-        }),
+              },
+            }
+          : {}),
+        ...(brand ? { "brand.name": brand } : {}),
+        ...(model ? { "model.name": model } : {}),
+        ...(specifications
+          ? { "specification.some.name": specifications }
+          : {}),
+        ...(colors.length ? { "color.hex": encodedColors } : {}),
+        ...(fuelTypes ? { "carFuelType.name": fuelTypes } : {}),
+        ...(category ? { "category.name": category } : {}),
+        ...remFilters,
+      };
+      const queryParams = new URLSearchParams({
+        ...remFilters,
+        filters: JSON.stringify(apiFilters),
       });
       const response = await fetch(
         `/api/cars/listCars?${queryParams.toString()}`
@@ -322,7 +336,7 @@ export default function ListingsPage() {
 
       {/* Car Listings */}
       <Row gutter={[16, 16]}>
-        {filteredCars.map((car) => (
+        {filteredCars?.map((car) => (
           <Col
             key={car.id}
             xs={24}
@@ -379,7 +393,12 @@ export default function ListingsPage() {
                   <div className="flex items-center gap-2 text-sm text-gray-600">
                     <span className="flex items-center gap-1">
                       <MdEventAvailable />
-                      {car?.status?.replace("_", " ")}
+                      {car?.status
+                        ?.replace("_", " ")
+                        .toLowerCase()
+                        .charAt(0)
+                        .toUpperCase() +
+                        car?.status?.slice(1).toLowerCase().replace("_", " ")}
                     </span>
                   </div>
                   <div className="flex items-center gap-2 text-sm text-gray-600">
@@ -391,11 +410,11 @@ export default function ListingsPage() {
                   <div className="flex items-center gap-2 text-sm text-gray-600">
                     <span className="flex items-center gap-1">
                       <MdCarRental />
-                      {car?.rentalType}
+                      {car?.mileage || "No Mileage"}
                     </span>
                   </div>
                 </div>
-                <div className="flex items-center justify-between gap-2 mt-4">
+                <div className="flex flex-col gap-2">
                   <Button
                     type="primary"
                     block

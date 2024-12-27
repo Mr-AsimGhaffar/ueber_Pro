@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Drawer, Checkbox, Collapse, Button, Input } from "antd";
 import { FilterOutlined } from "@ant-design/icons";
 
@@ -12,8 +12,45 @@ const FiltersSidebar: React.FC<{
     Record<string, string[]>
   >({});
   const [mileage, setMileage] = useState({ from: "", to: "" });
+  const [filterData, setFilterData] = useState<any>({});
 
   const toggleDrawer = () => setIsOpen(!isOpen);
+
+  const formatText = (text: any) => {
+    if (typeof text === "number" || !isNaN(text)) {
+      return text.toString(); // Convert numbers to strings
+    }
+    if (typeof text !== "string") {
+      return ""; // Fallback for invalid types
+    }
+    return text
+      .split("_") // Split on underscores
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()) // Capitalize each word
+      .join(" "); // Join with spaces
+  };
+
+  useEffect(() => {
+    const fetchFilterData = async () => {
+      try {
+        const response = await fetch("/api/cars/getCarFilters", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setFilterData(data.data);
+        } else {
+          console.error("Failed to fetch filter data");
+        }
+      } catch (error) {
+        console.error("Error fetching filter data:", error);
+      }
+    };
+
+    fetchFilterData();
+  }, []);
 
   const handleCheckboxChange = (category: string, value: string) => {
     setSelectedFilters((prev) => {
@@ -25,32 +62,31 @@ const FiltersSidebar: React.FC<{
     });
   };
 
-  const renderCheckboxGroup = (category: string, options: string[]) => (
+  const renderCheckboxGroup = (category: string, options: any[]) => (
     <div className="flex flex-col space-y-2">
-      {options.map((option) => (
+      {options.map((option: any) => (
         <Checkbox
-          key={option}
-          onChange={() => handleCheckboxChange(category, option)}
-          checked={selectedFilters[category]?.includes(option)}
+          key={option.id || option}
+          onChange={() =>
+            handleCheckboxChange(category, option.name || option.hex || option)
+          }
+          checked={selectedFilters[category]?.includes(
+            option.name || option.hex || option
+          )}
           className="font-sansInter text-xs"
         >
-          {option}
+          {category === "colors" ? (
+            <div
+              className="w-4 h-4 rounded-full"
+              style={{ backgroundColor: option.hex }}
+            />
+          ) : (
+            formatText(option.name || option)
+          )}
         </Checkbox>
       ))}
     </div>
   );
-
-  const filterOptions = {
-    status: ["AVAILABLE", "IN_USE", "MAINTENANCE"],
-    year: Array.from({ length: 35 }, (_, i) => (2024 - i).toString()),
-    brand: ["Toyota", "Honda", "BMW", "Tesla"],
-    category: ["SUV", "Sedan", "Truck", "Hatchback"],
-    carFuelType: ["Petrol", "Diesel", "Electric"],
-    transmission: ["AUTOMATIC", "MANUAL", "SEMI_AUTOMATIC"],
-    rating: ["1", "2", "3", "4", "5"],
-    color: ["Red", "Blue", "Black", "White", "Gray"],
-    capacity: ["2", "4", "6", "8"],
-  };
 
   const handleMileageChange = (type: "from" | "to", value: string) => {
     setMileage((prev) => ({ ...prev, [type]: value }));
@@ -59,7 +95,7 @@ const FiltersSidebar: React.FC<{
   const handleApplyFilters = () => {
     const updatedFilters = {
       ...selectedFilters,
-      mileage,
+      mileage: mileage.from || mileage.to ? mileage : undefined,
     };
     setFilters(updatedFilters);
     toggleDrawer();
@@ -96,12 +132,19 @@ const FiltersSidebar: React.FC<{
           ghost
           className="[&_.ant-collapse-header]:text-xs [&_.ant-collapse-header]:font-bold"
         >
-          {Object.entries(filterOptions).map(([category, options], index) => (
-            <Panel header={category.toUpperCase()} key={index}>
-              {renderCheckboxGroup(category, options)}
-            </Panel>
-          ))}
-          <Panel header="MILEAGE" key="mileage">
+          {filterData &&
+            Object.entries(filterData).map(([category, options], index) => {
+              // Render different types of filter options based on the category
+              if (Array.isArray(options)) {
+                return (
+                  <Panel header={formatText(category)} key={index}>
+                    {renderCheckboxGroup(category, options)}
+                  </Panel>
+                );
+              }
+              return null;
+            })}
+          <Panel header="Mileage" key="mileage">
             <div className="flex items-center">
               <Input
                 placeholder="From"
@@ -117,6 +160,9 @@ const FiltersSidebar: React.FC<{
               />
             </div>
           </Panel>
+          {/* <Panel header="Rating" key="rating">
+            {renderCheckboxGroup("rating", ["1", "2", "3", "4", "5"])}
+          </Panel> */}
         </Collapse>
       </Drawer>
     </div>
