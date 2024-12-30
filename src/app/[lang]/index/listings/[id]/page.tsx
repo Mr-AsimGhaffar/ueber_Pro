@@ -30,7 +30,12 @@ import { FaCar } from "react-icons/fa";
 import { IoCarSportOutline } from "react-icons/io5";
 import Spinner from "@/components/Spinner";
 
-export default function CarDetailPage() {
+export default function CarDetailPage({
+  params: { lang },
+}: {
+  params: { lang: string };
+}) {
+  const router = useRouter();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedCar, setSelectedCar] = useState<Car | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -77,7 +82,7 @@ export default function CarDetailPage() {
   // };
 
   const handleAddBooking = () => {
-    setIsModalOpen(true);
+    router.push(`/${lang}/index/carBooking/bookingLocation`);
   };
 
   const handleModalOk = () => {
@@ -173,7 +178,7 @@ export default function CarDetailPage() {
                     </span>
                     <span className="flex items-center gap-1">
                       <MdCarRental className="text-cyan-700" />
-                      {selectedCar?.rentalType}
+                      {selectedCar?.mileage || "No Mileage"}
                     </span>
                     <span className="flex items-center gap-1">
                       <GiGearStickPattern className="text-cyan-700" />
@@ -181,7 +186,7 @@ export default function CarDetailPage() {
                     </span>
                     <span className="flex items-center gap-1">
                       <MdOutlineReduceCapacity className="text-cyan-700" />
-                      {selectedCar?.capacity}
+                      {selectedCar?.capacity || "No Capacity"}
                     </span>
                   </div>
                 </div>
@@ -194,7 +199,7 @@ export default function CarDetailPage() {
                   <div className="p-4 bg-gray-50 rounded-lg flex items-center justify-between text-sm text-gray-600 font-medium">
                     <div className="flex items-center gap-1">
                       <GiPathDistance className="text-cyan-700" />
-                      {selectedCar?.mileage}
+                      {selectedCar?.mileage || "No Mileage"}
                     </div>
                     <div className="flex items-center gap-1">
                       <IoCarSportOutline className="text-cyan-700" />
@@ -206,7 +211,7 @@ export default function CarDetailPage() {
                     </div>
                     <div className="flex items-center gap-1">
                       <MdOutlineReduceCapacity className="text-cyan-700" />
-                      {selectedCar?.capacity}
+                      {selectedCar?.capacity || "No Capacity"}
                     </div>
                   </div>
                 </div>

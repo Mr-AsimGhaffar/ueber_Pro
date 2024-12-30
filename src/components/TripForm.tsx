@@ -84,10 +84,18 @@ export default function TripForm({
         (model) => model.id === initialValues.pricingModelId
       );
       setShowPriceField(selectedModel?.model !== "OPEN_BIDDING");
+      const selectedCar = cars?.data.find(
+        (car) => car.id === initialValues.carId
+      );
+
       form.setFieldsValue({
         ...initialValues,
+        cost: initialValues.cost / 100,
         profilePictureId: initialValues?.profilePictureId || "",
         startTime: startTime?.isValid() ? startTime : undefined,
+        carId: selectedCar
+          ? { value: selectedCar.id, label: selectedCar.model.name }
+          : undefined,
       });
       const { startLocation, endLocation } = initialValues;
       if (startLocation && endLocation) {
@@ -169,7 +177,7 @@ export default function TripForm({
     const selectedModel = tripModelName.find((model) => model.id === value);
     setShowPriceField(selectedModel?.model !== "OPEN_BIDDING");
   };
-  // console.log("Map data", mapData);
+
   return (
     <Form
       form={form}
@@ -229,10 +237,12 @@ export default function TripForm({
             showSearch
             placeholder="Select a car"
             loading={loading}
-            options={cars?.data.map((car) => ({
-              value: car.id,
-              label: car.model.name,
-            }))}
+            options={cars?.data
+              .filter((car) => car.status === "AVAILABLE") // Filter cars by status
+              .map((car) => ({
+                value: car.id,
+                label: car.model.name,
+              }))}
             filterOption={(input, option) =>
               (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
             }

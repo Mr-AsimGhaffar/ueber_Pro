@@ -293,7 +293,7 @@ export default function Sidebar({ locale }: Props) {
               </svg>
             </SidebarLink>
 
-            <SidebarLink href={`/${locale}/index/messages`}>
+            {/* <SidebarLink href={`/${locale}/index/messages`}>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
@@ -308,8 +308,8 @@ export default function Sidebar({ locale }: Props) {
                   d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-5l-5 5v-5Z"
                 />
               </svg>
-            </SidebarLink>
-            {user?.company?.type === "SUPER_ADMIN" && (
+            </SidebarLink> */}
+            {user?.role?.name === "SUPER_ADMIN" && (
               <SidebarLink href={`/${locale}/index/activities`}>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -327,7 +327,7 @@ export default function Sidebar({ locale }: Props) {
                 </svg>
               </SidebarLink>
             )}
-            {user?.role?.name !== "ADMIN" && (
+            {/* {user?.role?.name !== "ADMIN" && (
               <>
                 <SidebarLink href={`/${locale}/index/reports`}>
                   <svg
@@ -346,7 +346,7 @@ export default function Sidebar({ locale }: Props) {
                   </svg>
                 </SidebarLink>
               </>
-            )}
+            )} */}
           </div>
         }
       >
@@ -618,7 +618,7 @@ export default function Sidebar({ locale }: Props) {
             <div className="mx-4">Settings</div>
           </SidebarLink>
 
-          <SidebarLink href={`/${locale}/index/messages`}>
+          {/* <SidebarLink href={`/${locale}/index/messages`}>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
@@ -634,7 +634,7 @@ export default function Sidebar({ locale }: Props) {
               />
             </svg>
             <div className="mx-4">Messages</div>
-          </SidebarLink>
+          </SidebarLink> */}
           {user?.role?.name === "SUPER_ADMIN" && (
             <SidebarLink href={`/${locale}/index/activities`}>
               <svg
@@ -654,7 +654,7 @@ export default function Sidebar({ locale }: Props) {
               <div className="mx-4">Activites</div>
             </SidebarLink>
           )}
-          {user?.role?.name !== "ADMIN" && (
+          {/* {user?.role?.name !== "ADMIN" && (
             <>
               <SidebarLink href={`/${locale}/index/reports`}>
                 <svg
@@ -674,7 +674,7 @@ export default function Sidebar({ locale }: Props) {
                 <div className="mx-4">Reports</div>
               </SidebarLink>
             </>
-          )}
+          )} */}
         </div>
       </CollapsibleSidebar>
     </>
