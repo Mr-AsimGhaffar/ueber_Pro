@@ -128,9 +128,8 @@ const FiltersSidebar: React.FC<{
       >
         {/* Collapsible Filter Groups */}
         <Collapse
-          defaultActiveKey={["1"]}
           ghost
-          className="[&_.ant-collapse-header]:text-xs [&_.ant-collapse-header]:font-bold"
+          className="[&_.ant-collapse-header]:text-sm [&_.ant-collapse-header]"
         >
           {filterData &&
             Object.entries(filterData).map(([category, options], index) => {
@@ -160,9 +159,6 @@ const FiltersSidebar: React.FC<{
               />
             </div>
           </Panel>
-          {/* <Panel header="Rating" key="rating">
-            {renderCheckboxGroup("rating", ["1", "2", "3", "4", "5"])}
-          </Panel> */}
         </Collapse>
       </Drawer>
     </div>

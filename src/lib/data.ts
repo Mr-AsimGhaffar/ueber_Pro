@@ -46,55 +46,50 @@ const getAccessToken = async (): Promise<string> => {
   return accessToken;
 };
 
-async function getUserWithNewAccessToken(
-  newAccessToken: string,
-  userId: string
-): Promise<User> {
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API_BASE_URL}/users/${userId}`,
-    {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${newAccessToken}`,
-      },
-    }
-  );
+// Wrapper function for the fetch API
+export const fetchWithTokenRefresh = async (
+  url: string,
+  options: RequestInit = {}
+): Promise<Response> => {
+  let accessToken = await getAccessToken();
 
-  if (!response.ok) {
-    throw new Error("Failed to fetch user data after refreshing token.");
+  options.headers = {
+    ...options.headers,
+    Authorization: `Bearer ${accessToken}`,
+  };
+
+  const response = await fetch(url, options);
+
+  if (response.status === 401) {
+    accessToken = await getAccessToken();
+    options.headers = {
+      ...options.headers,
+      Authorization: `Bearer ${accessToken}`,
+    };
+    return fetch(url, options);
   }
 
-  const user = await response.json();
-  return user.data;
-}
+  return response;
+};
 
 export async function getUser(): Promise<User> {
   try {
-    const accessToken = await getAccessToken();
     const id = cookies().get("id")?.value;
 
     if (!id) {
       throw new Error("User ID not found. Please log in.");
     }
 
-    const response = await fetch(
+    const response = await fetchWithTokenRefresh(
       `${process.env.NEXT_PUBLIC_API_BASE_URL}/users/${id}`,
       {
         method: "GET",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
         // body: JSON.stringify({ clientType: "web" }),
       }
     );
 
     if (!response.ok) {
       if (response.status === 401) {
-        const refreshToken = cookies().get("refreshToken")?.value;
-        if (refreshToken) {
-          const newAccessToken = await refreshAccessToken(refreshToken);
-          return await getUserWithNewAccessToken(newAccessToken, id);
-        }
         throw new Error("Unauthorized. Please log in again.");
       }
       throw new Error("Failed to fetch user data");
@@ -112,8 +107,6 @@ export async function getCars(
   filters: Record<string, string[]> = {}
 ): Promise<Cars> {
   try {
-    const accessToken = await getAccessToken();
-
     const queryParams = new URLSearchParams();
 
     Object.entries(filters).forEach(([key, values]) => {
@@ -122,13 +115,10 @@ export async function getCars(
       }
     });
 
-    const response = await fetch(
+    const response = await fetchWithTokenRefresh(
       `${process.env.NEXT_PUBLIC_API_BASE_URL}/cars/?${queryParams.toString()}`,
       {
         method: "GET",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
       }
     );
 
@@ -148,20 +138,16 @@ export async function getCars(
 }
 
 export async function getActivities(): Promise<Activity> {
-  const accessToken = await getAccessToken();
   const id = cookies().get("id")?.value;
 
   if (!id) {
     throw new Error("User ID not found. Please log in.");
   }
 
-  const response = await fetch(
+  const response = await fetchWithTokenRefresh(
     `${process.env.NEXT_PUBLIC_API_BASE_URL}/activities/`,
     {
       method: "GET",
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
     }
   );
 

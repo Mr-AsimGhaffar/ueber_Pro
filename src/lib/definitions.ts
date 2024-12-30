@@ -106,6 +106,34 @@ export type Activity = {
   };
 };
 
+export interface Driver {
+  id: string;
+  name: string;
+  age: number;
+  noOfRides: number;
+  imageUrl: string;
+}
+
+export interface AddOn {
+  id: string;
+  name: string;
+  price: number;
+  description: string;
+}
+
+export interface CarDetails {
+  id: string;
+  model: string;
+  location: string;
+  imageUrl: string;
+  rentalRate: number;
+  deliveryFee: number;
+  protectionFee: number;
+  convenienceFee: number;
+  tax: number;
+  deposit: number;
+}
+
 export type Report = {
   filename: string;
   url: string;

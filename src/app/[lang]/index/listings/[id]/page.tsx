@@ -30,7 +30,12 @@ import { FaCar } from "react-icons/fa";
 import { IoCarSportOutline } from "react-icons/io5";
 import Spinner from "@/components/Spinner";
 
-export default function CarDetailPage() {
+export default function CarDetailPage({
+  params: { lang },
+}: {
+  params: { lang: string };
+}) {
+  const router = useRouter();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedCar, setSelectedCar] = useState<Car | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -77,7 +82,7 @@ export default function CarDetailPage() {
   // };
 
   const handleAddBooking = () => {
-    setIsModalOpen(true);
+    router.push(`/${lang}/index/carBooking/bookingLocation`);
   };
 
   const handleModalOk = () => {
