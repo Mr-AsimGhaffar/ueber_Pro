@@ -1,13 +1,23 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { Radio, Button, Input, Checkbox, DatePicker, TimePicker } from "antd";
-import { useState } from "react";
+import {
+  Radio,
+  Button,
+  Input,
+  Checkbox,
+  DatePicker,
+  TimePicker,
+  message,
+} from "antd";
+import { useEffect, useState } from "react";
 import { BookingProgress } from "@/app/[lang]/components/carBooking/bookingProgress";
 import { CarDetailsSection } from "@/app/[lang]/components/carBooking/carDetail";
+import { Car } from "@/lib/definitions";
+import { useCar } from "@/hooks/context/AuthContextCars";
 
 const dummyCarData = {
-  id: "1",
+  id: 1,
   model: "Chevrolet Camaro",
   location: "Miami St, Destin, FL 32550, USA",
   imageUrl: "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=500",
@@ -25,11 +35,54 @@ export default function LocationPage({
   params: { lang: string };
 }) {
   const router = useRouter();
-  const [rentalType, setRentalType] = useState("delivery");
+  const { cars } = useCar();
+  const [selectedCar, setSelectedCar] = useState<Car | null>(null);
+  const [carBooking, setCarBooking] = useState<Car[]>([]);
+  const [rentalType, setRentalType] = useState("SELF_DRIVE");
   const [bookingType, setBookingType] = useState("day");
-  const handleContinue = () => {
-    router.push(`/${lang}/index/carBooking/bookingAddOns`);
+
+  useEffect(() => {
+    // Access the 'data' property of cars
+    if (cars?.data && cars.data.length > 0) {
+      setSelectedCar(cars.data[0]); // Select the first car as the default
+    }
+  }, [cars]);
+
+  const handleCreateBooking = async () => {
+    if (!selectedCar) {
+      message.error("No car selected for booking");
+      return;
+    }
+    const values = {
+      carId: selectedCar.id,
+      rentalType,
+    };
+    try {
+      const response = await fetch("/api/carBooking/createRentalAgreement", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(values),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        message.success("Successfully created rental agreement");
+        router.push(`/${lang}/index/carBooking/rentalAgreement`);
+      } else {
+        const error = await response.json();
+        message.error(error.message || "Failed to created rental agreement");
+      }
+    } catch (error) {
+      console.error("Error creating booking:", error);
+      message.error("An error occurred while creating the booking");
+    }
   };
+
+  //   const handleContinue = () => {
+  //     router.push(`/${lang}/index/carBooking/bookingAddOns`);
+  //   };
   const handleBack = () => {
     router.push(`/${lang}/index/listings/`);
   };
@@ -48,98 +101,19 @@ export default function LocationPage({
               <h2 className="text-lg font-semibold mb-4">Rental Type</h2>
               <div className="flex gap-2 mb-4">
                 <Button
-                  type={rentalType === "delivery" ? "primary" : "default"}
-                  onClick={() => setRentalType("delivery")}
+                  type={rentalType === "SELF_DRIVE" ? "primary" : "default"}
+                  onClick={() => setRentalType("SELF_DRIVE")}
                   className="flex-1"
                 >
-                  Delivery
+                  Without Driver
                 </Button>
                 <Button
-                  type={rentalType === "self-pickup" ? "primary" : "default"}
-                  onClick={() => setRentalType("self-pickup")}
+                  type={rentalType === "WITH_DRIVER" ? "primary" : "default"}
+                  onClick={() => setRentalType("WITH_DRIVER")}
                   className="flex-1"
                 >
-                  Self Pickup
+                  With Driver
                 </Button>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-lg p-6">
-              <h2 className="text-lg font-semibold mb-4">Location</h2>
-              <div className="space-y-4">
-                {rentalType === "delivery" ? (
-                  <>
-                    <div>
-                      <label>Delivery Location</label>
-                      <div className="flex gap-2 mt-1">
-                        <Input placeholder="Add Location" />
-                        <Button>Current Location</Button>
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Checkbox>Return to same location</Checkbox>
-                    </div>
-                    <div>
-                      <label>Return Location</label>
-                      <div className="flex gap-2 mt-1">
-                        <Input placeholder="Add Location" />
-                        <Button>Current Location</Button>
-                      </div>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <div>
-                      <label>Pickup Location</label>
-                      <div className="flex gap-2 mt-1">
-                        <Input placeholder="Add Location" />
-                      </div>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <Checkbox>Return to same location</Checkbox>
-                    </div>
-                    <div>
-                      <label>Return Location</label>
-                      <div className="flex gap-2 mt-1">
-                        <Input placeholder="Add Location" />
-                      </div>
-                    </div>
-                  </>
-                )}
-              </div>
-            </div>
-
-            <div className="bg-white rounded-lg p-6">
-              <h2 className="text-lg font-semibold mb-4">
-                Booking Type & Time
-              </h2>
-              <Radio.Group
-                value={bookingType}
-                onChange={(e) => setBookingType(e.target.value)}
-                className="flex gap-4 mb-6"
-              >
-                <Radio.Button value="hourly">Hourly</Radio.Button>
-                <Radio.Button value="day">Day (8 Hrs)</Radio.Button>
-                <Radio.Button value="weekly">Weekly</Radio.Button>
-                <Radio.Button value="monthly">Monthly</Radio.Button>
-              </Radio.Group>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label>Pickup Date</label>
-                  <DatePicker className="w-full" />
-                </div>
-                <div>
-                  <label>Pickup Time</label>
-                  <TimePicker className="w-full" />
-                </div>
-                <div>
-                  <label>Return Date</label>
-                  <DatePicker className="w-full" />
-                </div>
-                <div>
-                  <label>Return Time</label>
-                  <TimePicker className="w-full" />
-                </div>
               </div>
             </div>
 
@@ -147,14 +121,18 @@ export default function LocationPage({
               <Button type="default" onClick={handleBack}>
                 Back to Car details
               </Button>
-              <Button type="primary" onClick={handleContinue}>
-                Continue Booking
+              <Button type="primary" onClick={handleCreateBooking}>
+                Confirm Booking
               </Button>
             </div>
           </div>
 
           <div className="lg:col-span-1">
-            <CarDetailsSection car={dummyCarData} />
+            {selectedCar ? (
+              <CarDetailsSection car={selectedCar} />
+            ) : (
+              <p>Loading car details...</p>
+            )}
           </div>
         </div>
       </div>

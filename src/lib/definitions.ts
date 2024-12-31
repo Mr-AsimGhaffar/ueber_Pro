@@ -73,6 +73,13 @@ export type Car = {
     createdAt: string;
     updatedAt: string;
   };
+  RentalPricing: {
+    basePrice: number;
+    hourlyRate: number;
+    dailyRate: number;
+    weeklyRate: number;
+    monthlyRate: number;
+  };
 };
 export type Cars = {
   data: Car[];
@@ -122,7 +129,7 @@ export interface AddOn {
 }
 
 export interface CarDetails {
-  id: string;
+  id: number;
   model: string;
   location: string;
   imageUrl: string;

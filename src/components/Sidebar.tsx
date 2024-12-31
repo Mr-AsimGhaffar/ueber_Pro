@@ -239,6 +239,22 @@ export default function Sidebar({ locale }: Props) {
                 </svg>
               </SidebarLink>
             )}
+            <SidebarLink href={`/${locale}/index/carBooking/rentalAgreement`}>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth="1.5"
+                stroke="currentColor"
+                className="size-6"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M3 13.5L5.25 8.25C5.67 7.2 6.75 6.75 7.8 6.75H16.2C17.25 6.75 18.33 7.2 18.75 8.25L21 13.5M3 13.5H21M3 13.5L4.5 19.5H19.5L21 13.5M7.5 19.5v-1.5M16.5 19.5v-1.5M9 16.5h6"
+                />
+              </svg>
+            </SidebarLink>
             <SidebarLink href={`/${locale}/index/accounts`}>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -561,6 +577,23 @@ export default function Sidebar({ locale }: Props) {
               <div className="mx-4">Offers</div>
             </SidebarLink>
           )}
+          <SidebarLink href={`/${locale}/index/carBooking/rentalAgreement`}>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth="1.5"
+              stroke="currentColor"
+              className="size-6"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M3 13.5L5.25 8.25C5.67 7.2 6.75 6.75 7.8 6.75H16.2C17.25 6.75 18.33 7.2 18.75 8.25L21 13.5M3 13.5H21M3 13.5L4.5 19.5H19.5L21 13.5M7.5 19.5v-1.5M16.5 19.5v-1.5M9 16.5h6"
+              />
+            </svg>
+            <div className="mx-4">Car Bookings</div>
+          </SidebarLink>
           <SidebarLink href={`/${locale}/index/accounts`}>
             <svg
               xmlns="http://www.w3.org/2000/svg"

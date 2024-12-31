@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 const dummyCarData = {
-  id: "1",
+  id: 1,
   model: "Chevrolet Camaro",
   location: "Miami St, Destin, FL 32550, USA",
   imageUrl: "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=500",
