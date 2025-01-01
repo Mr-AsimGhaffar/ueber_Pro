@@ -7,13 +7,13 @@ export default async function handler(
   if (req.method === "GET") {
     try {
       const accessToken = req.cookies.accessToken;
-      const { filters, page, limit } = req.query;
+
       if (!accessToken) {
         throw new Error("Token not found. Please log in.");
       }
       // Send credentials to external API
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/cars/?page=${page}&limit=${limit}&filters=${filters}`,
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/stats/`,
         {
           method: "GET",
           headers: {
@@ -24,20 +24,20 @@ export default async function handler(
       );
 
       if (response.ok) {
-        const carResponse = await response.json();
+        const apiResponse = await response.json();
 
         return res.status(200).json({
-          ...carResponse,
-          message: "Successfully fetched cars",
+          ...apiResponse,
+          message: "Successfully fetch stats response",
         });
       } else {
         const errorData = await response.json();
-        return res
-          .status(response.status)
-          .json({ message: errorData.message || "Failed to fetch cars" });
+        return res.status(response.status).json({
+          message: errorData.message || "Failed to fetch stats response",
+        });
       }
     } catch (error) {
-      console.error("Error fetching cars:", error);
+      console.error("Error authenticating:", error);
       return res.status(500).json({ message: "Internal Server Error" });
     }
   } else {

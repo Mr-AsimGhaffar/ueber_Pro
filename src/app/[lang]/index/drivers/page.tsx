@@ -907,7 +907,7 @@ export default function DriverPage() {
       </div>
       <div className="flex items-center gap-4 mb-2 font-workSans text-sm">
         <div className="flex items-center gap-1">
-          <div className="font-medium">All</div>
+          <div className="font-medium text-blue-700">All</div>
           <div className="text-gray-700">({pagination.total})</div>
         </div>
         <div className="flex items-center gap-1">
@@ -935,7 +935,7 @@ export default function DriverPage() {
               size="large"
               icon={<UserAddOutlined />}
               onClick={handleAddDriver}
-              className="font-sansInter"
+              className="font-sansInter bg-teal-800 hover:!bg-teal-700"
             >
               Add Driver
             </Button>

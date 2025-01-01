@@ -166,7 +166,11 @@ export default function Profile() {
           </div>
           <div className="flex justify-end gap-4">
             <Button>Cancel</Button>
-            <Button type="primary" htmlType="submit">
+            <Button
+              type="primary"
+              htmlType="submit"
+              className="bg-teal-800 hover:!bg-teal-700"
+            >
               Save Changes
             </Button>
           </div>

@@ -107,15 +107,15 @@ const FiltersSidebar: React.FC<{
       <Button
         icon={<FilterOutlined />}
         type="primary"
-        className="mb-4"
+        className="mb-4 font-workSans text-base bg-teal-800 hover:!bg-teal-700"
         onClick={toggleDrawer}
       >
-        Filters
+        Search Car
       </Button>
 
       {/* Drawer */}
       <Drawer
-        title="Filters"
+        title="Search Car"
         placement="left"
         onClose={toggleDrawer}
         open={isOpen}

@@ -30,13 +30,6 @@ export default function Sidebar({ locale }: Props) {
       <CollapsibleSidebar
         collapseChildren={
           <div>
-            <img
-              src="/images/ueberProLogo.png"
-              alt="Ueber Pro Logo"
-              width={50}
-              height={50}
-              className="mt-[-10]"
-            />
             <SidebarLink href={`/${locale}/index/home`}>
               <svg
                 xmlns="http://www.w3.org/2000/svg"

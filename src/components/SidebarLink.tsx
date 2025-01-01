@@ -20,9 +20,9 @@ export default function SidebarLink({ href, icon, children }: Props) {
     <Link
       href={href}
       className={classNames(
-        "flex items-center w-full py-3 px-4 rounded-md transition-colors duration-200 hover:bg-gray-700",
+        "flex items-center w-full py-3 px-4 rounded-md transition-colors duration-200 hover:bg-teal-700",
         {
-          "bg-blue-700 text-white font-sansInter tracking-wider": isActive,
+          "bg-teal-900 text-white font-sansInter tracking-wider": isActive,
           "text-white font-sansInter tracking-wider": !isActive,
         }
       )}

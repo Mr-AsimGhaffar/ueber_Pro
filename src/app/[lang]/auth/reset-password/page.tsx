@@ -93,7 +93,11 @@ export default function ResetPasswordPage({
           </Form.Item>
 
           <Form.Item>
-            <Button type="primary" htmlType="submit" className="w-full">
+            <Button
+              type="primary"
+              htmlType="submit"
+              className="w-full bg-teal-800 hover:!bg-teal-700"
+            >
               Reset Password
             </Button>
           </Form.Item>

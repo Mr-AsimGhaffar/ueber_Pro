@@ -141,6 +141,48 @@ export interface CarDetails {
   deposit: number;
 }
 
+export interface StatsResponse {
+  message: string;
+  data: {
+    thisMonth: {
+      companies: number;
+      drivers: number;
+      trips: number;
+      users: number;
+      cars: number;
+    };
+    today: {
+      companies: number;
+      drivers: number;
+      trips: number;
+      users: number;
+      cars: number;
+    };
+    rentalAgreements: {
+      _count: number;
+      status: "PENDING" | "COMPLETED";
+    }[];
+    companies: {
+      _count: number;
+      status: "ACTIVE" | "IN_ACTIVE";
+    }[];
+    invoices: any[]; // If the invoices structure is known, define it here.
+    drivers: {
+      _count: number;
+      status: "AVAILABLE";
+    }[];
+    trips: {
+      _count: number;
+      status:
+        | "COMPLETED"
+        | "CANCELLED"
+        | "NOT_ASSIGNED"
+        | "ASSIGNED"
+        | "SCHEDULED";
+    }[];
+  };
+}
+
 export type Report = {
   filename: string;
   url: string;

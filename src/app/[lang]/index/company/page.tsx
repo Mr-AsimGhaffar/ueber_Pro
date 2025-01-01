@@ -773,7 +773,7 @@ export default function CompanyPage() {
               size="large"
               icon={<UserAddOutlined />}
               onClick={handleAddCompany}
-              className="font-sansInter"
+              className="font-sansInter bg-teal-800 hover:!bg-teal-700"
             >
               Add Company
             </Button>

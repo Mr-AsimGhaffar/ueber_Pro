@@ -121,7 +121,11 @@ export default function LocationPage({
               <Button type="default" onClick={handleBack}>
                 Back to Car details
               </Button>
-              <Button type="primary" onClick={handleCreateBooking}>
+              <Button
+                type="primary"
+                className="font-sansInter bg-teal-800 hover:!bg-teal-700"
+                onClick={handleCreateBooking}
+              >
                 Confirm Booking
               </Button>
             </div>

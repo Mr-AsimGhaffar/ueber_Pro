@@ -67,7 +67,6 @@ export default function CarDetailPage({
   const handleAddBooking = () => {
     router.push(`/${lang}/index/carBooking/bookingLocation`);
   };
-
   return (
     <div className="p-4">
       <Spin size="large" spinning={isLoading}>
@@ -122,8 +121,9 @@ export default function CarDetailPage({
                 <h2 className="text-xl font-semibold mb-4">
                   Description of Listing
                 </h2>
-                <p className="text-gray-600 mb-4">{selectedCar?.description}</p>
-                <p className="text-gray-600">{selectedCar?.description}</p>
+                <p className="text-gray-600 mb-4">
+                  {selectedCar?.description || "No Description"}
+                </p>
               </div>
 
               {/* Extra Services */}
@@ -164,7 +164,7 @@ export default function CarDetailPage({
               <div className="bg-white rounded-lg p-6">
                 <h2 className="text-xl font-semibold mb-4">Specifications</h2>
                 <div className="grid">
-                  <div className="p-4 bg-gray-50 rounded-lg flex items-center justify-between text-sm text-gray-600 font-medium">
+                  <div className="rounded-lg flex items-center justify-between text-sm text-gray-600 font-medium">
                     <div className="flex items-center gap-1">
                       <GiPathDistance className="text-cyan-700" />
                       {selectedCar?.mileage || "No Mileage"}
@@ -195,7 +195,11 @@ export default function CarDetailPage({
                       {selectedCar?.model?.name}
                     </h1>
                     <div className="flex items-center gap-2 mt-2">
-                      <Rate disabled defaultValue={selectedCar?.rating} />
+                      <Rate
+                        disabled
+                        value={selectedCar?.rating || 0}
+                        className="text-sm text-orange-400"
+                      />
                       <span className="text-gray-500">
                         ({selectedCar?.brand?.name} Reviews)
                       </span>
@@ -225,6 +229,7 @@ export default function CarDetailPage({
                   size="large"
                   block
                   onClick={handleAddBooking}
+                  className="font-sansInter bg-teal-800 hover:!bg-teal-700"
                 >
                   Book Now
                 </Button>

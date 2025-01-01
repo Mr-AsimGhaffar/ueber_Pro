@@ -709,7 +709,7 @@ export default function AccountPage() {
               size="large"
               icon={<UserAddOutlined />}
               onClick={handleAddAccount}
-              className="font-sansInter"
+              className="font-sansInter bg-teal-800 hover:!bg-teal-700"
             >
               Add Account
             </Button>

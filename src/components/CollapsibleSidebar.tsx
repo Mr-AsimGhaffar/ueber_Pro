@@ -15,37 +15,21 @@ export default function CollapsibleSidebar({
 
   return (
     <div
-      className={`fixed top-0 left-0 z-50 h-screen bg-gray-800 transition-all duration-300 ${
+      className={`fixed top-18 left-0 z-50 h-screen bg-teal-800 transition-all duration-300 ${
         isCollapsed ? "w-16" : "w-60"
       }`}
     >
       {/* Toggle Button */}
       <button
-        className="absolute top-4 right-[-15px] bg-gray-700 text-gray-200 p-2 rounded-full"
+        className="absolute top-2 right-[-15px] bg-teal-800 text-gray-200 p-2 rounded-full"
         onClick={toggleSidebar}
       >
         {isCollapsed ? "▶" : "◀"}
       </button>
 
       {/* Sidebar Content */}
-      <div className="flex flex-col items-center pt-6">
-        <div className="flex items-center justify-start w-full px-4">
-          {!isCollapsed && (
-            <>
-              <img
-                src="/images/ueberProLogo.png"
-                alt="Ueber Pro Logo"
-                width={70}
-                height={70}
-              />
-              <span className="ml-2 font-sansInter text-xl tracking-wider text-gray-200">
-                Ride Pro
-              </span>
-            </>
-          )}
-        </div>
-
-        <div className={`mt-4 w-full ${isCollapsed ? "px-1" : "px-1"}`}>
+      <div className="flex flex-col items-center py-2">
+        <div className={`w-full ${isCollapsed ? "px-1" : "px-1"}`}>
           {isCollapsed ? collapseChildren : children}
         </div>
       </div>

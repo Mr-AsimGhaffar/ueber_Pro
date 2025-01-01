@@ -182,10 +182,20 @@ export default function NavbarContent({ locale, messages }: Props) {
               </div>
             </Spin>
           </div>
-
+          <div className="flex items-center justify-start w-full">
+            <img
+              src="/images/ueberProLogo.png"
+              alt="Ueber Pro Logo"
+              width={70}
+              height={70}
+            />
+            <span className="font-workSans text-2xl tracking-wider text-black font-semibold">
+              Rider Pro
+            </span>
+          </div>
           <div className="flex items-center mx-2">
             {/* Language Switcher */}
-            <div className="relative mx-1">
+            {/* <div className="relative mx-1">
               <button
                 type="button"
                 className="rounded-full p-1 text-gray-500 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-600"
@@ -250,10 +260,10 @@ export default function NavbarContent({ locale, messages }: Props) {
                   </MenuItem>
                 </Menu>
               )}
-            </div>
+            </div> */}
 
             {/* Messages */}
-            <Link href={`/${locale}/index/messages`} className="relative mx-1">
+            {/* <Link href={`/${locale}/index/messages`} className="relative mx-1">
               <button
                 type="button"
                 className="rounded-full p-1 text-gray-500 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-600"
@@ -273,7 +283,7 @@ export default function NavbarContent({ locale, messages }: Props) {
                   />
                 </svg>
               </button>
-            </Link>
+            </Link> */}
 
             {/* Notifications */}
             <div className="relative mx-1">
@@ -338,9 +348,9 @@ export default function NavbarContent({ locale, messages }: Props) {
                   <MenuItem href={`/${locale}/index/settings`}>
                     <FormattedMessage id="common.user-menu.your-profile" />
                   </MenuItem>
-                  <MenuItem href={`/${locale}/index/settings`}>
+                  {/* <MenuItem href={`/${locale}/index/settings`}>
                     <FormattedMessage id="common.user-menu.settings" />
-                  </MenuItem>
+                  </MenuItem> */}
                   <button
                     onClick={handleSignOut}
                     className="w-full text-left block px-4 py-2 text-sm text-gray-700 hover:bg-gray-200"

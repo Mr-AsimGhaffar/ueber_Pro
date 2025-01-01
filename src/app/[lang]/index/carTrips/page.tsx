@@ -1212,7 +1212,7 @@ export default function CarOffers({
           <div className="text-gray-700 hover:underline">(12)</div>
         </div>
       </div>
-      <div className="flex justify-between items-center  mb-4">
+      <div className="flex justify-between items-center mb-4">
         <div>
           <SearchFiltersTripsDriver
             onFilterChange={handleGeneralSearch}
@@ -1227,7 +1227,7 @@ export default function CarOffers({
               size="large"
               icon={<UserAddOutlined />}
               onClick={handleAddCompany}
-              className="font-sansInter"
+              className="font-sansInter bg-teal-800 hover:!bg-teal-700"
             >
               Add Trip
             </Button>

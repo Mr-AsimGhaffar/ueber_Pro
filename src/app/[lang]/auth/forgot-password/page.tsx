@@ -87,7 +87,11 @@ export default function ForgotPasswordPage({
           </Form.Item>
 
           <Form.Item>
-            <Button type="primary" htmlType="submit" className="w-full">
+            <Button
+              type="primary"
+              htmlType="submit"
+              className="w-full bg-teal-800 hover:!bg-teal-700"
+            >
               Send Reset Instructions
             </Button>
           </Form.Item>
@@ -97,7 +101,7 @@ export default function ForgotPasswordPage({
               Remember your password?{" "}
               <Button
                 type="link"
-                className="text-blue-600 hover:text-blue-800 text-sm"
+                className="text-teal-800 hover:!text-teal-700 text-sm"
                 onClick={handleForgotPasswordClick}
                 loading={backToLoading}
               >

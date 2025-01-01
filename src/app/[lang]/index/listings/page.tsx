@@ -11,6 +11,7 @@ import {
   Spin,
   message,
   Modal,
+  Pagination,
 } from "antd";
 import { HeartOutlined, UserAddOutlined } from "@ant-design/icons";
 import CarFilters from "@/components/cars/CarFilters";
@@ -38,8 +39,11 @@ export default function ListingsPage() {
   const [isMounted, setIsMounted] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedCar, setSelectedCar] = useState<Car | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [totalCars, setTotalCars] = useState(0);
 
-  const fetchFilteredCars = async () => {
+  const fetchFilteredCars = async (page = 1, limit = 10) => {
     setLoading(true);
     try {
       const {
@@ -81,7 +85,8 @@ export default function ListingsPage() {
         ...remFilters,
       };
       const queryParams = new URLSearchParams({
-        ...remFilters,
+        page: page.toString(),
+        limit: limit.toString(),
         filters: JSON.stringify(apiFilters),
       });
       const response = await fetch(
@@ -90,6 +95,7 @@ export default function ListingsPage() {
       const data = await response.json();
       setCars(data);
       setFilteredCars(data.data);
+      setTotalCars(data.meta.total);
     } catch (error) {
       console.error("Error fetching filtered cars:", error);
     } finally {
@@ -98,8 +104,13 @@ export default function ListingsPage() {
   };
 
   useEffect(() => {
-    fetchFilteredCars();
-  }, [filters]);
+    fetchFilteredCars(currentPage, pageSize);
+  }, [filters, currentPage, pageSize]);
+
+  const handlePageChange = (page: number, pageSize?: number) => {
+    setCurrentPage(page);
+    if (pageSize) setPageSize(pageSize);
+  };
 
   const capitalizeFirstLetter = (str: string = "") => {
     return str
@@ -244,18 +255,32 @@ export default function ListingsPage() {
     setIsModalOpen(false);
   };
 
+  const getTotalText = () => {
+    const start = (currentPage - 1) * pageSize + 1;
+    const end = Math.min(currentPage * pageSize, totalCars);
+    return `Showing ${start}-${end} of ${totalCars} Cars`;
+  };
+
   return (
     <div className="p-6">
       {/* Search Section */}
-      <div className="flex gap-4">
-        <CarFilters setFilters={setFilters} />
-        <Button
-          type="primary"
-          icon={<UserAddOutlined />}
-          onClick={handleAddCar}
-        >
-          Add Car
-        </Button>
+      <div className="flex justify-between items-center">
+        <div>
+          <p className="font-workSans text-base font-semibold tracking-wide">
+            {getTotalText()}
+          </p>
+        </div>
+        <div className="flex gap-2">
+          <CarFilters setFilters={setFilters} />
+          <Button
+            type="primary"
+            icon={<UserAddOutlined />}
+            onClick={handleAddCar}
+            className="font-workSans text-base bg-teal-800 hover:!bg-teal-700"
+          >
+            Add Car
+          </Button>
+        </div>
       </div>
       {/* <Card className="mb-8">
         <Row gutter={[16, 16]}>
@@ -341,7 +366,7 @@ export default function ListingsPage() {
             key={car.id}
             xs={24}
             sm={viewMode === "grid" ? 12 : 24}
-            lg={viewMode === "grid" ? 6 : 24}
+            lg={viewMode === "grid" ? 8 : 24}
           >
             <Card
               // onClick={() => handleRouter(car.id)}
@@ -351,46 +376,56 @@ export default function ListingsPage() {
                     <img
                       alt={car.brand.name}
                       src="https://images.unsplash.com/photo-1542362567-b07e54358753?ixlib=rb-1.2.1&auto=format&fit=crop&w=334&q=80"
-                      className="h-48 w-full object-cover transition-transform duration-700 ease-in-out hover:scale-110 rounded-t-lg"
+                      className="h-48 w-full object-cover transition-transform duration-700 ease-in-out hover:scale-110 rounded-lg"
                     />
                   </div>
-                  <Button
-                    type="text"
-                    icon={<HeartOutlined />}
-                    className="absolute top-4 right-4 text-white hover:text-red-500"
-                  />
+                  <div className="absolute bottom-2 left-2 flex justify-between items-center w-[100%]">
+                    <div className="bg-white p-1 rounded-md">
+                      <div className="text-sm font-inter font-semibold">
+                        {capitalizeFirstLetter(car?.brand?.name)}
+                      </div>
+                    </div>
+                    <div>
+                      <Button
+                        type="primary"
+                        block
+                        onClick={() => getCarDetails(car.id.toString())}
+                      >
+                        <div className="flex items-center gap-2">
+                          <FaEdit />
+                        </div>
+                      </Button>
+                    </div>
+                  </div>
                 </div>
               }
-              className="cursor-pointer hover:shadow-2xl transition-shadow hover:rounded-tl-lg hover:rounded-tr-lg"
+              className="cursor-pointer hover:shadow-2xl transition-shadow hover:rounded-tl-lg hover:rounded-tr-lg group"
             >
               <div className="flex flex-col gap-2">
                 <div className="flex justify-between items-start">
-                  <h3 className="text-lg font-bold">
+                  <h3 className="text-lg font-bold font-montserrat transition-colors duration-300 group-hover:text-cyan-700">
                     {capitalizeFirstLetter(car?.model?.name)}
                   </h3>
-                  <div className="text-xl font-bold text-red-500">
-                    {capitalizeFirstLetter(car?.brand?.name)}
-                    {/* <span className="text-sm text-gray-500">/day</span> */}
-                  </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <Rate
                     disabled
                     defaultValue={car?.rating || 0}
-                    className="text-sm"
+                    className="text-sm text-orange-400"
                   />
-                  <span className="text-gray-500">
+                  <span className="font-semibold font-workSans text-cyan-700">
                     ({car?.brand?.name || "No"} Reviews)
                   </span>
                 </div>
-                <div className="grid grid-cols-2 gap-2 mt-2">
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                <hr />
+                <div className="grid grid-cols-3 gap-2 mt-2 mb-2 font-workSans">
+                  <div className="flex items-center text-sm text-gray-500 font-semibold">
                     <span className="flex items-center gap-1">
                       <BsFillFuelPumpFill />
                       {car?.carFuelType?.name}
                     </span>
                   </div>
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <div className="flex items-center text-sm text-gray-500 font-semibold">
                     <span className="flex items-center gap-1">
                       <MdEventAvailable />
                       {car?.status
@@ -401,38 +436,54 @@ export default function ListingsPage() {
                         car?.status?.slice(1).toLowerCase().replace("_", " ")}
                     </span>
                   </div>
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <div className="flex items-center text-sm text-gray-500 font-semibold">
                     <span className="flex items-center gap-1">
                       <CiCalendar />
                       {car?.year}
                     </span>
                   </div>
-                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <div className="flex items-center text-sm text-gray-500 font-semibold">
                     <span className="flex items-center gap-1">
                       <MdCarRental />
                       {car?.mileage || "No Mileage"}
                     </span>
                   </div>
+                  <div className="flex items-center text-sm text-gray-500 font-semibold">
+                    <span className="flex items-center gap-1">
+                      <MdCarRental />
+                      {car?.transmission
+                        ? car.transmission
+                            .toLowerCase()
+                            .replace(/_/g, " ")
+                            .replace(/^\w/, (c) => c.toUpperCase())
+                        : "No Transmission"}
+                    </span>
+                  </div>
+                  <div className="flex items-center text-sm text-gray-500 font-semibold">
+                    <span className="flex items-center gap-1">
+                      <MdCarRental />
+                      {car?.capacity || "No Capacity"}
+                    </span>
+                  </div>
                 </div>
-                <div className="flex flex-col gap-2">
+                <div className="bg-gray-100 p-2 text-red-600 font-bold text-xl text-end mb-2 font-workSans">
+                  {car?.RentalPricing?.basePrice
+                    ? new Intl.NumberFormat("en-US", {
+                        style: "currency",
+                        currency: "USD",
+                      }).format(car?.RentalPricing?.basePrice)
+                    : "Price not available"}
+                </div>
+                <div>
                   <Button
                     type="primary"
                     block
                     onClick={() => handleRouter(car.id)}
+                    className="transition-colors duration-300 group-hover:bg-cyan-700 group-hover:text-white bg-teal-800 hover:!bg-teal-700"
                   >
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 font-workSans text-base">
                       <TbListDetails />
                       View Details
-                    </div>
-                  </Button>
-                  <Button
-                    type="primary"
-                    block
-                    onClick={() => getCarDetails(car.id.toString())}
-                  >
-                    <div className="flex items-center gap-2">
-                      <FaEdit />
-                      Edit Car
                     </div>
                   </Button>
                 </div>
@@ -446,6 +497,16 @@ export default function ListingsPage() {
           <Spin size="large" />
         </div>
       )}
+      <div className="flex justify-center mt-6">
+        <Pagination
+          current={currentPage}
+          pageSize={pageSize}
+          total={totalCars}
+          onChange={handlePageChange}
+          showSizeChanger
+          onShowSizeChange={(current, size) => handlePageChange(current, size)}
+        />
+      </div>
       <Modal
         open={isModalOpen}
         onCancel={handleModalCancel}
