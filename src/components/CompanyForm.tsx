@@ -73,9 +73,8 @@ export default function CompanyForm({
               message: "Company name must be at most 100 characters long",
             },
             {
-              pattern: /^[a-zA-Z0-9\s]+$/,
-              message:
-                "Company name can only contain letters, numbers, and spaces",
+              pattern: /^[a-zA-Z ]+$/,
+              message: "Company name must contain only letters",
             },
           ]}
         >
@@ -123,12 +122,16 @@ export default function CompanyForm({
           rules={[
             { required: true, message: "Please enter contact number" },
             {
-              pattern: /^[0-9]{10}$/,
-              message: "Please enter a valid 10-digit contact number",
+              pattern: /^[0-9]*$/,
+              message: "Please enter a valid contact number with only digits",
             },
           ]}
         >
-          <Input placeholder="Enter contact number" />
+          <Input
+            placeholder="Enter contact number"
+            inputMode="numeric"
+            maxLength={15}
+          />
         </Form.Item>
 
         <Form.Item

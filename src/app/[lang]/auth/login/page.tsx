@@ -92,7 +92,7 @@ export default function LoginPage({
           <Form.Item>
             <div className="flex items-center justify-between">
               <Form.Item name="remember" valuePropName="checked" noStyle>
-                <Checkbox>Remember me</Checkbox>
+                <Checkbox className="custom-checkbox">Remember me</Checkbox>
               </Form.Item>
               <Button
                 type="link"

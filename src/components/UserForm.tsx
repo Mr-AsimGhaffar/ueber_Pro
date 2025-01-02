@@ -103,7 +103,7 @@ export default function UserForm({
           name="firstName"
           label="First Name"
           rules={[
-            { required: true, message: "Please enter firstName name" },
+            { required: true, message: "Please enter first name" },
             {
               min: 2,
               message: "First name must be at least 2 characters long",
@@ -118,14 +118,14 @@ export default function UserForm({
             },
           ]}
         >
-          <Input placeholder="Enter firstName name" />
+          <Input placeholder="Enter first name" />
         </Form.Item>
 
         <Form.Item
           name="lastName"
           label="Last Name"
           rules={[
-            { required: true, message: "Please enter lastName name" },
+            { required: true, message: "Please enter last name" },
             { min: 2, message: "Last name must be at least 2 characters long" },
             {
               max: 50,
@@ -137,7 +137,7 @@ export default function UserForm({
             },
           ]}
         >
-          <Input placeholder="Enter lastName name" />
+          <Input placeholder="Enter last name" />
         </Form.Item>
 
         <Form.Item
@@ -208,12 +208,16 @@ export default function UserForm({
           rules={[
             { required: true, message: "Please enter contact number" },
             {
-              pattern: /^[0-9]{10}$/,
-              message: "Please enter a valid 10-digit contact number",
+              pattern: /^[0-9]*$/,
+              message: "Please enter a valid contact number with only digits",
             },
           ]}
         >
-          <Input placeholder="Enter contact number" />
+          <Input
+            placeholder="Enter contact number"
+            inputMode="numeric"
+            maxLength={15}
+          />
         </Form.Item>
 
         <Form.Item

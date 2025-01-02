@@ -4,6 +4,7 @@ import { Locale } from "@/lib/definitions";
 import DashboardTable from "../../components/DashboardTable";
 import { DashboardCard } from "../../components/DashboardCard";
 import DashboardRecentStats from "../../components/DashboardRecentStats";
+import DashboardRecentInvoices from "../../components/DashboardRecentInvoices";
 
 interface Props {
   params: {
@@ -55,6 +56,26 @@ function PageContent({ locale }: PageContentProps) {
 
         {/* Recent Transactions */}
         <Card className="col-span-1">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-xl font-semibold  font-workSans">
+              Recent Invoices
+            </h2>
+            <div className="flex items-center gap-4">
+              <a
+                href={`/${locale}/index/invoices`}
+                className=" font-workSans text-white text-lg font-semibold bg-teal-800 px-4 py-2 rounded-md shadow-lg hover:bg-teal-700 hover:text-white"
+              >
+                View all Invoices
+              </a>
+            </div>
+          </div>
+          <div>
+            <DashboardRecentInvoices />
+          </div>
+        </Card>
+      </div>
+      <div className="grid grid-cols-2">
+        <Card>
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-xl font-semibold font-workSans">
               Recent Stats

@@ -211,12 +211,16 @@ export default function DriverForm({
           rules={[
             { required: true, message: "Please enter contact number" },
             {
-              pattern: /^[0-9]{10,15}$/,
-              message: "Please enter a valid contact number (10-15 digits)",
+              pattern: /^[0-9]*$/,
+              message: "Please enter a valid contact number with only digits",
             },
           ]}
         >
-          <Input placeholder="Enter contact number" />
+          <Input
+            placeholder="Enter contact number"
+            inputMode="numeric"
+            maxLength={15}
+          />
         </Form.Item>
         <Form.Item
           name="dateOfBirth"

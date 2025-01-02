@@ -22,14 +22,18 @@ export function BookingProgress({
       label: "Location & Time",
       path: `/${lang}/index/carBooking/bookingLocation`,
     },
+    // {
+    //   icon: FaBoxOpen,
+    //   label: "Add-Ons",
+    //   path: `/${lang}/index/carBooking/bookingAddOns`,
+    // },
+    // { icon: FaFileAlt, label: "Detail", path: "/detail" },
+    // { icon: FaCreditCard, label: "Checkout", path: "/checkout" },
     {
-      icon: FaBoxOpen,
-      label: "Add-Ons",
-      path: `/${lang}/index/carBooking/bookingAddOns`,
+      icon: FaCheckCircle,
+      label: "Booking Confirmed",
+      path: `/${lang}/index/carBooking/bookingConfirmed`,
     },
-    { icon: FaFileAlt, label: "Detail", path: "/detail" },
-    { icon: FaCreditCard, label: "Checkout", path: "/checkout" },
-    { icon: FaCheckCircle, label: "Booking Confirmed", path: "/confirmed" },
   ];
 
   const currentStepIndex = steps.findIndex((step) => step.path === pathname);

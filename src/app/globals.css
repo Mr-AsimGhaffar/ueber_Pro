@@ -1,3 +1,19 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.custom-checkbox .ant-checkbox-checked .ant-checkbox-inner {
+  @apply bg-teal-800 border-teal-800 /* Tailwind classes for the checked state */;
+}
+
+.custom-checkbox .ant-checkbox-inner {
+  @apply border-gray-300 /* Tailwind classes for the unchecked state */;
+}
+
+.custom-checkbox:hover .ant-checkbox-inner {
+  @apply border-teal-700 !important/* Ensure hover state uses teal */;
+}
+
+.custom-checkbox:hover .ant-checkbox-checked .ant-checkbox-inner {
+  @apply bg-teal-700 border-teal-600 !important/* Hover state for checked checkbox */;
+}

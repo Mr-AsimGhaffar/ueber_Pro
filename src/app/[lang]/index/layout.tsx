@@ -66,7 +66,7 @@ export default async function Root({ params, children }: Props) {
           strategy="beforeInteractive"
         />
       </head>
-      <body className="relative min-h-screen overflow-y-auto bg-gray-50">
+      <body className="relative mt-16">
         <ConfigProvider>
           <UserProvider initialUser={user}>
             <CarProvider initialCar={cars || { data: [] }}>

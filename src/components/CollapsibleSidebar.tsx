@@ -15,7 +15,7 @@ export default function CollapsibleSidebar({
 
   return (
     <div
-      className={`fixed top-18 left-0 z-50 h-screen bg-teal-800 transition-all duration-300 ${
+      className={`fixed left-0 z-50 h-screen bg-teal-800 transition-all duration-300 ${
         isCollapsed ? "w-16" : "w-60"
       }`}
     >

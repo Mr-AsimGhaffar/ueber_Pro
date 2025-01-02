@@ -13,6 +13,7 @@ import SearchFiltersInvoice from "../../components/SearchFiltersInvoice";
 import ExportTablePdf from "../../components/ExportTablePdf";
 import { FaSort, FaSortDown, FaSortUp } from "react-icons/fa";
 import InvoiceForm from "@/components/InvoiceForm";
+import dayjs from "dayjs";
 
 interface Invoice {
   key: string;
@@ -281,8 +282,8 @@ export default function AccountPage() {
       ),
       dataIndex: "amount",
       key: "amount",
-      className: "font-workSans font-semibold",
-      render: (text) => <a>{text}</a>,
+      className: "font-workSans",
+      render: (text) => <span>${(text / 100).toFixed(2)}</span>,
       filterDropdown: (
         <div style={{ padding: 8 }}>
           <Input
@@ -432,6 +433,9 @@ export default function AccountPage() {
       dataIndex: "dueDate",
       key: "dueDate",
       className: "font-workSans",
+      render: (createdAt: string) => (
+        <span>{dayjs(createdAt).format("MM/DD/YYYY, hh:mm:ss A")}</span>
+      ),
       filterDropdown: (
         <div style={{ padding: 8 }}>
           <Input
@@ -504,6 +508,9 @@ export default function AccountPage() {
       dataIndex: "createdAt",
       key: "createdAt",
       className: "font-workSans",
+      render: (createdAt: string) => (
+        <span>{dayjs(createdAt).format("MM/DD/YYYY, hh:mm:ss A")}</span>
+      ),
       filterDropdown: (
         <div style={{ padding: 8 }}>
           <Input
