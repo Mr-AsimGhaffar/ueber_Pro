@@ -7,13 +7,13 @@ export default async function handler(
   if (req.method === "GET") {
     try {
       const accessToken = req.cookies.accessToken;
-      const { filters, page, limit } = req.query;
+      const { filters, page, limit, search, searchFields = "" } = req.query;
       if (!accessToken) {
         throw new Error("Token not found. Please log in.");
       }
       // Send credentials to external API
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/cars/?page=${page}&limit=${limit}&filters=${filters}`,
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/cars/?page=${page}&limit=${limit}&filters=${filters}&search=${search}&searchFields=${searchFields}`,
         {
           method: "GET",
           headers: {

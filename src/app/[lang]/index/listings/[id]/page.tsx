@@ -76,7 +76,9 @@ export default function CarDetailPage({
               <div>
                 <IoCarSportOutline />
               </div>
-              <div className="">{selectedCar?.registrationNumber}</div>
+              <div className="font-workSans">
+                {selectedCar?.registrationNumber}
+              </div>
             </div>
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -118,19 +120,21 @@ export default function CarDetailPage({
 
               {/* Description */}
               <div className="bg-white rounded-lg p-6 mb-6">
-                <h2 className="text-xl font-semibold mb-4">
-                  Description of Listing
+                <h2 className="text-xl font-semibold mb-4 font-workSans">
+                  Description
                 </h2>
-                <p className="text-gray-600 mb-4">
+                <p className="text-gray-600 mb-4 font-sansInter">
                   {selectedCar?.description || "No Description"}
                 </p>
               </div>
 
               {/* Extra Services */}
               <div className="bg-white rounded-lg p-6 mb-6">
-                <h2 className="text-xl font-semibold mb-4">Extra Service</h2>
+                <h2 className="text-xl font-semibold mb-4 font-workSans">
+                  Extra Service
+                </h2>
                 <div className="grid">
-                  <div className="flex items-center justify-between font-medium text-sm text-gray-600">
+                  <div className="flex items-center justify-between font-medium text-sm text-gray-600 font-sansInter">
                     {/* <span>{selectedCar?.icon}</span> */}
                     <span className="flex items-center gap-1">
                       <BsFillFuelPumpFill className="text-cyan-700" />
@@ -162,9 +166,11 @@ export default function CarDetailPage({
 
               {/* Specifications */}
               <div className="bg-white rounded-lg p-6">
-                <h2 className="text-xl font-semibold mb-4">Specifications</h2>
+                <h2 className="text-xl font-semibold mb-4 font-workSans">
+                  Specifications
+                </h2>
                 <div className="grid">
-                  <div className="rounded-lg flex items-center justify-between text-sm text-gray-600 font-medium">
+                  <div className="rounded-lg flex items-center justify-between text-sm text-gray-600 font-medium font-sansInter">
                     <div className="flex items-center gap-1">
                       <GiPathDistance className="text-cyan-700" />
                       {selectedCar?.mileage || "No Mileage"}
@@ -191,7 +197,7 @@ export default function CarDetailPage({
               <div className="bg-white rounded-lg p-6 sticky top-6">
                 <div className="flex justify-between items-start mb-4">
                   <div>
-                    <h1 className="text-2xl font-semibold">
+                    <h1 className="text-2xl font-semibold font-workSans">
                       {selectedCar?.model?.name}
                     </h1>
                     <div className="flex items-center gap-2 mt-2">
@@ -200,20 +206,22 @@ export default function CarDetailPage({
                         value={selectedCar?.rating || 0}
                         className="text-sm text-orange-400"
                       />
-                      <span className="text-gray-500">
+                      <span className="text-gray-500 font-workSans">
                         ({selectedCar?.brand?.name} Reviews)
                       </span>
                     </div>
                   </div>
                   <div>
-                    <span className="text-sm text-gray-500">
+                    <span className="text-sm text-gray-500 font-workSans">
                       Registration#:{" "}
                     </span>
-                    {selectedCar?.registrationNumber}
+                    <span className="text-xs font-workSans">
+                      {selectedCar?.registrationNumber}
+                    </span>
                   </div>
                 </div>
                 <div>
-                  <p className="text-lg font-semibold text-gray-800 mb-2">
+                  <p className="text-lg font-semibold font-workSans text-gray-800 mb-2">
                     Price:{" "}
                     {selectedCar?.RentalPricing?.basePrice
                       ? new Intl.NumberFormat("en-US", {

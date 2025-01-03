@@ -41,12 +41,16 @@ export default function AccountPage() {
   const [searchRentalType, setSearchRentalType] = useState("");
   const [searchBasePrice, setSearchBasePrice] = useState("");
   const [searchCreatedAt, setSearchCreatedAt] = useState("");
+  const [searchPickupLocation, setSearchPickupLocation] = useState("");
+  const [searchDropOffLocation, setSearchDropOffLocation] = useState("");
   const searchRef = useRef<string[]>([]);
   const [filters, setFilters] = useState({
     rentalType: "",
     status: [] as string[],
     basePrice: "",
     createdAt: "",
+    pickupLocation: "",
+    dropOffLocation: "",
     search: "",
   });
   const [pagination, setPagination] = useState({
@@ -72,6 +76,12 @@ export default function AccountPage() {
         ...(currentFilters.createdAt && {
           createdAt: currentFilters.createdAt,
         }),
+        ...(currentFilters.pickupLocation && {
+          pickupLocation: currentFilters.pickupLocation,
+        }),
+        ...(currentFilters.dropOffLocation && {
+          dropOffLocation: currentFilters.dropOffLocation,
+        }),
       };
       const sort = sortParams
         .map((param) => `${param.field}:${param.order}`)
@@ -79,7 +89,8 @@ export default function AccountPage() {
       const query = new URLSearchParams({
         sort,
         filters: JSON.stringify(filtersObject),
-        searchFields: "basePrice,rentalType,createdAt",
+        searchFields:
+          "basePrice,rentalType,createdAt,pickupLocation,dropOffLocation",
       }).toString();
       const response = await fetch(
         `/api/carBooking/getRentalAgreement?${query}`,
@@ -94,10 +105,16 @@ export default function AccountPage() {
       if (response.ok) {
         const data = await response.json();
         setRentalAgreement(
-          data.data.map((item: RentalAgreement) => ({
-            ...item,
-            key: item.id.toString(),
-          }))
+          data.data
+            .map((item: RentalAgreement) => ({
+              ...item,
+              key: item.id.toString(),
+            }))
+            .sort(
+              (a: any, b: any) =>
+                new Date(b.createdAt).getTime() -
+                new Date(a.createdAt).getTime()
+            )
         );
         // setPagination((prev) => ({
         //   ...prev,
@@ -380,6 +397,162 @@ export default function AccountPage() {
       ),
       filterIcon: () => (
         <SearchOutlined style={{ color: searchCreatedAt ? "blue" : "gray" }} />
+      ),
+    },
+    {
+      title: (
+        <span className="flex items-center gap-2">
+          Pickup location
+          {sortParams.find((param) => param.field === "pickupLocation") ? (
+            sortParams.find((param) => param.field === "pickupLocation")!
+              .order === "asc" ? (
+              <FaSortUp
+                className="cursor-pointer text-blue-500"
+                onClick={() => handleSort("pickupLocation")}
+              />
+            ) : (
+              <FaSortDown
+                className="cursor-pointer text-blue-500"
+                onClick={() => handleSort("pickupLocation")}
+              />
+            )
+          ) : (
+            <FaSort
+              className="cursor-pointer text-gray-400"
+              onClick={() => handleSort("pickupLocation")}
+            />
+          )}
+        </span>
+      ),
+      dataIndex: "pickupLocation",
+      key: "pickupLocation",
+      className: "font-workSans",
+      render: (pickupLocation: string | null | undefined) =>
+        pickupLocation || "No Pickup Location Found",
+      filterDropdown: (
+        <div style={{ padding: 8 }}>
+          <Input
+            placeholder="Search Pickup Location"
+            value={searchPickupLocation}
+            suffix={
+              <SearchOutlined
+                style={{ color: searchPickupLocation ? "blue" : "gray" }}
+              />
+            }
+            onChange={(e) => {
+              const searchValue = "pickupLocation";
+              setSearchPickupLocation(e.target.value);
+              if (!searchRef.current.includes(searchValue)) {
+                searchRef.current.push(searchValue);
+              }
+              handleFilterChange("pickupLocation", e.target.value);
+            }}
+          />
+          <div style={{ marginTop: 8 }}>
+            <Button
+              type="primary"
+              icon={<SearchOutlined />}
+              onClick={() =>
+                handleFilterChange("pickupLocation", searchPickupLocation)
+              }
+              style={{ marginRight: 8 }}
+            >
+              Search
+            </Button>
+            <Button
+              icon={<ReloadOutlined />}
+              onClick={() => {
+                setSearchPickupLocation(""); // Reset the search field
+                handleFilterChange("pickupLocation", ""); // Reset filter
+              }}
+            >
+              Reset
+            </Button>
+          </div>
+        </div>
+      ),
+      filterIcon: () => (
+        <SearchOutlined
+          style={{ color: searchPickupLocation ? "blue" : "gray" }}
+        />
+      ),
+    },
+    {
+      title: (
+        <span className="flex items-center gap-2">
+          Return Location
+          {sortParams.find((param) => param.field === "dropOffLocation") ? (
+            sortParams.find((param) => param.field === "dropOffLocation")!
+              .order === "asc" ? (
+              <FaSortUp
+                className="cursor-pointer text-blue-500"
+                onClick={() => handleSort("dropOffLocation")}
+              />
+            ) : (
+              <FaSortDown
+                className="cursor-pointer text-blue-500"
+                onClick={() => handleSort("dropOffLocation")}
+              />
+            )
+          ) : (
+            <FaSort
+              className="cursor-pointer text-gray-400"
+              onClick={() => handleSort("dropOffLocation")}
+            />
+          )}
+        </span>
+      ),
+      dataIndex: "dropOffLocation",
+      key: "dropOffLocation",
+      className: "font-workSans",
+      render: (dropOffLocation: string | null | undefined) =>
+        dropOffLocation || "No Return Location Found",
+      filterDropdown: (
+        <div style={{ padding: 8 }}>
+          <Input
+            placeholder="Search Dropoff Location"
+            value={searchDropOffLocation}
+            suffix={
+              <SearchOutlined
+                style={{ color: searchDropOffLocation ? "blue" : "gray" }}
+              />
+            }
+            onChange={(e) => {
+              const searchValue = "dropOffLocation";
+              setSearchDropOffLocation(e.target.value);
+              if (!searchRef.current.includes(searchValue)) {
+                searchRef.current.push(searchValue);
+              }
+              handleFilterChange("dropOffLocation", e.target.value);
+            }}
+          />
+          <div style={{ marginTop: 8 }}>
+            <Button
+              type="primary"
+              icon={<SearchOutlined />}
+              onClick={() =>
+                handleFilterChange("dropOffLocation", searchDropOffLocation)
+              }
+              style={{ marginRight: 8 }}
+            >
+              Search
+            </Button>
+            <Button
+              icon={<ReloadOutlined />}
+              onClick={() => {
+                setSearchDropOffLocation(""); // Reset the search field
+                handleFilterChange("dropOffLocation", ""); // Reset filter
+              }}
+            >
+              Reset
+            </Button>
+          </div>
+        </div>
+      ),
+      filterIcon: () => (
+        <SearchOutlined
+          style={{ color: searchDropOffLocation ? "blue" : "gray" }}
+        />
       ),
     },
     {

@@ -16,19 +16,6 @@ import { CarDetailsSection } from "@/app/[lang]/components/carBooking/carDetail"
 import { Car } from "@/lib/definitions";
 import { useCar } from "@/hooks/context/AuthContextCars";
 
-const dummyCarData = {
-  id: 1,
-  model: "Chevrolet Camaro",
-  location: "Miami St, Destin, FL 32550, USA",
-  imageUrl: "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=500",
-  rentalRate: 300,
-  deliveryFee: 60,
-  protectionFee: 25,
-  convenienceFee: 2,
-  tax: 2,
-  deposit: 1200,
-};
-
 export default function LocationPage({
   params: { lang },
 }: {
@@ -37,9 +24,18 @@ export default function LocationPage({
   const router = useRouter();
   const { cars } = useCar();
   const [selectedCar, setSelectedCar] = useState<Car | null>(null);
-  const [carBooking, setCarBooking] = useState<Car[]>([]);
   const [rentalType, setRentalType] = useState("SELF_DRIVE");
-  const [bookingType, setBookingType] = useState("day");
+  const [pickupLocation, setPickupLocation] = useState("");
+  const [dropOffLocation, setDropOffLocation] = useState("");
+  const [startDate, setStartDate] = useState<string | null>(null);
+  const [endDate, setEndDate] = useState<string | null>(null);
+  const [returnToSameLocation, setReturnToSameLocation] = useState(false);
+
+  useEffect(() => {
+    if (returnToSameLocation) {
+      setDropOffLocation(pickupLocation);
+    }
+  }, [returnToSameLocation, pickupLocation]);
 
   useEffect(() => {
     // Access the 'data' property of cars
@@ -49,13 +45,17 @@ export default function LocationPage({
   }, [cars]);
 
   const handleCreateBooking = async () => {
-    if (!selectedCar) {
-      message.error("No car selected for booking");
+    if (!selectedCar || !pickupLocation || !startDate || !endDate) {
+      message.error("All fields are required.");
       return;
     }
     const values = {
       carId: selectedCar.id,
       rentalType,
+      pickupLocation,
+      dropOffLocation,
+      startDate,
+      endDate,
     };
     try {
       const response = await fetch("/api/carBooking/createRentalAgreement", {
@@ -68,8 +68,13 @@ export default function LocationPage({
 
       if (response.ok) {
         const result = await response.json();
+        const bookingId = result?.data?.id;
         message.success("Successfully created rental agreement");
-        router.push(`/${lang}/index/carBooking/bookingConfirmed`);
+        if (bookingId) {
+          router.push(
+            `/${lang}/index/carBooking/bookingConfirmed?id=${bookingId}`
+          );
+        }
       } else {
         const error = await response.json();
         message.error(error.message || "Failed to created rental agreement");
@@ -80,9 +85,6 @@ export default function LocationPage({
     }
   };
 
-  //   const handleContinue = () => {
-  //     router.push(`/${lang}/index/carBooking/bookingAddOns`);
-  //   };
   const handleBack = () => {
     router.push(`/${lang}/index/listings/`);
   };
@@ -134,14 +136,29 @@ export default function LocationPage({
                       <p className="font-workSans text-sm font-semibold">
                         Delivery Location
                       </p>
-                      <Input placeholder="Add Location" />
-                      <Checkbox className="custom-checkbox font-workSans text-gray-600">
+                      <Input
+                        placeholder="Add Location"
+                        value={pickupLocation}
+                        onChange={(e) => setPickupLocation(e.target.value)}
+                      />
+                      <Checkbox
+                        className="custom-checkbox font-workSans text-gray-600"
+                        checked={returnToSameLocation}
+                        onChange={(e) =>
+                          setReturnToSameLocation(e.target.checked)
+                        }
+                      >
                         Return to same location
                       </Checkbox>
                       <p className="font-workSans text-sm font-semibold">
                         Return Location
                       </p>
-                      <Input placeholder="Add Location" />
+                      <Input
+                        placeholder="Add Location"
+                        value={dropOffLocation}
+                        onChange={(e) => setDropOffLocation(e.target.value)}
+                        disabled={returnToSameLocation}
+                      />
                     </div>
                   </div>
                 ) : (
@@ -154,14 +171,29 @@ export default function LocationPage({
                       <p className="font-workSans text-sm font-semibold">
                         Pickup Location
                       </p>
-                      <Input placeholder="Add Location" />
-                      <Checkbox className="custom-checkbox font-workSans text-gray-600">
+                      <Input
+                        placeholder="Add Location"
+                        value={pickupLocation}
+                        onChange={(e) => setPickupLocation(e.target.value)}
+                      />
+                      <Checkbox
+                        className="custom-checkbox font-workSans text-gray-600"
+                        checked={returnToSameLocation}
+                        onChange={(e) =>
+                          setReturnToSameLocation(e.target.checked)
+                        }
+                      >
                         Return to same location
                       </Checkbox>
                       <p className="font-workSans text-sm font-semibold">
                         Return Location
                       </p>
-                      <Input placeholder="Add Location" />
+                      <Input
+                        placeholder="Add Location"
+                        value={dropOffLocation}
+                        onChange={(e) => setDropOffLocation(e.target.value)}
+                        disabled={returnToSameLocation}
+                      />
                     </div>
                   </div>
                 )}
@@ -172,50 +204,44 @@ export default function LocationPage({
               <h2 className="text-xl font-semibold font-workSans mb-4">
                 Booking type & Time
               </h2>
-              <Radio.Group
-                value={bookingType}
-                onChange={(e) => setBookingType(e.target.value)}
-                className="flex gap-2 mb-4"
-              >
-                <Radio.Button value="hourly" className="flex-1">
-                  Hourly
-                </Radio.Button>
-                <Radio.Button value="day" className="flex-1">
-                  Day (8 Hrs)
-                </Radio.Button>
-                <Radio.Button value="weekly" className="flex-1">
-                  Weekly
-                </Radio.Button>
-                <Radio.Button value="monthly" className="flex-1">
-                  Monthly
-                </Radio.Button>
-              </Radio.Group>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <p className="font-workSans text-sm font-semibold mb-2">
                     Start Date
                   </p>
-                  <DatePicker placeholder="Start Date" className="w-full" />
-                  <p className="font-workSans text-sm font-semibold mt-2">
+                  <DatePicker
+                    placeholder="Start Date"
+                    className="w-full"
+                    onChange={(date) =>
+                      setStartDate(date ? date.toISOString() : null)
+                    }
+                  />
+                  {/* <p className="font-workSans text-sm font-semibold mt-2">
                     Start Time
                   </p>
                   <TimePicker
                     placeholder="Start Time"
                     className="w-full mt-2"
-                  />
+                  /> */}
                 </div>
                 <div>
                   <p className="font-workSans text-sm font-semibold mb-2">
                     Return Date
                   </p>
-                  <DatePicker placeholder="Return Date" className="w-full" />
-                  <p className="font-workSans text-sm font-semibold mt-2">
+                  <DatePicker
+                    placeholder="Return Date"
+                    className="w-full"
+                    onChange={(date) =>
+                      setEndDate(date ? date.toISOString() : null)
+                    }
+                  />
+                  {/* <p className="font-workSans text-sm font-semibold mt-2">
                     Return Time
                   </p>
                   <TimePicker
                     placeholder="Return Time"
                     className="w-full mt-2"
-                  />
+                  /> */}
                 </div>
               </div>
             </div>

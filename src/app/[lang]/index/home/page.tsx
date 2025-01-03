@@ -45,7 +45,7 @@ function PageContent({ locale }: PageContentProps) {
             <div className="flex items-center gap-4">
               <a
                 href={`/${locale}/index/bookings`}
-                className=" font-workSans text-white text-lg font-semibold bg-teal-800 px-4 py-2 rounded-md shadow-lg hover:bg-teal-700 hover:text-white"
+                className=" font-workSans text-white text-sm font-semibold bg-teal-800 px-4 py-2 rounded-md shadow-lg hover:bg-teal-700 hover:text-white"
               >
                 View all trips
               </a>
@@ -63,7 +63,7 @@ function PageContent({ locale }: PageContentProps) {
             <div className="flex items-center gap-4">
               <a
                 href={`/${locale}/index/invoices`}
-                className=" font-workSans text-white text-lg font-semibold bg-teal-800 px-4 py-2 rounded-md shadow-lg hover:bg-teal-700 hover:text-white"
+                className="font-workSans text-white text-sm font-semibold bg-teal-800 px-4 py-2 rounded-md shadow-lg hover:bg-teal-700 hover:text-white"
               >
                 View all Invoices
               </a>

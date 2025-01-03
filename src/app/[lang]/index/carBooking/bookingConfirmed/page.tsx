@@ -3,15 +3,60 @@ import { BookingProgress } from "@/app/[lang]/components/carBooking/bookingProgr
 import { CarDetailsSection } from "@/app/[lang]/components/carBooking/carDetail";
 import { useCar } from "@/hooks/context/AuthContextCars";
 import { Car } from "@/lib/definitions";
-import { Button } from "antd";
-import { useRouter } from "next/navigation";
+import { Button, message } from "antd";
+import { useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { GiConfirmed } from "react-icons/gi";
+
+interface BookingConfirm {
+  id: number;
+  rentalType: string;
+  pickupLocation: string;
+  dropOffLocation: string;
+  startDate: string;
+  endDate: string;
+}
 
 const ConfirmBooking = ({ params: { lang } }: { params: { lang: string } }) => {
   const { cars } = useCar();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const [confirmBooking, setConfirmBooking] = useState<BookingConfirm>();
   const [selectedCar, setSelectedCar] = useState<Car | null>(null);
+
+  useEffect(() => {
+    const id = searchParams?.get("id");
+    if (id) {
+      const fetchConfirmBooking = async () => {
+        try {
+          const response = await fetch(
+            `/api/carBooking/getRentalAgreementById?id=${id}`,
+            {
+              method: "GET",
+              headers: {
+                "Content-Type": "application/json",
+              },
+            }
+          );
+
+          if (response.ok) {
+            const data = await response.json();
+            setConfirmBooking(data.data);
+          } else {
+            const error = await response.json();
+            message.error(error.message || "Failed to fetch rental details");
+          }
+        } catch (error) {
+          console.error("Error fetching rental details:", error);
+          message.error("An error occurred while fetching rental details");
+        }
+      };
+      fetchConfirmBooking();
+    } else {
+      message.error("No booking ID found in the URL");
+    }
+  }, [searchParams]);
+
   useEffect(() => {
     // Access the 'data' property of cars
     if (cars?.data && cars.data.length > 0) {
@@ -21,6 +66,24 @@ const ConfirmBooking = ({ params: { lang } }: { params: { lang: string } }) => {
   const handleBackToCarBooking = () => {
     router.push(`/${lang}/index/carBooking/rentalAgreement`);
   };
+
+  const formatText = (text: string) => {
+    return text
+      .toLowerCase()
+      .replace(/_/g, " ")
+      .replace(/\b\w/g, (char) => char.toUpperCase());
+  };
+
+  const rentalType = confirmBooking?.rentalType
+    ? formatText(confirmBooking.rentalType)
+    : "No Rental Type";
+  const pickupLocation = confirmBooking?.pickupLocation
+    ? formatText(confirmBooking.pickupLocation)
+    : "No Pickup location";
+  const returnLocation = confirmBooking?.dropOffLocation
+    ? formatText(confirmBooking.dropOffLocation)
+    : "No Dropoff Location";
+
   return (
     <div>
       <div>
@@ -64,25 +127,57 @@ const ConfirmBooking = ({ params: { lang } }: { params: { lang: string } }) => {
                   Booking Type
                 </h1>
                 <p className="font-workSans text-gray-500 text-sm">
-                  With Driver
+                  {rentalType}
                 </p>
               </div>
               <div className="py-2">
                 <h1 className="font-workSans font-semibold text-sm">
-                  Rental Type
+                  Pickup Location
                 </h1>
-                <p className="font-workSans text-gray-500 text-sm">Hourly</p>
-              </div>
-              <div className="py-2">
-                <h1 className="font-workSans font-semibold text-sm">Pickup</h1>
                 <p className="font-workSans text-gray-500 text-sm">
-                  1230 E Springs Rd, Los Angeles, CA, USA 04/18/2024 - 14:00
+                  {pickupLocation}
                 </p>
               </div>
               <div>
-                <h1 className="font-workSans font-semibold text-sm">Return</h1>
+                <h1 className="font-workSans font-semibold text-sm">
+                  Return Location
+                </h1>
                 <p className="font-workSans text-gray-500 text-sm">
-                  1230 E Springs Rd, Los Angeles, CA, USA 04/18/2024 - 14:00
+                  {returnLocation}
+                </p>
+              </div>
+              <div>
+                <h1 className="font-workSans font-semibold text-sm">
+                  Start Date
+                </h1>
+                <p className="font-workSans text-gray-500 text-sm">
+                  {confirmBooking?.startDate
+                    ? new Date(confirmBooking.startDate).toLocaleDateString(
+                        "en-US",
+                        {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        }
+                      )
+                    : "N/A"}
+                </p>
+              </div>
+              <div>
+                <h1 className="font-workSans font-semibold text-sm">
+                  Return Date
+                </h1>
+                <p className="font-workSans text-gray-500 text-sm">
+                  {confirmBooking?.endDate
+                    ? new Date(confirmBooking.endDate).toLocaleDateString(
+                        "en-US",
+                        {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        }
+                      )
+                    : "N/A"}
                 </p>
               </div>
             </div>

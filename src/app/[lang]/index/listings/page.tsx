@@ -12,6 +12,7 @@ import {
   message,
   Modal,
   Pagination,
+  Input,
 } from "antd";
 import { HeartOutlined, UserAddOutlined } from "@ant-design/icons";
 import CarFilters from "@/components/cars/CarFilters";
@@ -42,6 +43,7 @@ export default function ListingsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [totalCars, setTotalCars] = useState(0);
+  const [search, setSearch] = useState<string>("");
 
   const fetchFilteredCars = async (page = 1, limit = 10) => {
     setLoading(true);
@@ -87,6 +89,8 @@ export default function ListingsPage() {
       const queryParams = new URLSearchParams({
         page: page.toString(),
         limit: limit.toString(),
+        search,
+        searchFields: "model.name,brand.name",
         filters: JSON.stringify(apiFilters),
       });
       const response = await fetch(
@@ -105,7 +109,7 @@ export default function ListingsPage() {
 
   useEffect(() => {
     fetchFilteredCars(currentPage, pageSize);
-  }, [filters, currentPage, pageSize]);
+  }, [filters, currentPage, pageSize, search]);
 
   const handlePageChange = (page: number, pageSize?: number) => {
     setCurrentPage(page);
@@ -264,13 +268,26 @@ export default function ListingsPage() {
   return (
     <div className="p-6">
       {/* Search Section */}
-      <div className="flex justify-between items-center">
-        <div>
-          <p className="font-workSans text-base font-semibold tracking-wide">
-            {getTotalText()}
-          </p>
+      <div className="flex justify-between items-center mb-4">
+        <div className="flex items-center gap-4 w-[60%]">
+          <div className="w-[30%]">
+            <p className="font-workSans text-base font-semibold tracking-wide">
+              {getTotalText()}
+            </p>
+          </div>
+          <div className="w-[70%]">
+            {/* Car Search Input */}
+            <Input
+              placeholder="Search for cars..."
+              className="border border-gray-300 rounded-lg"
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
+              }}
+            />
+          </div>
         </div>
-        <div className="flex gap-2">
+        <div className="flex items-center gap-2 w-[40%] justify-end">
           <CarFilters setFilters={setFilters} />
           <Button
             type="primary"
@@ -472,7 +489,8 @@ export default function ListingsPage() {
                         style: "currency",
                         currency: "USD",
                       }).format(car?.RentalPricing?.basePrice)
-                    : "Price not available"}
+                    : "Price not available"}{" "}
+                  / Day
                 </div>
                 <div>
                   <Button

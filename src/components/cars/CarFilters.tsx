@@ -107,7 +107,7 @@ const FiltersSidebar: React.FC<{
       <Button
         icon={<FilterOutlined />}
         type="primary"
-        className="mb-4 font-workSans text-base bg-teal-800 hover:!bg-teal-700"
+        className="font-workSans text-base bg-teal-800 hover:!bg-teal-700"
         onClick={toggleDrawer}
       >
         Search Car

@@ -65,7 +65,7 @@ export default function CompanyPage() {
   const searchRef = useRef<string[]>([]);
   const [selectedType, setSelectedType] = useState<
     "ASSIGNED_TO_MY_COMPANY" | "CREATED_BY_MY_COMPANY" | "AVAILABLE"
-  >(user?.company.type === "DRIVERS" ? "AVAILABLE" : "CREATED_BY_MY_COMPANY");
+  >(user?.company?.type === "DRIVERS" ? "AVAILABLE" : "CREATED_BY_MY_COMPANY");
   const [filters, setFilters] = useState({
     id: "",
     "driverCompany.name": "",

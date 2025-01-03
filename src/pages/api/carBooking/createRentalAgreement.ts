@@ -5,7 +5,14 @@ export default async function handler(
   res: NextApiResponse
 ) {
   if (req.method === "POST") {
-    const { carId, rentalType } = req.body;
+    const {
+      carId,
+      rentalType,
+      pickupLocation,
+      dropOffLocation,
+      startDate,
+      endDate,
+    } = req.body;
 
     if (!carId) {
       return res.status(400).json({ message: "Car ID is required" });
@@ -29,6 +36,10 @@ export default async function handler(
           body: JSON.stringify({
             carId,
             rentalType,
+            pickupLocation,
+            dropOffLocation,
+            startDate,
+            endDate,
             clientType: "web",
           }),
         }

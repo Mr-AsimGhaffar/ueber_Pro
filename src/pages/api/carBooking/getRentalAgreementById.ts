@@ -5,25 +5,18 @@ export default async function handler(
   res: NextApiResponse
 ) {
   if (req.method === "GET") {
+    const { id } = req.query;
+
     try {
       const accessToken = req.cookies.accessToken;
 
       if (!accessToken) {
         throw new Error("Token not found. Please log in.");
       }
-      const {
-        page = 1,
-        limit = 10,
-        filters = "",
-        sort = "",
-        type,
-        search = "",
-        searchFields = "",
-      } = req.query;
 
       // Send credentials to external API
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/invoices?page=${page}&limit=${limit}&filters=${filters}&sort=${sort}&type=${type}&search=${search}&searchFields=${searchFields}`,
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/rentals/${id}`,
         {
           method: "GET",
           headers: {
@@ -34,20 +27,19 @@ export default async function handler(
       );
 
       if (response.ok) {
-        const companiesResponse = await response.json();
-
+        const apiResponse = await response.json();
         return res.status(200).json({
-          ...companiesResponse,
-          message: "Successfully fetched accounts",
+          data: apiResponse.data,
+          message: "Successfully fetched rental details",
         });
       } else {
         const errorData = await response.json();
-        return res
-          .status(response.status)
-          .json({ message: errorData.message || "Failed to fetched accounts" });
+        return res.status(response.status).json({
+          message: errorData.message || "Failed to fetch rental details",
+        });
       }
     } catch (error) {
-      console.error("Error authenticating:", error);
+      console.error("Error fetching rental details:", error);
       return res.status(500).json({ message: "Internal Server Error" });
     }
   } else {

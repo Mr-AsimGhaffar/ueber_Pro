@@ -7,6 +7,7 @@ import { useEffect, useRef, useState } from "react";
 import { FaSort, FaSortDown, FaSortUp } from "react-icons/fa";
 import { ReloadOutlined, SearchOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
+import { useUser } from "@/hooks/context/AuthContext";
 
 interface dashboardTrip {
   key: string;
@@ -22,11 +23,15 @@ interface dashboardTrip {
 }
 
 const DashboardTable = () => {
+  const { user } = useUser();
   const [trips, setTrips] = useState<dashboardTrip[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchStartLocation, setSearchStartLocation] = useState("");
   const [searchEndLocation, setSearchEndLocation] = useState("");
   const [searchCreatedAt, setSearchCreatedAt] = useState("");
+  const [selectedType, setSelectedType] = useState<
+    "ASSIGNED_TO_MY_COMPANY" | "CREATED_BY_MY_COMPANY" | "AVAILABLE"
+  >(user?.company?.type === "DRIVERS" ? "AVAILABLE" : "CREATED_BY_MY_COMPANY");
   const searchRef = useRef<string[]>([]);
   const [filters, setFilters] = useState({
     startLocation: "",
@@ -46,7 +51,7 @@ const DashboardTable = () => {
   >([]);
 
   const [search, setSearch] = useState("");
-  const fetchTrips = async (currentFilters = filters) => {
+  const fetchTrips = async (currentFilters = filters, type = selectedType) => {
     setLoading(true);
     try {
       const filtersObject = {
@@ -77,6 +82,7 @@ const DashboardTable = () => {
         sort,
         filters: JSON.stringify(filtersObject),
         search,
+        type,
         searchFields: "startLocation,endLocation,createdAt,pricingModel.model",
       }).toString();
       const response = await fetch(`/api/listTrips?${query}`, {

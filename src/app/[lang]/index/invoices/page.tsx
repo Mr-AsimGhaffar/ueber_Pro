@@ -14,6 +14,7 @@ import ExportTablePdf from "../../components/ExportTablePdf";
 import { FaSort, FaSortDown, FaSortUp } from "react-icons/fa";
 import InvoiceForm from "@/components/InvoiceForm";
 import dayjs from "dayjs";
+import { useUser } from "@/hooks/context/AuthContext";
 
 interface Invoice {
   key: string;
@@ -32,6 +33,7 @@ interface Invoice {
 }
 
 export default function AccountPage() {
+  const { user } = useUser();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [invoice, setInvoice] = useState<Invoice[]>([]);
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
@@ -67,6 +69,12 @@ export default function AccountPage() {
   const fetchAccounts = async (currentFilters = filters) => {
     setLoading(true);
     try {
+      let type = "";
+      if (user?.company?.type === "CARS") {
+        type = "RECEIVED";
+      } else if (user?.company?.type === "DRIVERS") {
+        type = "SENT";
+      }
       const filtersObject = {
         ...(currentFilters.unixId && {
           unixId: currentFilters.unixId,
@@ -95,6 +103,7 @@ export default function AccountPage() {
         page: String(pagination.current),
         limit: String(pagination.pageSize),
         sort,
+        type,
         filters: JSON.stringify(filtersObject),
         search,
         searchFields:

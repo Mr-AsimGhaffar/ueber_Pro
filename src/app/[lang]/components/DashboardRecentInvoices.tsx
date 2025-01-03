@@ -11,6 +11,7 @@ import type { ColumnsType } from "antd/es/table";
 import debounce from "lodash.debounce";
 import { FaSort, FaSortDown, FaSortUp } from "react-icons/fa";
 import dayjs from "dayjs";
+import { useUser } from "@/hooks/context/AuthContext";
 
 interface Invoice {
   key: string;
@@ -21,6 +22,7 @@ interface Invoice {
 }
 
 export default function DashboardRecentInvoices() {
+  const { user } = useUser();
   const [invoice, setInvoice] = useState<Invoice[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchAmount, setSearchAmount] = useState("");
@@ -46,6 +48,12 @@ export default function DashboardRecentInvoices() {
   const fetchAccounts = async (currentFilters = filters) => {
     setLoading(true);
     try {
+      let type = "";
+      if (user?.company?.type === "CARS") {
+        type = "RECEIVED";
+      } else if (user?.company?.type === "DRIVERS") {
+        type = "SENT";
+      }
       const filtersObject = {
         ...(currentFilters.amount && {
           amount: currentFilters.amount,
@@ -62,6 +70,7 @@ export default function DashboardRecentInvoices() {
         page: String(pagination.current),
         limit: String(pagination.pageSize),
         sort,
+        type,
         filters: JSON.stringify(filtersObject),
         search,
         searchFields: "amount,dueDate",

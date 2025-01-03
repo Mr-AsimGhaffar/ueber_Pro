@@ -74,7 +74,6 @@ export default function UserForm({
       console.error("Validation failed:", error);
     }
   };
-  console.log("initialValues", initialValues);
   return (
     <Form
       form={form}
@@ -83,14 +82,14 @@ export default function UserForm({
       onFinish={handleSubmit}
       preserve={true}
     >
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 font-workSans">
         {/* Company Information */}
-        <div className="md:col-span-2 text-center">
-          <h1 className="font-medium text-base">
+        <div className="md:col-span-2">
+          <h1 className="font-medium text-base text-center mb-2">
             {" "}
             {initialValues ? "Edit Car" : "Add New Car"}
           </h1>
-          <h3 className="font-medium mb-4">Car Information</h3>
+          <h3 className="font-medium mb-4 text-left">Car Information</h3>
         </div>
 
         <Form.Item
@@ -220,9 +219,44 @@ export default function UserForm({
           </Select>
         </Form.Item>
 
-        {/* Document Upload */}
+        {/* Rental Pricing */}
+
         <div className="md:col-span-2">
-          <h3 className="font-medium mb-4 mt-4">Documents</h3>
+          <h3 className="font-medium mb-4">Rental Pricing</h3>
+          <div className="flex gap-4">
+            <Form.Item
+              name="hourlyRate"
+              label="Hourly Rate"
+              rules={[{ required: true, message: "Please enter Hourly Rate" }]}
+              className="flex-1"
+            >
+              <Input placeholder="Enter hourly rate" />
+            </Form.Item>
+            <Form.Item
+              name="dailyRate"
+              label="Daily Rate"
+              rules={[{ required: true, message: "Please enter daily rate" }]}
+              className="flex-1"
+            >
+              <Input placeholder="Enter daily rate" />
+            </Form.Item>
+            <Form.Item
+              name="weeklyRate"
+              label="Weekly Rate"
+              rules={[{ required: true, message: "Please enter weekly rate" }]}
+              className="flex-1"
+            >
+              <Input placeholder="Enter weekly rate" />
+            </Form.Item>
+            <Form.Item
+              name="monthlyRate"
+              label="Monthly Rate"
+              rules={[{ required: true, message: "Please enter monthly rate" }]}
+              className="flex-1"
+            >
+              <Input placeholder="Enter monthly rate" />
+            </Form.Item>
+          </div>
         </div>
 
         {/* Uncomment and extend validation for company logo upload */}
