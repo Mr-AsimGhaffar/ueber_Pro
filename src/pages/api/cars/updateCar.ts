@@ -16,6 +16,10 @@ export default async function handler(
       carFuelType,
       companyId,
       status,
+      hourlyRate,
+      dailyRate,
+      weeklyRate,
+      monthlyRate,
     } = req.body;
 
     try {
@@ -24,6 +28,23 @@ export default async function handler(
       if (!accessToken) {
         throw new Error("Token not found. Please log in.");
       }
+
+      const convertToCents = (rate: any) => {
+        const num = Number(rate);
+        if (isNaN(num) || num < 0) {
+          throw new Error(
+            "Invalid rate value. Rates must be positive numbers."
+          );
+        }
+        return Math.round(num * 100).toString();
+      };
+
+      const rentalPricing = {
+        hourlyRate: convertToCents(hourlyRate),
+        dailyRate: convertToCents(dailyRate),
+        weeklyRate: convertToCents(weeklyRate),
+        monthlyRate: convertToCents(monthlyRate),
+      };
 
       // Send credentials to external API
       const response = await fetch(
@@ -45,6 +66,7 @@ export default async function handler(
             carFuelType,
             companyId,
             status,
+            rentalPricing,
           }),
         }
       );

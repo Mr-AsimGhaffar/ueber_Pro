@@ -6,22 +6,25 @@ export default async function handler(
 ) {
   if (req.method === "GET") {
     try {
-      const accessToken = req.cookies.accessToken;
       const { filters, page, limit, search, searchFields = "" } = req.query;
-      if (!accessToken) {
-        throw new Error("Token not found. Please log in.");
+      const accessToken = req.cookies.accessToken;
+      // If the user is not authenticated, fetch from the public API
+      const endpoint = accessToken
+        ? `${process.env.NEXT_PUBLIC_API_BASE_URL}/cars/?page=${page}&limit=${limit}&filters=${filters}&search=${search}&searchFields=${searchFields}`
+        : `${process.env.NEXT_PUBLIC_API_BASE_URL}/cars/public?page=${page}&limit=${limit}&filters=${filters}&search=${search}&searchFields=${searchFields}`;
+
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+      };
+
+      if (accessToken) {
+        headers["Authorization"] = `Bearer ${accessToken}`;
       }
-      // Send credentials to external API
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/cars/?page=${page}&limit=${limit}&filters=${filters}&search=${search}&searchFields=${searchFields}`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
-      );
+
+      const response = await fetch(endpoint, {
+        method: "GET",
+        headers,
+      });
 
       if (response.ok) {
         const carResponse = await response.json();

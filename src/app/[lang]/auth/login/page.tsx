@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { Form, Input, Button, Checkbox, Card, message, Spin } from "antd";
 import { UserOutlined, LockOutlined } from "@ant-design/icons";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Cookies from "js-cookie";
 
 export default function LoginPage({
@@ -14,6 +14,8 @@ export default function LoginPage({
 }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const searchParams = useSearchParams();
+  const redirectUrl = searchParams?.get("redirect") || `/${lang}/index/home`;
   const [loadingForgotPassword, setLoadingForgotPassword] = useState(false);
 
   const onFinish = async (values: any) => {
@@ -36,7 +38,7 @@ export default function LoginPage({
         Cookies.set("id", user.id, { expires: 1 });
 
         message.success("Successfully logged in!");
-        router.push(`/${lang}/index/home`);
+        router.push(redirectUrl);
       } else {
         const data = await response.json();
         message.error(data.message || "Invalid credentials");

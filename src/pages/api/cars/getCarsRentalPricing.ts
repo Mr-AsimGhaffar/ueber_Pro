@@ -8,9 +8,13 @@ export default async function handler(
     try {
       const accessToken = req.cookies.accessToken;
 
+      if (!accessToken) {
+        throw new Error("Token not found. Please log in.");
+      }
+
       // Send credentials to external API
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/cars/filters/`,
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/cars/rental-pricing`,
         {
           method: "GET",
           headers: {
@@ -21,19 +25,20 @@ export default async function handler(
       );
 
       if (response.ok) {
-        const carFilterResponse = await response.json();
+        const apiResponse = await response.json();
+
         return res.status(200).json({
-          data: carFilterResponse.data,
-          message: "Successfully fetched car filters data",
+          ...apiResponse,
+          message: "Successfully get cars rental pricing",
         });
       } else {
         const errorData = await response.json();
         return res.status(response.status).json({
-          message: errorData.message || "Failed to fetch car filters data",
+          message: errorData.message || "Failed to get cars rental pricing",
         });
       }
     } catch (error) {
-      console.error("Error fetching car filters:", error);
+      console.error("Error authenticating:", error);
       return res.status(500).json({ message: "Internal Server Error" });
     }
   } else {

@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { Form, Input, Upload, Button, Switch, Select } from "antd";
 import { LockOutlined, UploadOutlined } from "@ant-design/icons";
 import type { UploadFile } from "antd/es/upload/interface";
-import { Car } from "@/lib/definitions";
+import { Car, RentalPricing } from "@/lib/definitions";
 
 interface CarFormProps {
   onSubmit: (values: any) => void;
@@ -14,14 +14,42 @@ interface Company {
   name: string;
 }
 
-export default function UserForm({
+export default function CarForm({
   onSubmit,
   onCancel,
   initialValues,
 }: CarFormProps) {
   const [form] = Form.useForm();
   const [CarName, setCarName] = useState<Company[]>([]);
+  const [pricingOptions, setPricingOptions] = useState<RentalPricing[]>([]);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchRentalPricing = async () => {
+      setLoading(true);
+      try {
+        const response = await fetch("/api/cars/getCarsRentalPricing", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setPricingOptions(data.data); // Assuming the API response contains a `data` array
+        } else {
+          console.error("Failed to fetch rental pricing options");
+        }
+      } catch (error) {
+        console.error("Error fetching rental pricing options:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRentalPricing();
+  }, []);
 
   useEffect(() => {
     const fetchCompanies = async () => {
@@ -56,11 +84,29 @@ export default function UserForm({
       form.setFieldsValue({
         ...initialValues,
         profilePictureId: initialValues?.profilePictureId || "",
+        hourlyRate: initialValues?.RentalPricing?.hourlyRate / 100 || "", // Convert from cents to dollars
+        dailyRate: initialValues?.RentalPricing?.dailyRate / 100 || "",
+        weeklyRate: initialValues?.RentalPricing?.weeklyRate / 100 || "",
+        monthlyRate: initialValues?.RentalPricing?.monthlyRate / 100 || "",
       });
     } else {
       form.resetFields(); // Reset the form when initialValues is null (add new company)
     }
   }, [initialValues, form]);
+
+  const handlePricingChange = (pricingId: number) => {
+    const selectedPricing = pricingOptions.find(
+      (pricing) => pricing.id === pricingId
+    );
+    if (selectedPricing) {
+      form.setFieldsValue({
+        hourlyRate: selectedPricing.hourlyRate,
+        dailyRate: selectedPricing.dailyRate,
+        weeklyRate: selectedPricing.weeklyRate,
+        monthlyRate: selectedPricing.monthlyRate,
+      });
+    }
+  };
 
   const handleSubmit = async () => {
     try {
@@ -223,6 +269,23 @@ export default function UserForm({
 
         <div className="md:col-span-2">
           <h3 className="font-medium mb-4">Rental Pricing</h3>
+          <Form.Item name="pricingId" label="Select Rental Pricing">
+            <Select
+              placeholder="Select Rental Pricing"
+              loading={loading}
+              onChange={handlePricingChange}
+              options={pricingOptions.map((pricing) => ({
+                value: pricing.id,
+                label: `${pricing.title ?? "Car name unavailable"} - Daily: ${
+                  pricing.dailyRate || "No Rate"
+                }, Hourly: ${pricing.hourlyRate || "No Rate"}, Weekly:${
+                  pricing.weeklyRate || "No Rate"
+                },
+                Monthly:${pricing.monthlyRate || "No Rate"}`,
+              }))}
+              allowClear
+            />
+          </Form.Item>
           <div className="flex gap-4">
             <Form.Item
               name="hourlyRate"

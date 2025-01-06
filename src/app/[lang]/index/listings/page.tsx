@@ -26,11 +26,14 @@ import { usePathname } from "next/navigation";
 import { Car } from "@/lib/definitions";
 import CarForm from "@/components/CarForm";
 import { FaEdit } from "react-icons/fa";
+import { useUser } from "@/hooks/context/AuthContext";
 
 const { Option } = Select;
 
 export default function ListingsPage() {
   const { cars, setCars } = useCar();
+  const { user } = useUser();
+  const isLoggedIn = !!user;
   const [filteredCars, setFilteredCars] = useState(cars?.data || []);
   const [filters, setFilters] = useState<Record<string, any>>({});
   const router = useRouter();
@@ -96,6 +99,10 @@ export default function ListingsPage() {
       const response = await fetch(
         `/api/cars/listCars?${queryParams.toString()}`
       );
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to fetch cars");
+      }
       const data = await response.json();
       setCars(data);
       setFilteredCars(data.data);
@@ -264,10 +271,13 @@ export default function ListingsPage() {
     const end = Math.min(currentPage * pageSize, totalCars);
     return `Showing ${start}-${end} of ${totalCars} Cars`;
   };
+  const formatMileage = (mileage?: number) =>
+    mileage ? `${new Intl.NumberFormat().format(mileage)} km` : "No Mileage";
 
   return (
     <div className="p-6">
       {/* Search Section */}
+
       <div className="flex justify-between items-center mb-4">
         <div className="flex items-center gap-4 w-[60%]">
           <div className="w-[30%]">
@@ -289,14 +299,16 @@ export default function ListingsPage() {
         </div>
         <div className="flex items-center gap-2 w-[40%] justify-end">
           <CarFilters setFilters={setFilters} />
-          <Button
-            type="primary"
-            icon={<UserAddOutlined />}
-            onClick={handleAddCar}
-            className="font-workSans text-base bg-teal-800 hover:!bg-teal-700"
-          >
-            Add Car
-          </Button>
+          {isLoggedIn && (
+            <Button
+              type="primary"
+              icon={<UserAddOutlined />}
+              onClick={handleAddCar}
+              className="font-workSans text-base bg-teal-800 hover:!bg-teal-700"
+            >
+              Add Car
+            </Button>
+          )}
         </div>
       </div>
       {/* <Card className="mb-8">
@@ -403,15 +415,17 @@ export default function ListingsPage() {
                       </div>
                     </div>
                     <div>
-                      <Button
-                        type="primary"
-                        block
-                        onClick={() => getCarDetails(car.id.toString())}
-                      >
-                        <div className="flex items-center gap-2">
-                          <FaEdit />
-                        </div>
-                      </Button>
+                      {isLoggedIn && (
+                        <Button
+                          type="primary"
+                          block
+                          onClick={() => getCarDetails(car.id.toString())}
+                        >
+                          <div className="flex items-center gap-2">
+                            <FaEdit />
+                          </div>
+                        </Button>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -462,7 +476,7 @@ export default function ListingsPage() {
                   <div className="flex items-center text-sm text-gray-500 font-semibold">
                     <span className="flex items-center gap-1">
                       <MdCarRental />
-                      {car?.mileage || "No Mileage"}
+                      {formatMileage(car?.mileage)}
                     </span>
                   </div>
                   <div className="flex items-center text-sm text-gray-500 font-semibold">
@@ -484,11 +498,11 @@ export default function ListingsPage() {
                   </div>
                 </div>
                 <div className="bg-gray-100 p-2 text-red-600 font-bold text-xl text-end mb-2 font-workSans">
-                  {car?.RentalPricing?.basePrice
+                  {car?.RentalPricing?.dailyRate
                     ? new Intl.NumberFormat("en-US", {
                         style: "currency",
                         currency: "USD",
-                      }).format(car?.RentalPricing?.basePrice)
+                      }).format(car?.RentalPricing?.dailyRate / 100)
                     : "Price not available"}{" "}
                   / Day
                 </div>

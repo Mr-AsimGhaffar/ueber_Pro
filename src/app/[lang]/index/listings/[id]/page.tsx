@@ -15,12 +15,14 @@ import {
 import { CiCalendar } from "react-icons/ci";
 import { GiGearStickPattern, GiPathDistance } from "react-icons/gi";
 import { IoCarSportOutline } from "react-icons/io5";
+import { useUser } from "@/hooks/context/AuthContext";
 
 export default function CarDetailPage({
   params: { lang },
 }: {
   params: { lang: string };
 }) {
+  const { user } = useUser();
   const router = useRouter();
   const [selectedCar, setSelectedCar] = useState<Car | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -65,7 +67,16 @@ export default function CarDetailPage({
   // };
 
   const handleAddBooking = () => {
-    router.push(`/${lang}/index/carBooking/bookingLocation`);
+    if (!user) {
+      const currentPath = window.location.pathname + window.location.search; // Get the current page URL
+      message.info("You need to log in first to book cars.", 3, () => {
+        router.push(
+          `/${lang}/auth/login?redirect=${encodeURIComponent(currentPath)}`
+        );
+      });
+    } else {
+      router.push(`/${lang}/index/carBooking/bookingLocation`);
+    }
   };
   return (
     <div className="p-4">
@@ -77,7 +88,7 @@ export default function CarDetailPage({
                 <IoCarSportOutline />
               </div>
               <div className="font-workSans">
-                {selectedCar?.registrationNumber}
+                {selectedCar?.registrationNumber || "Un-Registered"}
               </div>
             </div>
           </div>
@@ -177,7 +188,7 @@ export default function CarDetailPage({
                     </div>
                     <div className="flex items-center gap-1">
                       <IoCarSportOutline className="text-cyan-700" />
-                      {selectedCar?.registrationNumber}
+                      {selectedCar?.registrationNumber || "Un-Registered"}
                     </div>
                     <div className="flex items-center gap-1">
                       <CiCalendar className="text-cyan-700" />
@@ -216,22 +227,22 @@ export default function CarDetailPage({
                       Registration#:{" "}
                     </span>
                     <span className="text-xs font-workSans">
-                      {selectedCar?.registrationNumber}
+                      {selectedCar?.registrationNumber || "Un-Registered"}
                     </span>
                   </div>
                 </div>
                 <div>
                   <p className="text-lg font-semibold font-workSans text-gray-800 mb-2">
                     Price:{" "}
-                    {selectedCar?.RentalPricing?.basePrice
+                    {selectedCar?.RentalPricing?.dailyRate
                       ? new Intl.NumberFormat("en-US", {
                           style: "currency",
                           currency: "USD",
-                        }).format(selectedCar.RentalPricing.basePrice)
-                      : "Price not available"}
+                        }).format(selectedCar?.RentalPricing?.dailyRate / 100)
+                      : "Price not available"}{" "}
+                    / Day
                   </p>
                 </div>
-
                 <Button
                   type="primary"
                   size="large"

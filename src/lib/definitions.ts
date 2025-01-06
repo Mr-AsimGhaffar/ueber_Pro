@@ -32,7 +32,7 @@ export type Car = {
   transmission: string;
   description: string;
   capacity: string;
-  mileage: string;
+  mileage: number;
   registrationNumber: string;
   rating: number;
   model: {
@@ -112,6 +112,15 @@ export type Activity = {
     id: number;
   };
 };
+
+export interface RentalPricing {
+  id: number;
+  title: string;
+  hourlyRate: string;
+  dailyRate: string;
+  weeklyRate: string;
+  monthlyRate: string;
+}
 
 export interface Driver {
   id: string;

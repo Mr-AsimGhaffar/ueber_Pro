@@ -10,21 +10,22 @@ export default async function handler(
     try {
       const accessToken = req.cookies.accessToken;
 
-      if (!accessToken) {
-        throw new Error("Token not found. Please log in.");
-      }
+      // If the user is not authenticated, fetch from the public API
+      const endpoint = accessToken
+        ? `${process.env.NEXT_PUBLIC_API_BASE_URL}/cars/${id}`
+        : `${process.env.NEXT_PUBLIC_API_BASE_URL}/cars/public/${id}`;
 
-      // Send credentials to external API
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/cars/${id}`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
-      );
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+      };
+
+      if (accessToken) {
+        headers["Authorization"] = `Bearer ${accessToken}`;
+      }
+      const response = await fetch(endpoint, {
+        method: "GET",
+        headers,
+      });
 
       if (response.ok) {
         const carResponse = await response.json();

@@ -18,7 +18,6 @@ function getLocale(request: NextRequest): string | undefined {
 
 export function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
-
   const headers = new Headers(request.headers);
   headers.set("x-current-path", request.nextUrl.pathname);
   const isAuthPath = pathname.includes("/auth/");
@@ -38,18 +37,40 @@ export function middleware(request: NextRequest) {
       ? pathname.substring(1)
       : pathname;
     return NextResponse.redirect(
-      new URL(`/${locale}/${sanitizedPathname || "home"}`, request.url)
+      new URL(
+        `/${locale}/${sanitizedPathname || "index/listings"}`,
+        request.url
+      )
     );
   }
 
+  // If user is not logged in and trying to access a protected route
+  // if (
+  //   !authToken &&
+  //   !pathname.startsWith("/auth") &&
+  //   pathname !== `/${locale}/index/listings`
+  // ) {
+  //   return NextResponse.redirect(
+  //     new URL(`/${locale}/index/listings`, request.url)
+  //   ); // Redirect to listings page
+  // }
   // If user is not authenticated and trying to access protected routes
-  if (!authToken && !isAuthPath && !isRootPath) {
-    return NextResponse.redirect(new URL(`/${locale}/auth/login`, request.url));
-  }
+  // if (!authToken && !isAuthPath && !isRootPath) {
+  //   return NextResponse.redirect(
+  //     new URL(`/${locale}/index/listings`, request.url)
+  //   );
+  // }
 
   // If user is authenticated and trying to access auth pages
   if (authToken && isRegisterPath) {
-    return NextResponse.redirect(new URL(`/${locale}/index/home`, request.url));
+    return NextResponse.redirect(
+      new URL(`/${locale}/index/listings`, request.url)
+    );
+  }
+  if (isRootPath) {
+    return NextResponse.redirect(
+      new URL(`/${locale}/index/listings`, request.url)
+    );
   }
 
   return NextResponse.next({ headers });

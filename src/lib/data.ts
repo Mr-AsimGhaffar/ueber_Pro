@@ -29,16 +29,14 @@ const refreshAccessToken = async (refreshToken: string): Promise<string> => {
   }
 };
 
-const getAccessToken = async (): Promise<string> => {
+const getAccessToken = async (): Promise<string | null> => {
   let accessToken = cookies().get("accessToken")?.value;
 
   // If the access token is expired, attempt to refresh it using the refresh token
   if (!accessToken) {
     const refreshToken = cookies().get("refreshToken")?.value;
     if (!refreshToken) {
-      throw new Error(
-        "Both access token and refresh token are missing. Please log in."
-      );
+      return null;
     }
     accessToken = await refreshAccessToken(refreshToken); // Refresh the access token
   }
@@ -52,6 +50,12 @@ export const fetchWithTokenRefresh = async (
   options: RequestInit = {}
 ): Promise<Response> => {
   let accessToken = await getAccessToken();
+
+  // If there is no access token (i.e., the user is not logged in)
+  if (accessToken === null) {
+    // Return a 401 Unauthorized status directly, indicating the user is not logged in
+    return new Response(null, { status: 401 });
+  }
 
   options.headers = {
     ...options.headers,
@@ -72,12 +76,12 @@ export const fetchWithTokenRefresh = async (
   return response;
 };
 
-export async function getUser(): Promise<User> {
+export async function getUser(): Promise<User | null> {
   try {
     const id = cookies().get("id")?.value;
 
     if (!id) {
-      throw new Error("User ID not found. Please log in.");
+      return null;
     }
 
     const response = await fetchWithTokenRefresh(
@@ -105,7 +109,7 @@ export async function getUser(): Promise<User> {
 
 export async function getCars(
   filters: Record<string, string[]> = {}
-): Promise<Cars> {
+): Promise<Cars | null> {
   try {
     const queryParams = new URLSearchParams();
 
@@ -121,12 +125,14 @@ export async function getCars(
         method: "GET",
       }
     );
+    if (response.status === 401) {
+      // Handle unauthenticated state, e.g., redirect to login
+      // Example: redirectToLoginPage();
+      return null;
+    }
 
     if (!response.ok) {
-      if (response.status === 401) {
-        throw new Error("Unauthorized. Please log in again.");
-      }
-      throw new Error("Failed to fetch cars data");
+      return null;
     }
 
     const cars = await response.json();
@@ -137,11 +143,11 @@ export async function getCars(
   }
 }
 
-export async function getActivities(): Promise<Activity> {
+export async function getActivities(): Promise<Activity | null> {
   const id = cookies().get("id")?.value;
 
   if (!id) {
-    throw new Error("User ID not found. Please log in.");
+    return null;
   }
 
   const response = await fetchWithTokenRefresh(

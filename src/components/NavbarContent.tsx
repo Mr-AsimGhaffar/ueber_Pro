@@ -21,6 +21,7 @@ interface Props {
 
 export default function NavbarContent({ locale, messages }: Props) {
   const { user } = useUser();
+  const isLoggedIn = !!user;
   const [refreshTrigger, setRefreshTrigger] = useState(false);
   // const [selectedUser, setSelectedUser] = useState<any>(null);
   const pathname = usePathname();
@@ -286,6 +287,13 @@ export default function NavbarContent({ locale, messages }: Props) {
             </Link> */}
 
             {/* Notifications */}
+            {!isLoggedIn && (
+              <Link href={`/${locale}/auth/login`}>
+                <button className="bg-blue-500 text-white px-4 py-2 rounded-full">
+                  Login
+                </button>
+              </Link>
+            )}
             <div className="relative mx-1">
               <Dropdown
                 overlay={<NotificationList refreshTrigger={refreshTrigger} />}
