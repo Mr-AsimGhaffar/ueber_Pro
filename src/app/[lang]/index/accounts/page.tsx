@@ -11,7 +11,7 @@ import type { ColumnsType } from "antd/es/table";
 import debounce from "lodash.debounce";
 import SearchFiltersAccounts from "../../components/SearchFiltersAccounts";
 import ExportTablePdf from "../../components/ExportTablePdf";
-import { FaSort, FaSortDown, FaSortUp } from "react-icons/fa";
+import { FaEdit, FaSort, FaSortDown, FaSortUp } from "react-icons/fa";
 import AccountForm from "@/components/AccountForm";
 
 interface Account {
@@ -168,7 +168,7 @@ export default function AccountPage() {
       title: (
         <span className="flex items-center gap-2">
           Account Number
-          {sortParams.find((param) => param.field === "accountNumber") ? (
+          {/* {sortParams.find((param) => param.field === "accountNumber") ? (
             sortParams.find((param) => param.field === "accountNumber")!
               .order === "asc" ? (
               <FaSortUp
@@ -186,67 +186,67 @@ export default function AccountPage() {
               className="cursor-pointer text-gray-400"
               onClick={() => handleSort("accountNumber")}
             />
-          )}
+          )} */}
         </span>
       ),
       dataIndex: "accountNumber",
       key: "accountNumber",
-      className: "font-workSans font-semibold",
-      render: (text) => <a>{text}</a>,
-      filterDropdown: (
-        <div style={{ padding: 8 }}>
-          <Input
-            placeholder="Search Account Number"
-            value={searchAccountNumber}
-            suffix={
-              <SearchOutlined
-                style={{ color: searchAccountNumber ? "blue" : "gray" }}
-              />
-            }
-            onChange={(e) => {
-              const newSearchValue = "searchAccountNumber";
-              setSearchAccountNumber(e.target.value);
-              if (!searchRef.current.includes(newSearchValue)) {
-                searchRef.current.push(newSearchValue);
-              }
-              handleFilterChange("accountNumber", e.target.value);
-            }}
-            style={{ width: "200px" }}
-          />
-          <div style={{ marginTop: 8 }}>
-            <Button
-              type="primary"
-              icon={<SearchOutlined />}
-              onClick={() =>
-                handleFilterChange("accountNumber", searchAccountNumber)
-              }
-              style={{ marginRight: 8 }}
-            >
-              Search
-            </Button>
-            <Button
-              icon={<ReloadOutlined />}
-              onClick={() => {
-                setSearchAccountNumber(""); // Reset the search field
-                handleFilterChange("accountNumber", ""); // Reset filter
-              }}
-            >
-              Reset
-            </Button>
-          </div>
-        </div>
-      ),
-      filterIcon: () => (
-        <SearchOutlined
-          style={{ color: searchAccountNumber ? "blue" : "gray" }}
-        />
-      ),
+      className: "font-workSans",
+      render: (text) => <p>{text}</p>,
+      // filterDropdown: (
+      //   <div style={{ padding: 8 }}>
+      //     <Input
+      //       placeholder="Search Account Number"
+      //       value={searchAccountNumber}
+      //       suffix={
+      //         <SearchOutlined
+      //           style={{ color: searchAccountNumber ? "blue" : "gray" }}
+      //         />
+      //       }
+      //       onChange={(e) => {
+      //         const newSearchValue = "searchAccountNumber";
+      //         setSearchAccountNumber(e.target.value);
+      //         if (!searchRef.current.includes(newSearchValue)) {
+      //           searchRef.current.push(newSearchValue);
+      //         }
+      //         handleFilterChange("accountNumber", e.target.value);
+      //       }}
+      //       style={{ width: "200px" }}
+      //     />
+      //     <div style={{ marginTop: 8 }}>
+      //       <Button
+      //         type="primary"
+      //         icon={<SearchOutlined />}
+      //         onClick={() =>
+      //           handleFilterChange("accountNumber", searchAccountNumber)
+      //         }
+      //         style={{ marginRight: 8 }}
+      //       >
+      //         Search
+      //       </Button>
+      //       <Button
+      //         icon={<ReloadOutlined />}
+      //         onClick={() => {
+      //           setSearchAccountNumber(""); // Reset the search field
+      //           handleFilterChange("accountNumber", ""); // Reset filter
+      //         }}
+      //       >
+      //         Reset
+      //       </Button>
+      //     </div>
+      //   </div>
+      // ),
+      // filterIcon: () => (
+      //   <SearchOutlined
+      //     style={{ color: searchAccountNumber ? "blue" : "gray" }}
+      //   />
+      // ),
     },
     {
       title: (
         <span className="flex items-center gap-2">
           Bank Name
-          {sortParams.find((param) => param.field === "bankName") ? (
+          {/* {sortParams.find((param) => param.field === "bankName") ? (
             sortParams.find((param) => param.field === "bankName")!.order ===
             "asc" ? (
               <FaSortUp
@@ -264,61 +264,61 @@ export default function AccountPage() {
               className="cursor-pointer text-gray-400"
               onClick={() => handleSort("bankName")}
             />
-          )}
+          )} */}
         </span>
       ),
       dataIndex: "bankName",
       key: "bankName",
       className: "font-workSans",
-      filterDropdown: (
-        <div style={{ padding: 8 }}>
-          <Input
-            placeholder="Search Bank Name"
-            value={searchBankName}
-            suffix={
-              <SearchOutlined
-                style={{ color: searchBankName ? "blue" : "gray" }}
-              />
-            }
-            onChange={(e) => {
-              const searchValue = "bankName";
-              setSearchBankName(e.target.value);
-              if (!searchRef.current.includes(searchValue)) {
-                searchRef.current.push(searchValue);
-              }
-              handleFilterChange("bankName", e.target.value);
-            }}
-          />
-          <div style={{ marginTop: 8 }}>
-            <Button
-              type="primary"
-              icon={<SearchOutlined />}
-              onClick={() => handleFilterChange("bankName", searchBankName)}
-              style={{ marginRight: 8 }}
-            >
-              Search
-            </Button>
-            <Button
-              icon={<ReloadOutlined />}
-              onClick={() => {
-                setSearchBankName(""); // Reset the search field
-                handleFilterChange("bankName", ""); // Reset filter
-              }}
-            >
-              Reset
-            </Button>
-          </div>
-        </div>
-      ),
-      filterIcon: () => (
-        <SearchOutlined style={{ color: searchBankName ? "blue" : "gray" }} />
-      ),
+      // filterDropdown: (
+      //   <div style={{ padding: 8 }}>
+      //     <Input
+      //       placeholder="Search Bank Name"
+      //       value={searchBankName}
+      //       suffix={
+      //         <SearchOutlined
+      //           style={{ color: searchBankName ? "blue" : "gray" }}
+      //         />
+      //       }
+      //       onChange={(e) => {
+      //         const searchValue = "bankName";
+      //         setSearchBankName(e.target.value);
+      //         if (!searchRef.current.includes(searchValue)) {
+      //           searchRef.current.push(searchValue);
+      //         }
+      //         handleFilterChange("bankName", e.target.value);
+      //       }}
+      //     />
+      //     <div style={{ marginTop: 8 }}>
+      //       <Button
+      //         type="primary"
+      //         icon={<SearchOutlined />}
+      //         onClick={() => handleFilterChange("bankName", searchBankName)}
+      //         style={{ marginRight: 8 }}
+      //       >
+      //         Search
+      //       </Button>
+      //       <Button
+      //         icon={<ReloadOutlined />}
+      //         onClick={() => {
+      //           setSearchBankName(""); // Reset the search field
+      //           handleFilterChange("bankName", ""); // Reset filter
+      //         }}
+      //       >
+      //         Reset
+      //       </Button>
+      //     </div>
+      //   </div>
+      // ),
+      // filterIcon: () => (
+      //   <SearchOutlined style={{ color: searchBankName ? "blue" : "gray" }} />
+      // ),
     },
     {
       title: (
         <span className="flex items-center gap-2">
           Account Holder Name
-          {sortParams.find((param) => param.field === "accountHolderName") ? (
+          {/* {sortParams.find((param) => param.field === "accountHolderName") ? (
             sortParams.find((param) => param.field === "accountHolderName")!
               .order === "asc" ? (
               <FaSortUp
@@ -336,65 +336,65 @@ export default function AccountPage() {
               className="cursor-pointer text-gray-400"
               onClick={() => handleSort("accountHolderName")}
             />
-          )}
+          )} */}
         </span>
       ),
       dataIndex: "accountHolderName",
       key: "accountHolderName",
-      className: "font-workSans text-blue-500",
-      filterDropdown: (
-        <div style={{ padding: 8 }}>
-          <Input
-            placeholder="Search Account Holder Name"
-            value={searchAccountHolderName}
-            suffix={
-              <SearchOutlined
-                style={{ color: searchAccountHolderName ? "blue" : "gray" }}
-              />
-            }
-            onChange={(e) => {
-              const searchValue = "accountHolderName";
-              setSearchAccountHolderName(e.target.value);
-              if (!searchRef.current.includes(searchValue)) {
-                searchRef.current.push(searchValue);
-              }
-              handleFilterChange("accountHolderName", e.target.value);
-            }}
-          />
-          <div style={{ marginTop: 8 }}>
-            <Button
-              type="primary"
-              icon={<SearchOutlined />}
-              onClick={() =>
-                handleFilterChange("accountHolderName", searchAccountHolderName)
-              }
-              style={{ marginRight: 8 }}
-            >
-              Search
-            </Button>
-            <Button
-              icon={<ReloadOutlined />}
-              onClick={() => {
-                setSearchAccountHolderName(""); // Reset the search field
-                handleFilterChange("accountHolderName", ""); // Reset filter
-              }}
-            >
-              Reset
-            </Button>
-          </div>
-        </div>
-      ),
-      filterIcon: () => (
-        <SearchOutlined
-          style={{ color: searchAccountHolderName ? "blue" : "gray" }}
-        />
-      ),
+      className: "font-workSans",
+      // filterDropdown: (
+      //   <div style={{ padding: 8 }}>
+      //     <Input
+      //       placeholder="Search Account Holder Name"
+      //       value={searchAccountHolderName}
+      //       suffix={
+      //         <SearchOutlined
+      //           style={{ color: searchAccountHolderName ? "blue" : "gray" }}
+      //         />
+      //       }
+      //       onChange={(e) => {
+      //         const searchValue = "accountHolderName";
+      //         setSearchAccountHolderName(e.target.value);
+      //         if (!searchRef.current.includes(searchValue)) {
+      //           searchRef.current.push(searchValue);
+      //         }
+      //         handleFilterChange("accountHolderName", e.target.value);
+      //       }}
+      //     />
+      //     <div style={{ marginTop: 8 }}>
+      //       <Button
+      //         type="primary"
+      //         icon={<SearchOutlined />}
+      //         onClick={() =>
+      //           handleFilterChange("accountHolderName", searchAccountHolderName)
+      //         }
+      //         style={{ marginRight: 8 }}
+      //       >
+      //         Search
+      //       </Button>
+      //       <Button
+      //         icon={<ReloadOutlined />}
+      //         onClick={() => {
+      //           setSearchAccountHolderName(""); // Reset the search field
+      //           handleFilterChange("accountHolderName", ""); // Reset filter
+      //         }}
+      //       >
+      //         Reset
+      //       </Button>
+      //     </div>
+      //   </div>
+      // ),
+      // filterIcon: () => (
+      //   <SearchOutlined
+      //     style={{ color: searchAccountHolderName ? "blue" : "gray" }}
+      //   />
+      // ),
     },
     {
       title: (
         <span className="flex items-center gap-2">
           Created Date
-          {sortParams.find((param) => param.field === "createdAt") ? (
+          {/* {sortParams.find((param) => param.field === "createdAt") ? (
             sortParams.find((param) => param.field === "createdAt")!.order ===
             "asc" ? (
               <FaSortUp
@@ -412,61 +412,61 @@ export default function AccountPage() {
               className="cursor-pointer text-gray-400"
               onClick={() => handleSort("createdAt")}
             />
-          )}
+          )} */}
         </span>
       ),
       dataIndex: "createdAt",
       key: "createdAt",
       className: "font-workSans",
-      filterDropdown: (
-        <div style={{ padding: 8 }}>
-          <Input
-            placeholder="Search Created Date"
-            value={searchCreatedAt}
-            suffix={
-              <SearchOutlined
-                style={{ color: searchCreatedAt ? "blue" : "gray" }}
-              />
-            }
-            onChange={(e) => {
-              const searchValue = "createdAt";
-              setSearchCreatedAt(e.target.value);
-              if (!searchRef.current.includes(searchValue)) {
-                searchRef.current.push(searchValue);
-              }
-              handleFilterChange("createdAt", e.target.value);
-            }}
-          />
-          <div style={{ marginTop: 8 }}>
-            <Button
-              type="primary"
-              icon={<SearchOutlined />}
-              onClick={() => handleFilterChange("createdAt", searchCreatedAt)}
-              style={{ marginRight: 8 }}
-            >
-              Search
-            </Button>
-            <Button
-              icon={<ReloadOutlined />}
-              onClick={() => {
-                setSearchCreatedAt(""); // Reset the search field
-                handleFilterChange("createdAt", ""); // Reset filter
-              }}
-            >
-              Reset
-            </Button>
-          </div>
-        </div>
-      ),
-      filterIcon: () => (
-        <SearchOutlined style={{ color: searchCreatedAt ? "blue" : "gray" }} />
-      ),
+      // filterDropdown: (
+      //   <div style={{ padding: 8 }}>
+      //     <Input
+      //       placeholder="Search Created Date"
+      //       value={searchCreatedAt}
+      //       suffix={
+      //         <SearchOutlined
+      //           style={{ color: searchCreatedAt ? "blue" : "gray" }}
+      //         />
+      //       }
+      //       onChange={(e) => {
+      //         const searchValue = "createdAt";
+      //         setSearchCreatedAt(e.target.value);
+      //         if (!searchRef.current.includes(searchValue)) {
+      //           searchRef.current.push(searchValue);
+      //         }
+      //         handleFilterChange("createdAt", e.target.value);
+      //       }}
+      //     />
+      //     <div style={{ marginTop: 8 }}>
+      //       <Button
+      //         type="primary"
+      //         icon={<SearchOutlined />}
+      //         onClick={() => handleFilterChange("createdAt", searchCreatedAt)}
+      //         style={{ marginRight: 8 }}
+      //       >
+      //         Search
+      //       </Button>
+      //       <Button
+      //         icon={<ReloadOutlined />}
+      //         onClick={() => {
+      //           setSearchCreatedAt(""); // Reset the search field
+      //           handleFilterChange("createdAt", ""); // Reset filter
+      //         }}
+      //       >
+      //         Reset
+      //       </Button>
+      //     </div>
+      //   </div>
+      // ),
+      // filterIcon: () => (
+      //   <SearchOutlined style={{ color: searchCreatedAt ? "blue" : "gray" }} />
+      // ),
     },
     {
       title: (
         <span className="flex items-center gap-2">
           Created By
-          {sortParams.find((param) => param.field === "createdBy") ? (
+          {/* {sortParams.find((param) => param.field === "createdBy") ? (
             sortParams.find((param) => param.field === "createdBy")!.order ===
             "asc" ? (
               <FaSortUp
@@ -484,7 +484,7 @@ export default function AccountPage() {
               className="cursor-pointer text-gray-400"
               onClick={() => handleSort("createdBy")}
             />
-          )}
+          )} */}
         </span>
       ),
       dataIndex: "createdByUser",
@@ -497,49 +497,49 @@ export default function AccountPage() {
         }
         return null;
       },
-      filterDropdown: (
-        <div style={{ padding: 8 }}>
-          <Input
-            placeholder="Search Created By"
-            value={searchCreatedBy}
-            suffix={
-              <SearchOutlined
-                style={{ color: searchCreatedBy ? "blue" : "gray" }}
-              />
-            }
-            onChange={(e) => {
-              const searchValue = "createdByUser";
-              setSearchCreatedBy(e.target.value);
-              if (!searchRef.current.includes(searchValue)) {
-                searchRef.current.push(searchValue);
-              }
-              handleFilterChange("createdBy", e.target.value);
-            }}
-          />
-          <div style={{ marginTop: 8 }}>
-            <Button
-              type="primary"
-              icon={<SearchOutlined />}
-              onClick={() => handleFilterChange("createdBy", searchCreatedBy)}
-              style={{ marginRight: 8 }}
-            >
-              Search
-            </Button>
-            <Button
-              icon={<ReloadOutlined />}
-              onClick={() => {
-                setSearchCreatedBy(""); // Reset the search field
-                handleFilterChange("createdBy", ""); // Reset filter
-              }}
-            >
-              Reset
-            </Button>
-          </div>
-        </div>
-      ),
-      filterIcon: () => (
-        <SearchOutlined style={{ color: searchCreatedBy ? "blue" : "gray" }} />
-      ),
+      // filterDropdown: (
+      //   <div style={{ padding: 8 }}>
+      //     <Input
+      //       placeholder="Search Created By"
+      //       value={searchCreatedBy}
+      //       suffix={
+      //         <SearchOutlined
+      //           style={{ color: searchCreatedBy ? "blue" : "gray" }}
+      //         />
+      //       }
+      //       onChange={(e) => {
+      //         const searchValue = "createdByUser";
+      //         setSearchCreatedBy(e.target.value);
+      //         if (!searchRef.current.includes(searchValue)) {
+      //           searchRef.current.push(searchValue);
+      //         }
+      //         handleFilterChange("createdBy", e.target.value);
+      //       }}
+      //     />
+      //     <div style={{ marginTop: 8 }}>
+      //       <Button
+      //         type="primary"
+      //         icon={<SearchOutlined />}
+      //         onClick={() => handleFilterChange("createdBy", searchCreatedBy)}
+      //         style={{ marginRight: 8 }}
+      //       >
+      //         Search
+      //       </Button>
+      //       <Button
+      //         icon={<ReloadOutlined />}
+      //         onClick={() => {
+      //           setSearchCreatedBy(""); // Reset the search field
+      //           handleFilterChange("createdBy", ""); // Reset filter
+      //         }}
+      //       >
+      //         Reset
+      //       </Button>
+      //     </div>
+      //   </div>
+      // ),
+      // filterIcon: () => (
+      //   <SearchOutlined style={{ color: searchCreatedBy ? "blue" : "gray" }} />
+      // ),
     },
     {
       title: "Action",
@@ -547,7 +547,7 @@ export default function AccountPage() {
       className: "font-workSans",
       render: (_, record) => (
         <Button type="link" onClick={() => handleEdit(record)}>
-          Edit
+          <FaEdit className="text-lg text-teal-800" />
         </Button>
       ),
     },
@@ -654,22 +654,22 @@ export default function AccountPage() {
   const handlePaginationChange = (page: number, pageSize: number) => {
     setPagination({ current: page, pageSize, total: pagination.total });
   };
-  const rowSelection = {
-    onChange: (selectedRowKeys: React.Key[], selectedRows: Account[]) => {
-      console.log(
-        `Selected row keys: ${selectedRowKeys}`,
-        "Selected rows: ",
-        selectedRows
-      );
-    },
-  };
+  // const rowSelection = {
+  //   onChange: (selectedRowKeys: React.Key[], selectedRows: Account[]) => {
+  //     console.log(
+  //       `Selected row keys: ${selectedRowKeys}`,
+  //       "Selected rows: ",
+  //       selectedRows
+  //     );
+  //   },
+  // };
 
   return (
     <div>
       <div className="mb-6">
         <h1 className="text-3xl font-bold font-montserrat">Accounts</h1>
       </div>
-      <div className="flex items-center gap-4 mb-2 font-workSans text-sm cursor-pointer">
+      {/* <div className="flex items-center gap-4 mb-2 font-workSans text-sm cursor-pointer">
         <div className="flex items-center gap-1">
           <div className="text-blue-700 font-medium">All</div>
           <div className="text-gray-700 hover:underline">
@@ -696,10 +696,10 @@ export default function AccountPage() {
           <div className="text-blue-700 font-medium">Drivers</div>
           <div className="text-gray-700 hover:underline">(4)</div>
         </div>
-      </div>
+      </div> */}
       <div className="flex justify-between items-center  mb-4">
         <div>
-          <SearchFiltersAccounts onFilterChange={handleGeneralSearch} />
+          {/* <SearchFiltersAccounts onFilterChange={handleGeneralSearch} /> */}
         </div>
         <div>
           <div className="flex items-center gap-4">
@@ -718,10 +718,10 @@ export default function AccountPage() {
       </div>
 
       <Table
-        rowSelection={{
-          type: "checkbox",
-          ...rowSelection,
-        }}
+        // rowSelection={{
+        //   type: "checkbox",
+        //   ...rowSelection,
+        // }}
         columns={columns}
         dataSource={accounts}
         loading={loading}

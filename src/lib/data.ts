@@ -25,7 +25,7 @@ const refreshAccessToken = async (refreshToken: string): Promise<string> => {
     return newAccessToken;
   } catch (error) {
     console.error("Error refreshing access token:", error);
-    throw error;
+    return Promise.reject("Session expired. Please log in again.");
   }
 };
 
@@ -62,18 +62,16 @@ export const fetchWithTokenRefresh = async (
     Authorization: `Bearer ${accessToken}`,
   };
 
-  const response = await fetch(url, options);
-
-  if (response.status === 401) {
-    accessToken = await getAccessToken();
-    options.headers = {
-      ...options.headers,
-      Authorization: `Bearer ${accessToken}`,
-    };
-    return fetch(url, options);
+  try {
+    const response = await fetch(url, options);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch. Status: ${response.status}`);
+    }
+    return response;
+  } catch (error) {
+    console.error("Fetch failed:", error);
+    throw new Error("Network or server error occurred");
   }
-
-  return response;
 };
 
 export async function getUser(): Promise<User | null> {

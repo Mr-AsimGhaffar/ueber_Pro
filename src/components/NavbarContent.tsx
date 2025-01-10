@@ -330,11 +330,11 @@ export default function NavbarContent({ locale, messages }: Props) {
                 onClick={() => setUserMenuOpen(!userMenuOpen)}
               >
                 <Image
-                  src="https://images.unsplash.com/photo-1550355291-bbee04a92027"
+                  src="/images/navbarAvatar.png"
                   alt="Profile image"
-                  className="rounded-full"
-                  width={24}
-                  height={24}
+                  className="rounded-full object-cover"
+                  width={36}
+                  height={36}
                 />
               </button>
 

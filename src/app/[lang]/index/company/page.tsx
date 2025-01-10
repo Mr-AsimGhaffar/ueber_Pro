@@ -12,7 +12,7 @@ import CompanyForm from "@/components/CompanyForm";
 import debounce from "lodash.debounce";
 import SearchFilters from "../../components/SearchFilters";
 import ExportTablePdf from "../../components/ExportTablePdf";
-import { FaSort, FaSortDown, FaSortUp } from "react-icons/fa";
+import { FaEdit, FaSort, FaSortDown, FaSortUp } from "react-icons/fa";
 
 interface Company {
   key: string;
@@ -76,7 +76,12 @@ export default function CompanyPage() {
         ...(currentFilters.contact && { contact: currentFilters.contact }),
       };
       const sort = sortParams
-        .map((param) => `${param.field}:${param.order}`)
+        .map(
+          (param) =>
+            `${
+              param.field == "createdBy" ? "createdByUser.name" : param.field
+            }:${param.order}`
+        )
         .join(",");
       const query = new URLSearchParams({
         page: String(pagination.current),
@@ -166,6 +171,17 @@ export default function CompanyPage() {
     fetchCompanies();
   }, [pagination.current, pagination.pageSize, sortParams, search, filters]);
 
+  const formatString = (str: any) => {
+    if (!str) return "";
+    return str
+      .split("_") // Split by underscore
+      .map(
+        (word: any) =>
+          word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+      ) // Capitalize first letter of each word
+      .join(" "); // Join the words back together with spaces
+  };
+
   const columns: ColumnsType<Company> = [
     {
       title: (
@@ -194,8 +210,7 @@ export default function CompanyPage() {
       ),
       dataIndex: "name",
       key: "name",
-      className: "font-workSans font-semibold",
-      render: (text) => <a>{text}</a>,
+      className: "font-workSans",
       filterDropdown: (
         <div style={{ padding: 8 }}>
           <Input
@@ -267,6 +282,9 @@ export default function CompanyPage() {
       dataIndex: "type",
       key: "type",
       className: "font-workSans",
+      render: (type) => {
+        return <p>{formatString(type)}</p>;
+      },
     },
     {
       title: (
@@ -375,7 +393,7 @@ export default function CompanyPage() {
         };
         return (
           <Tag color={statusColors[status] || "default"}>
-            {status.replace("_", " ")}
+            {formatString(status)}
           </Tag>
         );
       },
@@ -407,7 +425,8 @@ export default function CompanyPage() {
       ),
       dataIndex: "email",
       key: "email",
-      className: "font-workSans text-blue-500",
+      className: "font-workSans",
+      render: (text) => <p>{text ? text : "No email"}</p>,
       filterDropdown: (
         <div style={{ padding: 8 }}>
           <Input
@@ -617,7 +636,7 @@ export default function CompanyPage() {
       className: "font-workSans",
       render: (_, record) => (
         <Button type="link" onClick={() => handleEdit(record)}>
-          Edit
+          <FaEdit className="text-lg" />
         </Button>
       ),
     },
@@ -718,15 +737,6 @@ export default function CompanyPage() {
   const handlePaginationChange = (page: number, pageSize: number) => {
     setPagination({ current: page, pageSize, total: pagination.total });
   };
-  const rowSelection = {
-    onChange: (selectedRowKeys: React.Key[], selectedRows: Company[]) => {
-      console.log(
-        `Selected row keys: ${selectedRowKeys}`,
-        "Selected rows: ",
-        selectedRows
-      );
-    },
-  };
 
   return (
     <div>
@@ -740,7 +750,8 @@ export default function CompanyPage() {
             ({pagination.total})
           </div>
         </div>
-        <div className="flex items-center gap-1">
+
+        {/* <div className="flex items-center gap-1">
           <div className="text-blue-700 font-medium">New</div>
           <div className="text-gray-700 hover:underline">(6)</div>
         </div>
@@ -759,7 +770,7 @@ export default function CompanyPage() {
         <div className="flex items-center gap-1">
           <div className="text-blue-700 font-medium">Drivers</div>
           <div className="text-gray-700 hover:underline">(4)</div>
-        </div>
+        </div> */}
       </div>
       <div className="flex justify-between items-center  mb-4">
         <div>
@@ -782,10 +793,6 @@ export default function CompanyPage() {
       </div>
 
       <Table
-        rowSelection={{
-          type: "checkbox",
-          ...rowSelection,
-        }}
         columns={columns}
         dataSource={companies}
         loading={loading}

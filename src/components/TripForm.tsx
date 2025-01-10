@@ -269,7 +269,11 @@ export default function TripForm({
       {/* Form Actions */}
       <div className="flex justify-end gap-4 mt-6">
         <Button onClick={onCancel}>Cancel</Button>
-        <Button type="primary" onClick={handleSubmit}>
+        <Button
+          type="primary"
+          onClick={handleSubmit}
+          className="font-sansInter bg-teal-800 hover:!bg-teal-700"
+        >
           {initialValues ? "Update Trip" : "Add Trip"}
         </Button>
       </div>

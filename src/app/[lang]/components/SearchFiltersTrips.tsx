@@ -86,7 +86,7 @@ const FilterBar: React.FC<SearchFiltersTripsProps> = ({ onFilterChange }) => {
     <div>
       <div className="flex items-center justify-between gap-4">
         {/* Search Input */}
-        <div>
+        {/* <div>
           <Input
             placeholder="Search companies"
             prefix={<SearchOutlined />}
@@ -94,7 +94,7 @@ const FilterBar: React.FC<SearchFiltersTripsProps> = ({ onFilterChange }) => {
             onChange={(e) => handleSearch(e.target.value)}
             className="w-80"
           />
-        </div>
+        </div> */}
         <div className="flex items-center gap-2">
           <Select
             mode="multiple"

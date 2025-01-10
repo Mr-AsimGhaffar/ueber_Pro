@@ -19,7 +19,7 @@ import {
 } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 import debounce from "lodash.debounce";
-import { FaSort, FaSortDown, FaSortUp } from "react-icons/fa";
+import { FaEdit, FaSort, FaSortDown, FaSortUp } from "react-icons/fa";
 import { useUser } from "@/hooks/context/AuthContext";
 
 interface RentalAgreement {
@@ -170,12 +170,23 @@ export default function AccountPage() {
     fetchRentalAgreements();
   }, [pagination.current, pagination.pageSize, sortParams, filters]);
 
+  const formatString = (str: any) => {
+    if (!str) return "";
+    return str
+      .split("_") // Split by underscore
+      .map(
+        (word: any) =>
+          word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+      ) // Capitalize first letter of each word
+      .join(" "); // Join the words back together with spaces
+  };
+
   const columns: ColumnsType<RentalAgreement> = [
     {
       title: (
         <span className="flex items-center gap-2">
           Rental Type
-          {sortParams.find((param) => param.field === "rentalType") ? (
+          {/* {sortParams.find((param) => param.field === "rentalType") ? (
             sortParams.find((param) => param.field === "rentalType")!.order ===
             "asc" ? (
               <FaSortUp
@@ -193,71 +204,71 @@ export default function AccountPage() {
               className="cursor-pointer text-gray-400"
               onClick={() => handleSort("rentalType")}
             />
-          )}
+          )} */}
         </span>
       ),
       dataIndex: "rentalType",
       key: "rentalType",
       className: "font-workSans",
       render: (text) => (
-        <a>
+        <p>
           {text
             .toLowerCase()
             .split("_")
             .map((word: any) => word.charAt(0).toUpperCase() + word.slice(1))
             .join(" ")}
-        </a>
+        </p>
       ),
-      filterDropdown: (
-        <div style={{ padding: 8 }}>
-          <Input
-            placeholder="Search rental type"
-            value={searchRentalType}
-            suffix={
-              <SearchOutlined
-                style={{ color: searchRentalType ? "blue" : "gray" }}
-              />
-            }
-            onChange={(e) => {
-              const newSearchValue = "rentalType";
-              setSearchRentalType(e.target.value);
-              if (!searchRef.current.includes(newSearchValue)) {
-                searchRef.current.push(newSearchValue);
-              }
-              handleFilterChange("rentalType", e.target.value);
-            }}
-            style={{ width: "200px" }}
-          />
-          <div style={{ marginTop: 8 }}>
-            <Button
-              type="primary"
-              icon={<SearchOutlined />}
-              onClick={() => handleFilterChange("rentalType", searchRentalType)}
-              style={{ marginRight: 8 }}
-            >
-              Search
-            </Button>
-            <Button
-              icon={<ReloadOutlined />}
-              onClick={() => {
-                setSearchRentalType(""); // Reset the search field
-                handleFilterChange("rentalType", ""); // Reset filter
-              }}
-            >
-              Reset
-            </Button>
-          </div>
-        </div>
-      ),
-      filterIcon: () => (
-        <SearchOutlined style={{ color: searchRentalType ? "blue" : "gray" }} />
-      ),
+      // filterDropdown: (
+      //   <div style={{ padding: 8 }}>
+      //     <Input
+      //       placeholder="Search rental type"
+      //       value={searchRentalType}
+      //       suffix={
+      //         <SearchOutlined
+      //           style={{ color: searchRentalType ? "blue" : "gray" }}
+      //         />
+      //       }
+      //       onChange={(e) => {
+      //         const newSearchValue = "rentalType";
+      //         setSearchRentalType(e.target.value);
+      //         if (!searchRef.current.includes(newSearchValue)) {
+      //           searchRef.current.push(newSearchValue);
+      //         }
+      //         handleFilterChange("rentalType", e.target.value);
+      //       }}
+      //       style={{ width: "200px" }}
+      //     />
+      //     <div style={{ marginTop: 8 }}>
+      //       <Button
+      //         type="primary"
+      //         icon={<SearchOutlined />}
+      //         onClick={() => handleFilterChange("rentalType", searchRentalType)}
+      //         style={{ marginRight: 8 }}
+      //       >
+      //         Search
+      //       </Button>
+      //       <Button
+      //         icon={<ReloadOutlined />}
+      //         onClick={() => {
+      //           setSearchRentalType(""); // Reset the search field
+      //           handleFilterChange("rentalType", ""); // Reset filter
+      //         }}
+      //       >
+      //         Reset
+      //       </Button>
+      //     </div>
+      //   </div>
+      // ),
+      // filterIcon: () => (
+      //   <SearchOutlined style={{ color: searchRentalType ? "blue" : "gray" }} />
+      // ),
     },
     {
       title: (
         <span className="flex items-center gap-2">
           Price
-          {sortParams.find((param) => param.field === "basePrice") ? (
+          {/* {sortParams.find((param) => param.field === "basePrice") ? (
             sortParams.find((param) => param.field === "basePrice")!.order ===
             "asc" ? (
               <FaSortUp
@@ -275,63 +286,63 @@ export default function AccountPage() {
               className="cursor-pointer text-gray-400"
               onClick={() => handleSort("basePrice")}
             />
-          )}
+          )} */}
         </span>
       ),
       dataIndex: "basePrice",
       key: "basePrice",
       className: "font-workSans",
       render: (text) => <span>${(text / 100).toFixed(2)}</span>,
-      filterDropdown: (
-        <div style={{ padding: 8 }}>
-          <Input
-            placeholder="Search price"
-            value={searchBasePrice}
-            suffix={
-              <SearchOutlined
-                style={{ color: searchBasePrice ? "blue" : "gray" }}
-              />
-            }
-            onChange={(e) => {
-              const newSearchValue = "basePrice";
-              setSearchBasePrice(e.target.value);
-              if (!searchRef.current.includes(newSearchValue)) {
-                searchRef.current.push(newSearchValue);
-              }
-              handleFilterChange("basePrice", e.target.value);
-            }}
-            style={{ width: "200px" }}
-          />
-          <div style={{ marginTop: 8 }}>
-            <Button
-              type="primary"
-              icon={<SearchOutlined />}
-              onClick={() => handleFilterChange("basePrice", searchBasePrice)}
-              style={{ marginRight: 8 }}
-            >
-              Search
-            </Button>
-            <Button
-              icon={<ReloadOutlined />}
-              onClick={() => {
-                setSearchBasePrice(""); // Reset the search field
-                handleFilterChange("basePrice", ""); // Reset filter
-              }}
-            >
-              Reset
-            </Button>
-          </div>
-        </div>
-      ),
-      filterIcon: () => (
-        <SearchOutlined style={{ color: searchBasePrice ? "blue" : "gray" }} />
-      ),
+      // filterDropdown: (
+      //   <div style={{ padding: 8 }}>
+      //     <Input
+      //       placeholder="Search price"
+      //       value={searchBasePrice}
+      //       suffix={
+      //         <SearchOutlined
+      //           style={{ color: searchBasePrice ? "blue" : "gray" }}
+      //         />
+      //       }
+      //       onChange={(e) => {
+      //         const newSearchValue = "basePrice";
+      //         setSearchBasePrice(e.target.value);
+      //         if (!searchRef.current.includes(newSearchValue)) {
+      //           searchRef.current.push(newSearchValue);
+      //         }
+      //         handleFilterChange("basePrice", e.target.value);
+      //       }}
+      //       style={{ width: "200px" }}
+      //     />
+      //     <div style={{ marginTop: 8 }}>
+      //       <Button
+      //         type="primary"
+      //         icon={<SearchOutlined />}
+      //         onClick={() => handleFilterChange("basePrice", searchBasePrice)}
+      //         style={{ marginRight: 8 }}
+      //       >
+      //         Search
+      //       </Button>
+      //       <Button
+      //         icon={<ReloadOutlined />}
+      //         onClick={() => {
+      //           setSearchBasePrice(""); // Reset the search field
+      //           handleFilterChange("basePrice", ""); // Reset filter
+      //         }}
+      //       >
+      //         Reset
+      //       </Button>
+      //     </div>
+      //   </div>
+      // ),
+      // filterIcon: () => (
+      //   <SearchOutlined style={{ color: searchBasePrice ? "blue" : "gray" }} />
+      // ),
     },
     {
       title: (
         <span className="flex items-center gap-2">
           Created Date
-          {sortParams.find((param) => param.field === "createdAt") ? (
+          {/* {sortParams.find((param) => param.field === "createdAt") ? (
             sortParams.find((param) => param.field === "createdAt")!.order ===
             "asc" ? (
               <FaSortUp
@@ -349,61 +360,61 @@ export default function AccountPage() {
               className="cursor-pointer text-gray-400"
               onClick={() => handleSort("createdAt")}
             />
-          )}
+          )} */}
         </span>
       ),
       dataIndex: "createdAt",
       key: "createdAt",
       className: "font-workSans",
-      filterDropdown: (
-        <div style={{ padding: 8 }}>
-          <Input
-            placeholder="Search Created Date"
-            value={searchCreatedAt}
-            suffix={
-              <SearchOutlined
-                style={{ color: searchCreatedAt ? "blue" : "gray" }}
-              />
-            }
-            onChange={(e) => {
-              const searchValue = "createdAt";
-              setSearchCreatedAt(e.target.value);
-              if (!searchRef.current.includes(searchValue)) {
-                searchRef.current.push(searchValue);
-              }
-              handleFilterChange("createdAt", e.target.value);
-            }}
-          />
-          <div style={{ marginTop: 8 }}>
-            <Button
-              type="primary"
-              icon={<SearchOutlined />}
-              onClick={() => handleFilterChange("createdAt", searchCreatedAt)}
-              style={{ marginRight: 8 }}
-            >
-              Search
-            </Button>
-            <Button
-              icon={<ReloadOutlined />}
-              onClick={() => {
-                setSearchCreatedAt(""); // Reset the search field
-                handleFilterChange("createdAt", ""); // Reset filter
-              }}
-            >
-              Reset
-            </Button>
-          </div>
-        </div>
-      ),
-      filterIcon: () => (
-        <SearchOutlined style={{ color: searchCreatedAt ? "blue" : "gray" }} />
-      ),
+      // filterDropdown: (
+      //   <div style={{ padding: 8 }}>
+      //     <Input
+      //       placeholder="Search Created Date"
+      //       value={searchCreatedAt}
+      //       suffix={
+      //         <SearchOutlined
+      //           style={{ color: searchCreatedAt ? "blue" : "gray" }}
+      //         />
+      //       }
+      //       onChange={(e) => {
+      //         const searchValue = "createdAt";
+      //         setSearchCreatedAt(e.target.value);
+      //         if (!searchRef.current.includes(searchValue)) {
+      //           searchRef.current.push(searchValue);
+      //         }
+      //         handleFilterChange("createdAt", e.target.value);
+      //       }}
+      //     />
+      //     <div style={{ marginTop: 8 }}>
+      //       <Button
+      //         type="primary"
+      //         icon={<SearchOutlined />}
+      //         onClick={() => handleFilterChange("createdAt", searchCreatedAt)}
+      //         style={{ marginRight: 8 }}
+      //       >
+      //         Search
+      //       </Button>
+      //       <Button
+      //         icon={<ReloadOutlined />}
+      //         onClick={() => {
+      //           setSearchCreatedAt(""); // Reset the search field
+      //           handleFilterChange("createdAt", ""); // Reset filter
+      //         }}
+      //       >
+      //         Reset
+      //       </Button>
+      //     </div>
+      //   </div>
+      // ),
+      // filterIcon: () => (
+      //   <SearchOutlined style={{ color: searchCreatedAt ? "blue" : "gray" }} />
+      // ),
     },
     {
       title: (
         <span className="flex items-center gap-2">
           Pickup location
-          {sortParams.find((param) => param.field === "pickupLocation") ? (
+          {/* {sortParams.find((param) => param.field === "pickupLocation") ? (
             sortParams.find((param) => param.field === "pickupLocation")!
               .order === "asc" ? (
               <FaSortUp
@@ -421,7 +432,7 @@ export default function AccountPage() {
               className="cursor-pointer text-gray-400"
               onClick={() => handleSort("pickupLocation")}
             />
-          )}
+          )} */}
         </span>
       ),
       dataIndex: "pickupLocation",
@@ -429,59 +440,59 @@ export default function AccountPage() {
       className: "font-workSans",
       render: (pickupLocation: string | null | undefined) =>
         pickupLocation || "No Pickup Location Found",
-      filterDropdown: (
-        <div style={{ padding: 8 }}>
-          <Input
-            placeholder="Search Pickup Location"
-            value={searchPickupLocation}
-            suffix={
-              <SearchOutlined
-                style={{ color: searchPickupLocation ? "blue" : "gray" }}
-              />
-            }
-            onChange={(e) => {
-              const searchValue = "pickupLocation";
-              setSearchPickupLocation(e.target.value);
-              if (!searchRef.current.includes(searchValue)) {
-                searchRef.current.push(searchValue);
-              }
-              handleFilterChange("pickupLocation", e.target.value);
-            }}
-          />
-          <div style={{ marginTop: 8 }}>
-            <Button
-              type="primary"
-              icon={<SearchOutlined />}
-              onClick={() =>
-                handleFilterChange("pickupLocation", searchPickupLocation)
-              }
-              style={{ marginRight: 8 }}
-            >
-              Search
-            </Button>
-            <Button
-              icon={<ReloadOutlined />}
-              onClick={() => {
-                setSearchPickupLocation(""); // Reset the search field
-                handleFilterChange("pickupLocation", ""); // Reset filter
-              }}
-            >
-              Reset
-            </Button>
-          </div>
-        </div>
-      ),
-      filterIcon: () => (
-        <SearchOutlined
-          style={{ color: searchPickupLocation ? "blue" : "gray" }}
-        />
-      ),
+      // filterDropdown: (
+      //   <div style={{ padding: 8 }}>
+      //     <Input
+      //       placeholder="Search Pickup Location"
+      //       value={searchPickupLocation}
+      //       suffix={
+      //         <SearchOutlined
+      //           style={{ color: searchPickupLocation ? "blue" : "gray" }}
+      //         />
+      //       }
+      //       onChange={(e) => {
+      //         const searchValue = "pickupLocation";
+      //         setSearchPickupLocation(e.target.value);
+      //         if (!searchRef.current.includes(searchValue)) {
+      //           searchRef.current.push(searchValue);
+      //         }
+      //         handleFilterChange("pickupLocation", e.target.value);
+      //       }}
+      //     />
+      //     <div style={{ marginTop: 8 }}>
+      //       <Button
+      //         type="primary"
+      //         icon={<SearchOutlined />}
+      //         onClick={() =>
+      //           handleFilterChange("pickupLocation", searchPickupLocation)
+      //         }
+      //         style={{ marginRight: 8 }}
+      //       >
+      //         Search
+      //       </Button>
+      //       <Button
+      //         icon={<ReloadOutlined />}
+      //         onClick={() => {
+      //           setSearchPickupLocation(""); // Reset the search field
+      //           handleFilterChange("pickupLocation", ""); // Reset filter
+      //         }}
+      //       >
+      //         Reset
+      //       </Button>
+      //     </div>
+      //   </div>
+      // ),
+      // filterIcon: () => (
+      //   <SearchOutlined
+      //     style={{ color: searchPickupLocation ? "blue" : "gray" }}
+      //   />
+      // ),
     },
     {
       title: (
         <span className="flex items-center gap-2">
           Return Location
-          {sortParams.find((param) => param.field === "dropOffLocation") ? (
+          {/* {sortParams.find((param) => param.field === "dropOffLocation") ? (
             sortParams.find((param) => param.field === "dropOffLocation")!
               .order === "asc" ? (
               <FaSortUp
@@ -499,7 +510,7 @@ export default function AccountPage() {
               className="cursor-pointer text-gray-400"
               onClick={() => handleSort("dropOffLocation")}
             />
-          )}
+          )} */}
         </span>
       ),
       dataIndex: "dropOffLocation",
@@ -507,59 +518,59 @@ export default function AccountPage() {
       className: "font-workSans",
       render: (dropOffLocation: string | null | undefined) =>
         dropOffLocation || "No Return Location Found",
-      filterDropdown: (
-        <div style={{ padding: 8 }}>
-          <Input
-            placeholder="Search Dropoff Location"
-            value={searchDropOffLocation}
-            suffix={
-              <SearchOutlined
-                style={{ color: searchDropOffLocation ? "blue" : "gray" }}
-              />
-            }
-            onChange={(e) => {
-              const searchValue = "dropOffLocation";
-              setSearchDropOffLocation(e.target.value);
-              if (!searchRef.current.includes(searchValue)) {
-                searchRef.current.push(searchValue);
-              }
-              handleFilterChange("dropOffLocation", e.target.value);
-            }}
-          />
-          <div style={{ marginTop: 8 }}>
-            <Button
-              type="primary"
-              icon={<SearchOutlined />}
-              onClick={() =>
-                handleFilterChange("dropOffLocation", searchDropOffLocation)
-              }
-              style={{ marginRight: 8 }}
-            >
-              Search
-            </Button>
-            <Button
-              icon={<ReloadOutlined />}
-              onClick={() => {
-                setSearchDropOffLocation(""); // Reset the search field
-                handleFilterChange("dropOffLocation", ""); // Reset filter
-              }}
-            >
-              Reset
-            </Button>
-          </div>
-        </div>
-      ),
-      filterIcon: () => (
-        <SearchOutlined
-          style={{ color: searchDropOffLocation ? "blue" : "gray" }}
-        />
-      ),
+      // filterDropdown: (
+      //   <div style={{ padding: 8 }}>
+      //     <Input
+      //       placeholder="Search Dropoff Location"
+      //       value={searchDropOffLocation}
+      //       suffix={
+      //         <SearchOutlined
+      //           style={{ color: searchDropOffLocation ? "blue" : "gray" }}
+      //         />
+      //       }
+      //       onChange={(e) => {
+      //         const searchValue = "dropOffLocation";
+      //         setSearchDropOffLocation(e.target.value);
+      //         if (!searchRef.current.includes(searchValue)) {
+      //           searchRef.current.push(searchValue);
+      //         }
+      //         handleFilterChange("dropOffLocation", e.target.value);
+      //       }}
+      //     />
+      //     <div style={{ marginTop: 8 }}>
+      //       <Button
+      //         type="primary"
+      //         icon={<SearchOutlined />}
+      //         onClick={() =>
+      //           handleFilterChange("dropOffLocation", searchDropOffLocation)
+      //         }
+      //         style={{ marginRight: 8 }}
+      //       >
+      //         Search
+      //       </Button>
+      //       <Button
+      //         icon={<ReloadOutlined />}
+      //         onClick={() => {
+      //           setSearchDropOffLocation(""); // Reset the search field
+      //           handleFilterChange("dropOffLocation", ""); // Reset filter
+      //         }}
+      //       >
+      //         Reset
+      //       </Button>
+      //     </div>
+      //   </div>
+      // ),
+      // filterIcon: () => (
+      //   <SearchOutlined
+      //     style={{ color: searchDropOffLocation ? "blue" : "gray" }}
+      //   />
+      // ),
     },
     {
       title: (
         <span className="flex items-center gap-2">
           Status
-          {sortParams.find((param) => param.field === "status") ? (
+          {/* {sortParams.find((param) => param.field === "status") ? (
             sortParams.find((param) => param.field === "status")!.order ===
             "asc" ? (
               <FaSortUp
@@ -577,7 +588,7 @@ export default function AccountPage() {
               className="cursor-pointer text-gray-400"
               onClick={() => handleSort("status")}
             />
-          )}
+          )} */}
         </span>
       ),
       dataIndex: "status",
@@ -594,7 +605,7 @@ export default function AccountPage() {
         };
         return (
           <Tag color={statusColors[status] || "default"}>
-            {status.replace("_", " ")}
+            {formatString(status)}
           </Tag>
         );
       },
@@ -605,7 +616,7 @@ export default function AccountPage() {
       className: "font-workSans",
       render: (_: any, record: RentalAgreement) => (
         <Button type="link" onClick={() => openModal(record)}>
-          Edit
+          <FaEdit className="text-lg text-teal-800" />
         </Button>
       ),
     },
@@ -657,18 +668,18 @@ export default function AccountPage() {
   const handlePaginationChange = (page: number, pageSize: number) => {
     setPagination({ current: page, pageSize, total: pagination.total });
   };
-  const rowSelection = {
-    onChange: (
-      selectedRowKeys: React.Key[],
-      selectedRows: RentalAgreement[]
-    ) => {
-      console.log(
-        `Selected row keys: ${selectedRowKeys}`,
-        "Selected rows: ",
-        selectedRows
-      );
-    },
-  };
+  // const rowSelection = {
+  //   onChange: (
+  //     selectedRowKeys: React.Key[],
+  //     selectedRows: RentalAgreement[]
+  //   ) => {
+  //     console.log(
+  //       `Selected row keys: ${selectedRowKeys}`,
+  //       "Selected rows: ",
+  //       selectedRows
+  //     );
+  //   },
+  // };
 
   const openModal = (agreement: any) => {
     setSelectedRentalAgreement(agreement);
@@ -685,9 +696,9 @@ export default function AccountPage() {
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-3xl font-bold font-montserrat">Rental Agreement</h1>
+        <h1 className="text-3xl font-bold font-montserrat">Car Bookings</h1>
       </div>
-      <div className="flex items-center gap-4 mb-2 font-workSans text-sm cursor-pointer">
+      {/* <div className="flex items-center gap-4 mb-2 font-workSans text-sm cursor-pointer">
         <div className="flex items-center gap-1">
           <div className="text-blue-700 font-medium">All</div>
           <div className="text-gray-700 hover:underline">
@@ -714,14 +725,14 @@ export default function AccountPage() {
           <div className="text-blue-700 font-medium">Drivers</div>
           <div className="text-gray-700 hover:underline">(4)</div>
         </div>
-      </div>
+      </div> */}
       <div className="flex justify-between items-center  mb-4"></div>
 
       <Table
-        rowSelection={{
-          type: "checkbox",
-          ...rowSelection,
-        }}
+        // rowSelection={{
+        //   type: "checkbox",
+        //   ...rowSelection,
+        // }}
         columns={columns}
         dataSource={rentalAgreement}
         loading={loading}

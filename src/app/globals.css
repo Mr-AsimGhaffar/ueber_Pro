@@ -17,3 +17,14 @@
 .custom-checkbox:hover .ant-checkbox-checked .ant-checkbox-inner {
   @apply bg-teal-700 border-teal-600 !important/* Hover state for checked checkbox */;
 }
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #0f766e;
+  border-radius: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(240, 240, 240, 0.5);
+}

@@ -12,7 +12,7 @@ import UserForm from "@/components/UserForm";
 import debounce from "lodash.debounce";
 import ExportTablePdf from "../../components/ExportTablePdf";
 import SearchFiltersUsers from "../../components/SearchFiltersUsers";
-import { FaSort, FaSortDown, FaSortUp } from "react-icons/fa";
+import { FaEdit, FaSort, FaSortDown, FaSortUp } from "react-icons/fa";
 
 interface User {
   key: string;
@@ -240,7 +240,7 @@ export default function UserPage() {
       dataIndex: "firstName",
       key: "firstName",
       className: "font-workSans",
-      render: (text) => <a>{formatString(text)}</a>,
+      render: (text) => <p>{formatString(text)}</p>,
       filterDropdown: (
         <div style={{ padding: 8 }}>
           <Input
@@ -313,7 +313,7 @@ export default function UserPage() {
       dataIndex: "lastName",
       key: "lastName",
       className: "font-workSans",
-      render: (text) => <a>{formatString(text)}</a>,
+      render: (text) => <p>{formatString(text)}</p>,
       filterDropdown: (
         <div style={{ padding: 8 }}>
           <Input
@@ -385,7 +385,7 @@ export default function UserPage() {
       ),
       dataIndex: "email",
       key: "email",
-      className: "font-workSans text-blue-500",
+      className: "font-workSans",
       filterDropdown: (
         <div style={{ padding: 8 }}>
           <Input
@@ -639,7 +639,7 @@ export default function UserPage() {
         };
         return (
           <Tag color={statusColors[status] || "default"}>
-            {status.replace("_", " ")}
+            {formatString(status)}
           </Tag>
         );
       },
@@ -649,49 +649,49 @@ export default function UserPage() {
       dataIndex: "contacts",
       key: "contacts",
       className: "font-workSans",
-      filterDropdown: (
-        <div style={{ padding: 8 }}>
-          <Input
-            placeholder="Search contact"
-            value={searchContact}
-            suffix={
-              <SearchOutlined
-                style={{ color: searchContact ? "blue" : "gray" }}
-              />
-            }
-            onChange={(e) => {
-              const searchValue = "contacts";
-              setSearchContact(e.target.value);
-              if (!searchRef.current.includes(searchValue)) {
-                searchRef.current.push(searchValue);
-              }
-              handleFilterChange("contacts", e.target.value);
-            }}
-          />
-          <div style={{ marginTop: 8 }}>
-            <Button
-              type="primary"
-              icon={<SearchOutlined />}
-              onClick={() => handleFilterChange("contacts", searchContact)}
-              style={{ marginRight: 8 }}
-            >
-              Search
-            </Button>
-            <Button
-              icon={<ReloadOutlined />}
-              onClick={() => {
-                setSearchContact(""); // Reset the search field
-                handleFilterChange("contacts", ""); // Reset filter
-              }}
-            >
-              Reset
-            </Button>
-          </div>
-        </div>
-      ),
-      filterIcon: () => (
-        <SearchOutlined style={{ color: searchContact ? "blue" : "gray" }} />
-      ),
+      // filterDropdown: (
+      //   <div style={{ padding: 8 }}>
+      //     <Input
+      //       placeholder="Search contact"
+      //       value={searchContact}
+      //       suffix={
+      //         <SearchOutlined
+      //           style={{ color: searchContact ? "blue" : "gray" }}
+      //         />
+      //       }
+      //       onChange={(e) => {
+      //         const searchValue = "contacts";
+      //         setSearchContact(e.target.value);
+      //         if (!searchRef.current.includes(searchValue)) {
+      //           searchRef.current.push(searchValue);
+      //         }
+      //         handleFilterChange("contacts", e.target.value);
+      //       }}
+      //     />
+      //     <div style={{ marginTop: 8 }}>
+      //       <Button
+      //         type="primary"
+      //         icon={<SearchOutlined />}
+      //         onClick={() => handleFilterChange("contacts", searchContact)}
+      //         style={{ marginRight: 8 }}
+      //       >
+      //         Search
+      //       </Button>
+      //       <Button
+      //         icon={<ReloadOutlined />}
+      //         onClick={() => {
+      //           setSearchContact(""); // Reset the search field
+      //           handleFilterChange("contacts", ""); // Reset filter
+      //         }}
+      //       >
+      //         Reset
+      //       </Button>
+      //     </div>
+      //   </div>
+      // ),
+      // filterIcon: () => (
+      //   <SearchOutlined style={{ color: searchContact ? "blue" : "gray" }} />
+      // ),
     },
     {
       title: (
@@ -759,7 +759,7 @@ export default function UserPage() {
             <Button
               icon={<ReloadOutlined />}
               onClick={() => {
-                setSearchCompanyName(""); // Reset the search field
+                setSearchCreatedBy(""); // Reset the search field
                 handleFilterChange("createdBy", ""); // Reset filter
               }}
             >
@@ -786,7 +786,7 @@ export default function UserPage() {
       className: "font-workSans",
       render: (_, record) => (
         <Button type="link" onClick={() => handleEdit(record)}>
-          Edit
+          <FaEdit className="text-lg" />
         </Button>
       ),
     },
@@ -887,15 +887,6 @@ export default function UserPage() {
   const handlePaginationChange = (page: number, pageSize: number) => {
     setPagination({ current: page, pageSize, total: pagination.total });
   };
-  const rowSelection = {
-    onChange: (selectedRowKeys: React.Key[], selectedRows: User[]) => {
-      console.log(
-        `Selected row keys: ${selectedRowKeys}`,
-        "Selected rows: ",
-        selectedRows
-      );
-    },
-  };
 
   return (
     <div>
@@ -907,7 +898,7 @@ export default function UserPage() {
           <div className="font-medium text-blue-700">All</div>
           <div className="text-gray-700">({pagination.total})</div>
         </div>
-        <div className="flex items-center gap-1">
+        {/* <div className="flex items-center gap-1">
           <div className="text-blue-700 font-medium">New</div>
           <div className="text-gray-700">(6)</div>
         </div>
@@ -918,7 +909,7 @@ export default function UserPage() {
         <div className="flex items-center gap-1">
           <div className="text-blue-700 font-medium">Active</div>
           <div className="text-gray-700 hover:underline">(12)</div>
-        </div>
+        </div> */}
       </div>
       <div className="flex justify-between items-center  mb-4">
         <div>
@@ -941,10 +932,6 @@ export default function UserPage() {
       </div>
 
       <Table
-        rowSelection={{
-          type: "checkbox",
-          ...rowSelection,
-        }}
         columns={columns}
         dataSource={users}
         loading={loading}

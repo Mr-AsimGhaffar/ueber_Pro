@@ -67,7 +67,11 @@ export default async function Root({ params, children }: Props) {
         />
       </head>
       <body className="relative mt-16">
-        <ConfigProvider>
+        <ConfigProvider
+          theme={{
+            token: { colorPrimary: "#115e59" },
+          }}
+        >
           <UserProvider initialUser={user}>
             <CarProvider initialCar={cars || { data: [] }}>
               <NotificationProvider>

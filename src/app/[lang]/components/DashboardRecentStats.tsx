@@ -1,5 +1,5 @@
 "use client";
-import { Spin } from "antd";
+import { Card, Spin } from "antd";
 import { useEffect, useState } from "react";
 
 interface RecentStatsResponse {
@@ -15,6 +15,7 @@ export default function DashboardRecentStats() {
     RecentStatsResponse["data"] | null
   >(null);
   const [error, setError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState("invoices");
 
   useEffect(() => {
     fetchStats()
@@ -34,86 +35,66 @@ export default function DashboardRecentStats() {
     return <Spin className="flex justify-center items-center my-10" />;
   }
 
+  const tabs = [
+    { key: "invoices", label: "Invoice" },
+    { key: "drivers", label: "Driver" },
+    { key: "trips", label: "Trip" },
+  ];
+
+  const dataToDisplay = recentStats[activeTab as keyof typeof recentStats];
+
   function formatString(input: string): string {
     return input
-      .split("_") // Split the string by underscores
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()) // Capitalize the first letter of each word
-      .join(""); // Join the words without underscores
+      .split("_")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join("");
   }
 
-  const { invoices, drivers, trips } = recentStats;
-
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-      {/* Invoices Card */}
-      <div className="px-2 py-4 bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-lg rounded-lg">
-        <h2 className="text-2xl font-semibold mb-4 font-workSans text-center">
-          Invoices
-        </h2>
-        {invoices.length > 0 ? (
-          invoices.map((invoice, index) => (
-            <div
-              key={index}
-              className="flex justify-between p-2 bg-white/10 rounded-lg mb-2"
-            >
-              <span className="font-medium font-workSans text-xs">
-                {formatString(invoice.status)}: {invoice._count}
-              </span>
-            </div>
-          ))
-        ) : (
-          <p className="text-center text-gray-200 font-workSans text-xs">
-            No invoices available
-          </p>
-        )}
+    <Card>
+      <div className="mb-6">
+        <h2 className="text-xl font-semibold font-workSans">Recent Stats</h2>
+      </div>
+      {/* Tabs */}
+      <div className="flex justify-between border-b border-gray-200 mb-4">
+        {tabs.map((tab) => (
+          <button
+            key={tab.key}
+            className={`px-4 py-2 text-base font-workSans border-b-2 transition-all duration-200 ${
+              activeTab === tab.key
+                ? "border-indigo-500 text-indigo-600 font-workSans font-semibold"
+                : "border-transparent text-gray-500"
+            }`}
+            onClick={() => setActiveTab(tab.key)}
+          >
+            {tab.label}
+          </button>
+        ))}
       </div>
 
-      {/* Drivers Card */}
-      <div className="px-2 py-4 bg-gradient-to-br from-green-400 to-teal-500 text-white shadow-lg rounded-lg">
-        <h2 className="text-2xl font-semibold mb-4 font-workSans text-center">
-          Drivers
-        </h2>
-        {drivers.length > 0 ? (
-          drivers.map((driver, index) => (
+      {/* Content */}
+      <div className="h-96 overflow-auto custom-scrollbar">
+        {dataToDisplay.length > 0 ? (
+          dataToDisplay.map((item, index) => (
             <div
               key={index}
-              className="flex justify-between p-2 bg-white/10 rounded-lg mb-2"
+              className="p-4 border border-gray-200 rounded-lg mb-4 flex justify-between items-center"
             >
-              <span className="font-bold font-workSans text-xs">
-                {formatString(driver.status)}: {driver._count}
-              </span>
+              <div>
+                <h3 className="font-semibold text-base text-gray-800 font-workSans text-green-500">
+                  {formatString(item.status)}
+                </h3>
+                <p className="text-sm text-gray-800 font-workSans font-medium">
+                  Count: {item._count}
+                </p>
+              </div>
             </div>
           ))
         ) : (
-          <p className="text-center text-gray-200 font-workSans text-xs">
-            No drivers available
-          </p>
+          <p className="text-center text-gray-500">No data available</p>
         )}
       </div>
-
-      {/* Trips Card */}
-      <div className="px-2 py-4 bg-gradient-to-br from-pink-400 to-red-500 text-white shadow-lg rounded-lg">
-        <h2 className="text-2xl font-semibold mb-4 font-workSans text-center">
-          Trips
-        </h2>
-        {trips.length > 0 ? (
-          trips.map((trip, index) => (
-            <div
-              key={index}
-              className="flex justify-between p-2 bg-white/10 rounded-lg mb-2"
-            >
-              <span className="font-bold font-workSans text-xs">
-                {formatString(trip.status)}: {trip._count}
-              </span>
-            </div>
-          ))
-        ) : (
-          <p className="text-center text-gray-200 font-workSans text-xs">
-            No trips available
-          </p>
-        )}
-      </div>
-    </div>
+    </Card>
   );
 }
 

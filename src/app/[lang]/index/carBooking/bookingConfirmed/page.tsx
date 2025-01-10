@@ -3,13 +3,14 @@ import { BookingProgress } from "@/app/[lang]/components/carBooking/bookingProgr
 import { CarDetailsSection } from "@/app/[lang]/components/carBooking/carDetail";
 import { useCar } from "@/hooks/context/AuthContextCars";
 import { Car } from "@/lib/definitions";
-import { Button, message } from "antd";
+import { Button, message, Spin } from "antd";
 import { useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { GiConfirmed } from "react-icons/gi";
 
 interface BookingConfirm {
   id: number;
+  carId: number;
   rentalType: string;
   pickupLocation: string;
   dropOffLocation: string;
@@ -23,6 +24,10 @@ const ConfirmBooking = ({ params: { lang } }: { params: { lang: string } }) => {
   const searchParams = useSearchParams();
   const [confirmBooking, setConfirmBooking] = useState<BookingConfirm>();
   const [selectedCar, setSelectedCar] = useState<Car | null>(null);
+  const [totalPrice, setTotalPrice] = useState<number | null>(null);
+  const [priceBreakdown, setPriceBreakdown] = useState<any | null>(null);
+  const [driverFee, setDriverFee] = useState<number>(0);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const id = searchParams?.get("id");
@@ -84,6 +89,60 @@ const ConfirmBooking = ({ params: { lang } }: { params: { lang: string } }) => {
     ? formatText(confirmBooking.dropOffLocation)
     : "No Dropoff Location";
 
+  const fetchRentalPrice = async () => {
+    if (
+      !confirmBooking?.carId ||
+      !confirmBooking?.startDate ||
+      !confirmBooking?.endDate
+    ) {
+      return; // Stop further execution if validation fails
+    }
+    if (!selectedCar) return;
+    setLoading(true);
+    try {
+      const response = await fetch("/api/carBooking/calculateRentalPricing", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          carId: selectedCar.id,
+          rentalType: confirmBooking?.rentalType,
+          startDate: confirmBooking?.startDate,
+          endDate: confirmBooking?.endDate,
+        }),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        setTotalPrice(Number(result.data.totalRentalPrice));
+        setPriceBreakdown(result.data.breakdown);
+        const driverFee =
+          confirmBooking?.rentalType === "WITH_DRIVER"
+            ? result.data.driverFee
+            : 0;
+        setDriverFee(driverFee);
+      } else {
+        const error = await response.json();
+        message.error(error.message || "Failed to calculate rental price.");
+      }
+    } catch (error) {
+      console.error("Error fetching rental price:", error);
+      message.error("An error occurred while fetching rental price.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchRentalPrice();
+  }, [
+    selectedCar,
+    confirmBooking?.carId,
+    confirmBooking?.rentalType,
+    confirmBooking?.startDate,
+    confirmBooking?.endDate,
+  ]);
   return (
     <div>
       <div>
@@ -108,9 +167,19 @@ const ConfirmBooking = ({ params: { lang } }: { params: { lang: string } }) => {
         </div>
         <hr />
         <div className="grid grid-cols-2 gap-4">
-          <div>
+          {loading && (
+            <div className="absolute inset-0 top-28 flex justify-center bg-opacity-50 z-10">
+              <Spin size="large" />
+            </div>
+          )}
+          <div className={loading ? "opacity-50 pointer-events-none" : ""}>
             {selectedCar ? (
-              <CarDetailsSection car={selectedCar} />
+              <CarDetailsSection
+                car={selectedCar}
+                price={totalPrice}
+                breakdown={priceBreakdown}
+                driverFee={driverFee}
+              />
             ) : (
               <p>Loading car details...</p>
             )}

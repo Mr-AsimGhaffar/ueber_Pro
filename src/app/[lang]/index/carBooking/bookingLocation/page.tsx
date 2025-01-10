@@ -9,12 +9,14 @@ import {
   DatePicker,
   TimePicker,
   message,
+  Spin,
 } from "antd";
 import { useEffect, useState } from "react";
 import { BookingProgress } from "@/app/[lang]/components/carBooking/bookingProgress";
 import { CarDetailsSection } from "@/app/[lang]/components/carBooking/carDetail";
 import { Car } from "@/lib/definitions";
 import { useCar } from "@/hooks/context/AuthContextCars";
+import dayjs from "dayjs";
 
 export default function LocationPage({
   params: { lang },
@@ -30,6 +32,10 @@ export default function LocationPage({
   const [startDate, setStartDate] = useState<string | null>(null);
   const [endDate, setEndDate] = useState<string | null>(null);
   const [returnToSameLocation, setReturnToSameLocation] = useState(false);
+  const [totalPrice, setTotalPrice] = useState<number | null>(null);
+  const [priceBreakdown, setPriceBreakdown] = useState<any | null>(null);
+  const [driverFee, setDriverFee] = useState<number>(0);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (returnToSameLocation) {
@@ -89,6 +95,46 @@ export default function LocationPage({
     router.push(`/${lang}/index/listings/`);
   };
 
+  const fetchRentalPrice = async () => {
+    if (!selectedCar || !startDate || !endDate) return;
+    setLoading(true);
+    try {
+      const response = await fetch("/api/carBooking/calculateRentalPricing", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          carId: selectedCar.id,
+          rentalType,
+          startDate,
+          endDate,
+        }),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        setTotalPrice(Number(result.data.totalRentalPrice));
+        setPriceBreakdown(result.data.breakdown);
+        const driverFee =
+          rentalType === "WITH_DRIVER" ? result.data.driverFee : 0;
+        setDriverFee(driverFee);
+      } else {
+        const error = await response.json();
+        message.error(error.message || "Failed to calculate rental price.");
+      }
+    } catch (error) {
+      console.error("Error fetching rental price:", error);
+      message.error("An error occurred while fetching rental price.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchRentalPrice();
+  }, [rentalType, startDate, endDate]);
+
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="container mx-auto px-4">
@@ -110,16 +156,22 @@ export default function LocationPage({
               </h2>
               <div className="flex gap-2 mb-4">
                 <Button
-                  type={rentalType === "SELF_DRIVE" ? "primary" : "default"}
                   onClick={() => setRentalType("SELF_DRIVE")}
-                  className="flex-1 font-workSans"
+                  className={`flex-1 font-workSans ${
+                    rentalType === "SELF_DRIVE"
+                      ? "bg-teal-800 text-white hover:!bg-teal-700 hover:!text-white hover:!border-teal-700"
+                      : "text-black hover:!text-black hover:!border-black"
+                  }`}
                 >
                   Without Driver
                 </Button>
                 <Button
-                  type={rentalType === "WITH_DRIVER" ? "primary" : "default"}
                   onClick={() => setRentalType("WITH_DRIVER")}
-                  className="flex-1 font-workSans"
+                  className={`flex-1 font-workSans ${
+                    rentalType === "WITH_DRIVER"
+                      ? "bg-teal-800 text-white hover:!bg-teal-700 hover:!text-white hover:!border-teal-700"
+                      : "text-black hover:!text-black hover:!border-black"
+                  }`}
                 >
                   With Driver
                 </Button>
@@ -140,6 +192,7 @@ export default function LocationPage({
                         placeholder="Add Location"
                         value={pickupLocation}
                         onChange={(e) => setPickupLocation(e.target.value)}
+                        className="hover:border-teal-700"
                       />
                       <Checkbox
                         className="custom-checkbox font-workSans text-gray-600"
@@ -158,6 +211,7 @@ export default function LocationPage({
                         value={dropOffLocation}
                         onChange={(e) => setDropOffLocation(e.target.value)}
                         disabled={returnToSameLocation}
+                        className="hover:border-teal-700"
                       />
                     </div>
                   </div>
@@ -175,6 +229,7 @@ export default function LocationPage({
                         placeholder="Add Location"
                         value={pickupLocation}
                         onChange={(e) => setPickupLocation(e.target.value)}
+                        className="hover:border-teal-700"
                       />
                       <Checkbox
                         className="custom-checkbox font-workSans text-gray-600"
@@ -193,6 +248,7 @@ export default function LocationPage({
                         value={dropOffLocation}
                         onChange={(e) => setDropOffLocation(e.target.value)}
                         disabled={returnToSameLocation}
+                        className="hover:border-teal-700"
                       />
                     </div>
                   </div>
@@ -211,9 +267,21 @@ export default function LocationPage({
                   </p>
                   <DatePicker
                     placeholder="Start Date"
-                    className="w-full"
-                    onChange={(date) =>
-                      setStartDate(date ? date.toISOString() : null)
+                    className="w-full hover:border-teal-700"
+                    value={startDate ? dayjs(startDate) : null}
+                    onChange={(date) => {
+                      const selectedStartDate = date
+                        ? date.toISOString()
+                        : null;
+                      setStartDate(selectedStartDate);
+
+                      if (!endDate && selectedStartDate) {
+                        const nextDay = dayjs(selectedStartDate).add(1, "day"); // Adds 1 day to the selected start date
+                        setEndDate(nextDay.toISOString()); // Set the return date to the next day
+                      }
+                    }}
+                    disabledDate={(current) =>
+                      current && current.isBefore(dayjs(), "day")
                     }
                   />
                   {/* <p className="font-workSans text-sm font-semibold mt-2">
@@ -230,9 +298,15 @@ export default function LocationPage({
                   </p>
                   <DatePicker
                     placeholder="Return Date"
-                    className="w-full"
+                    className="w-full hover:border-teal-700"
+                    value={endDate ? dayjs(endDate) : null}
                     onChange={(date) =>
                       setEndDate(date ? date.toISOString() : null)
+                    }
+                    disabledDate={(current) =>
+                      current &&
+                      (current.isBefore(dayjs(startDate)) ||
+                        current.isBefore(dayjs(), "day"))
                     }
                   />
                   {/* <p className="font-workSans text-sm font-semibold mt-2">
@@ -260,12 +334,24 @@ export default function LocationPage({
             </div>
           </div>
 
-          <div className="lg:col-span-1">
-            {selectedCar ? (
-              <CarDetailsSection car={selectedCar} />
-            ) : (
-              <p>Loading car details...</p>
+          <div className="lg:col-span-1 relative">
+            {loading && (
+              <div className="absolute inset-0 top-28 flex justify-center bg-opacity-50 z-10">
+                <Spin size="large" />
+              </div>
             )}
+            <div className={loading ? "opacity-50 pointer-events-none" : ""}>
+              {selectedCar ? (
+                <CarDetailsSection
+                  car={selectedCar}
+                  price={totalPrice}
+                  breakdown={priceBreakdown}
+                  driverFee={driverFee}
+                />
+              ) : (
+                <p>Loading car details...</p>
+              )}
+            </div>
           </div>
         </div>
       </div>

@@ -2,7 +2,12 @@
 
 import { StatsResponse } from "@/lib/definitions";
 import { useEffect, useState } from "react";
-import { CarOutlined, RocketOutlined, UserOutlined } from "@ant-design/icons";
+import {
+  BankOutlined,
+  CarOutlined,
+  EnvironmentOutlined,
+  UserOutlined,
+} from "@ant-design/icons";
 import { Card, Spin } from "antd";
 
 interface StatCardProps {
@@ -46,38 +51,38 @@ export function DashboardCard() {
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
       <StatCard
         title="Companies"
-        todayTitle="Today"
-        monthTitle="Month"
+        todayTitle="Created:"
+        monthTitle="Created:"
         value={stats?.data.thisMonth.companies.toString() || "0"}
         anotherValue={stats?.data.today.companies.toString() || "0"}
-        icon={<RocketOutlined className="text-4xl text-white" />}
+        icon={<BankOutlined className="text-xl text-white" />}
         iconBg="bg-teal-600"
       />
       <StatCard
         title="Drivers"
-        todayTitle="Today"
-        monthTitle="Month"
+        todayTitle="Created:"
+        monthTitle="Created:"
         value={stats?.data.thisMonth.drivers.toString() || "0"}
         anotherValue={stats?.data.today.drivers.toString() || "0"}
-        icon={<CarOutlined className="text-4xl text-white" />}
+        icon={<CarOutlined className="text-xl text-white" />}
         iconBg="bg-orange-500"
       />
       <StatCard
         title="Trips"
-        todayTitle="Today"
-        monthTitle="Month"
+        todayTitle="Created:"
+        monthTitle="Created:"
         value={stats?.data.thisMonth.trips.toString() || "0"}
         anotherValue={stats?.data.today.trips.toString() || "0"}
-        icon={<RocketOutlined className="text-4xl text-white" />}
+        icon={<EnvironmentOutlined className="text-xl text-white" />}
         iconBg="bg-green-500"
       />
       <StatCard
         title="Users"
-        todayTitle="Today"
-        monthTitle="Month"
+        todayTitle="Created:"
+        monthTitle="Created:"
         value={stats?.data.thisMonth.users.toString() || "0"}
         anotherValue={stats?.data.today.users.toString() || "0"}
-        icon={<UserOutlined className="text-4xl text-white" />}
+        icon={<UserOutlined className="text-xl text-white" />}
         iconBg="bg-red-500"
       />
     </div>
@@ -93,30 +98,48 @@ function StatCard({
   icon,
   iconBg,
 }: StatCardProps) {
+  const borderColors: Record<string, string> = {
+    Companies: "border-b-teal-600",
+    Drivers: "border-b-orange-500",
+    Trips: "border-b-green-500",
+    Users: "border-b-red-500",
+  };
+  const borderColor = borderColors[title] || "border-b-gray-300";
   return (
-    <Card>
-      <div className="flex justify-around items-center">
+    <Card className={`border-b-4 ${borderColor}`}>
+      <div>
         <div>
-          <div>
-            <p className="text-center text-gray-600 font-workSans text-lg">
-              {title}
-            </p>
+          <div className="flex gap-4 items-center mb-2">
+            <div className={`rounded-md p-2 ${iconBg}`}>{icon}</div>
+            <div>
+              <p className="text-gray-600 font-workSans text-lg">{title}</p>
+            </div>
           </div>
-          <div className="flex justify-between items-center gap-2">
-            <div>
-              <p className="text-gray-600 font-workSans text-base">
-                {monthTitle}
-              </p>
-              <p className="text-center text-base font-bold">{value}</p>
+          <div>
+            <div className="flex items-center gap-1">
+              <div>
+                <p className="text-gray-600 font-workSans text-base font-bold">
+                  {monthTitle}
+                </p>
+              </div>
+              <div>
+                <p className="text-base font-workSans">
+                  {value} <span className="text-sm text-gray-400">/ Month</span>
+                </p>
+              </div>
             </div>
-            <div>
-              <hr className="h-8 w-px bg-gray-300 mx-4" />
-            </div>
-            <div>
-              <p className="text-gray-600 font-workSans text-base">
-                {todayTitle}
-              </p>
-              <p className="text-center font-bold text-base">{anotherValue}</p>
+            <div className="flex items-center gap-1">
+              <div>
+                <p className="text-gray-600 font-workSans text-base font-bold">
+                  {todayTitle}
+                </p>
+              </div>
+              <div>
+                <p className="text-base font-workSans">
+                  {anotherValue}
+                  <span className="text-sm text-gray-400"> / Day</span>
+                </p>
+              </div>
             </div>
           </div>
         </div>
@@ -130,7 +153,6 @@ function StatCard({
             <p className="text-xl font-bold">{anotherValue}</p>
           </div>
         </div> */}
-        <div className={`rounded-full p-2 ${iconBg}`}>{icon}</div>
       </div>
     </Card>
   );
