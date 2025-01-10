@@ -1,6 +1,6 @@
-import React from 'react';
-import { Form, Input, Select, DatePicker, TimePicker, InputNumber } from 'antd';
-import type { FormInstance } from 'antd/es/form';
+import React from "react";
+import { Form, Input, Select, DatePicker, TimePicker, InputNumber } from "antd";
+import type { FormInstance } from "antd/es/form";
 
 const { Option } = Select;
 
@@ -26,16 +26,18 @@ export default function BookingForm({ form }: Props) {
       form={form}
       layout="vertical"
       initialValues={{
-        rentalType: 'Hourly',
+        rentalType: "Hourly",
       }}
     >
       <Form.Item
         name="carName"
         label="Car"
-        rules={[{ required: true, message: 'Please select a car' }]}
+        rules={[{ required: true, message: "Please select a car" }]}
       >
         <Select placeholder="Select a car">
-          <Option value="Ferrari 458 MM Speciale">Ferrari 458 MM Speciale</Option>
+          <Option value="Ferrari 458 MM Speciale">
+            Ferrari 458 MM Speciale
+          </Option>
           <Option value="Toyota Camry SE 350">Toyota Camry SE 350</Option>
           <Option value="Kia Soul 2016">Kia Soul 2016</Option>
           <Option value="Audi A3 2019">Audi A3 2019</Option>
@@ -47,7 +49,7 @@ export default function BookingForm({ form }: Props) {
       <Form.Item
         name="rentalType"
         label="Rental Type"
-        rules={[{ required: true, message: 'Please select rental type' }]}
+        rules={[{ required: true, message: "Please select rental type" }]}
       >
         <Select>
           <Option value="Hourly">Hourly</Option>
@@ -60,7 +62,7 @@ export default function BookingForm({ form }: Props) {
       <Form.Item
         name="pickupLocation"
         label="Pickup Location"
-        rules={[{ required: true, message: 'Please enter pickup location' }]}
+        rules={[{ required: true, message: "Please enter pickup location" }]}
       >
         <Input placeholder="Enter city, airport, or address" />
       </Form.Item>
@@ -68,7 +70,7 @@ export default function BookingForm({ form }: Props) {
       <Form.Item
         name="pickupDate"
         label="Pickup Date"
-        rules={[{ required: true, message: 'Please select pickup date' }]}
+        rules={[{ required: true, message: "Please select pickup date" }]}
       >
         <DatePicker className="w-full" />
       </Form.Item>
@@ -76,7 +78,7 @@ export default function BookingForm({ form }: Props) {
       <Form.Item
         name="pickupTime"
         label="Pickup Time"
-        rules={[{ required: true, message: 'Please select pickup time' }]}
+        rules={[{ required: true, message: "Please select pickup time" }]}
       >
         <TimePicker className="w-full" format="HH:mm" />
       </Form.Item>
@@ -84,7 +86,7 @@ export default function BookingForm({ form }: Props) {
       <Form.Item
         name="dropoffLocation"
         label="Drop-off Location"
-        rules={[{ required: true, message: 'Please enter drop-off location' }]}
+        rules={[{ required: true, message: "Please enter drop-off location" }]}
       >
         <Input placeholder="Enter city, airport, or address" />
       </Form.Item>
@@ -92,7 +94,7 @@ export default function BookingForm({ form }: Props) {
       <Form.Item
         name="dropoffDate"
         label="Drop-off Date"
-        rules={[{ required: true, message: 'Please select drop-off date' }]}
+        rules={[{ required: true, message: "Please select drop-off date" }]}
       >
         <DatePicker className="w-full" />
       </Form.Item>
@@ -100,7 +102,7 @@ export default function BookingForm({ form }: Props) {
       <Form.Item
         name="dropoffTime"
         label="Drop-off Time"
-        rules={[{ required: true, message: 'Please select drop-off time' }]}
+        rules={[{ required: true, message: "Please select drop-off time" }]}
       >
         <TimePicker className="w-full" format="HH:mm" />
       </Form.Item>
@@ -108,12 +110,14 @@ export default function BookingForm({ form }: Props) {
       <Form.Item
         name="total"
         label="Total Amount"
-        rules={[{ required: true, message: 'Please enter total amount' }]}
+        rules={[{ required: true, message: "Please enter total amount" }]}
       >
-        <InputNumber
+        <InputNumber<number>
           className="w-full"
-          formatter={value => `$ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-          parser={value => value!.replace(/\$\s?|(,*)/g, '')}
+          formatter={(value) =>
+            `$ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+          }
+          parser={(value) => parseFloat(value!.replace(/\$\s?|(,*)/g, "")) || 0}
           min={0}
         />
       </Form.Item>

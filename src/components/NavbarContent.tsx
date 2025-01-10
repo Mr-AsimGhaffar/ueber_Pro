@@ -190,7 +190,7 @@ export default function NavbarContent({ locale, messages }: Props) {
               width={70}
               height={70}
             />
-            <span className="font-workSans text-2xl tracking-wider text-black font-semibold">
+            <span className="font-workSans text-2xl tracking-wide text-black font-semibold opacity-80">
               Rider Pro
             </span>
           </div>

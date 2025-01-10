@@ -36,14 +36,14 @@ function PageContent({ locale }: PageContentProps) {
       </div>
 
       {/* Bookings and Transactions Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
         {/* Last 5 Bookings */}
-        <div className="col-span-2">
-          <DashboardTable locale={locale} />
+        <div>
+          <DashboardVehicle locale={locale} />
         </div>
 
         {/* Recent Transactions */}
-        <div className="col-span-1">
+        <div>
           <DashboardRecentStats />
         </div>
       </div>
@@ -52,7 +52,7 @@ function PageContent({ locale }: PageContentProps) {
           <DashboardRecentInvoices locale={locale} />
         </div>
         <div>
-          <DashboardVehicle locale={locale} />
+          <DashboardTable locale={locale} />
         </div>
       </div>
     </main>

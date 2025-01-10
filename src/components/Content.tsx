@@ -12,7 +12,7 @@ export default function Content({ children }: Props) {
     <div
       className={`transition-all duration-300 ${
         isCollapsed ? "lg:w-[calc(100%-4rem)]" : "lg:w-[calc(100%-15rem)]"
-      } p-5 lg:p-10 float-right`}
+      } p-4 lg:p-6 float-right`}
       style={{ backgroundColor: "#f9f9f9" }}
     >
       {children}

@@ -99,14 +99,14 @@ function StatCard({
   iconBg,
 }: StatCardProps) {
   const borderColors: Record<string, string> = {
-    Companies: "border-b-teal-600",
-    Drivers: "border-b-orange-500",
-    Trips: "border-b-green-500",
-    Users: "border-b-red-500",
+    Companies: "border-b-teal-200",
+    Drivers: "border-b-orange-200",
+    Trips: "border-b-green-200",
+    Users: "border-b-red-200",
   };
-  const borderColor = borderColors[title] || "border-b-gray-300";
+  const borderColor = borderColors[title] || "border-b-gray-200";
   return (
-    <Card className={`border-b-4 ${borderColor}`}>
+    <Card className={`border-b-2 ${borderColor}`}>
       <div>
         <div>
           <div className="flex gap-4 items-center mb-2">
