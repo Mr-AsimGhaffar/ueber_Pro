@@ -51,8 +51,8 @@ export function DashboardCard() {
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
       <StatCard
         title="Companies"
-        todayTitle="Created:"
-        monthTitle="Created:"
+        todayTitle="Today:"
+        monthTitle="This Month:"
         value={stats?.data.thisMonth.companies.toString() || "0"}
         anotherValue={stats?.data.today.companies.toString() || "0"}
         icon={<BankOutlined className="text-xl text-white" />}
@@ -60,8 +60,8 @@ export function DashboardCard() {
       />
       <StatCard
         title="Drivers"
-        todayTitle="Created:"
-        monthTitle="Created:"
+        todayTitle="Today:"
+        monthTitle="This Month:"
         value={stats?.data.thisMonth.drivers.toString() || "0"}
         anotherValue={stats?.data.today.drivers.toString() || "0"}
         icon={<CarOutlined className="text-xl text-white" />}
@@ -69,8 +69,8 @@ export function DashboardCard() {
       />
       <StatCard
         title="Trips"
-        todayTitle="Created:"
-        monthTitle="Created:"
+        todayTitle="Today:"
+        monthTitle="This Month:"
         value={stats?.data.thisMonth.trips.toString() || "0"}
         anotherValue={stats?.data.today.trips.toString() || "0"}
         icon={<EnvironmentOutlined className="text-xl text-white" />}
@@ -78,8 +78,8 @@ export function DashboardCard() {
       />
       <StatCard
         title="Users"
-        todayTitle="Created:"
-        monthTitle="Created:"
+        todayTitle="Today:"
+        monthTitle="This Month:"
         value={stats?.data.thisMonth.users.toString() || "0"}
         anotherValue={stats?.data.today.users.toString() || "0"}
         icon={<UserOutlined className="text-xl text-white" />}
@@ -112,32 +112,31 @@ function StatCard({
           <div className="flex gap-4 items-center mb-2">
             <div className={`rounded-md p-2 ${iconBg}`}>{icon}</div>
             <div>
-              <p className="text-gray-600 font-workSans text-lg">{title}</p>
+              <p className="text-gray-600 font-workSans text-lg font-bold">
+                {title}
+              </p>
             </div>
           </div>
           <div>
             <div className="flex items-center gap-1">
               <div>
-                <p className="text-gray-600 font-workSans text-base font-bold">
+                <p className="text-gray-600 font-workSans text-base font-medium">
                   {monthTitle}
                 </p>
               </div>
               <div>
-                <p className="text-base font-workSans">
-                  {value} <span className="text-sm text-gray-400">/ Month</span>
-                </p>
+                <p className="text-base font-workSans text-gray-500">{value}</p>
               </div>
             </div>
             <div className="flex items-center gap-1">
               <div>
-                <p className="text-gray-600 font-workSans text-base font-bold">
+                <p className="text-gray-600 font-workSans text-base font-medium">
                   {todayTitle}
                 </p>
               </div>
               <div>
-                <p className="text-base font-workSans">
+                <p className="text-base font-workSans text-gray-500">
                   {anotherValue}
-                  <span className="text-sm text-gray-400"> / Day</span>
                 </p>
               </div>
             </div>

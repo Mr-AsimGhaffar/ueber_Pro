@@ -329,7 +329,7 @@ export default function DriverForm({
         <Button
           type="primary"
           onClick={handleSubmit}
-          className="font-sansInter bg-teal-800 hover:!bg-teal-700"
+          className="font-sansInter"
         >
           {initialValues?.id ? "Update Driver" : "Add Driver"}
         </Button>

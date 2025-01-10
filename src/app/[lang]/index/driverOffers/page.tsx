@@ -161,7 +161,7 @@ export default function CompanyPage({
       title: (
         <span className="flex items-center gap-2">
           Trip Id
-          {sortParams.find((param) => param.field === "tripId") ? (
+          {/* {sortParams.find((param) => param.field === "tripId") ? (
             sortParams.find((param) => param.field === "tripId")!.order ===
             "asc" ? (
               <FaSortUp
@@ -179,63 +179,63 @@ export default function CompanyPage({
               className="cursor-pointer text-gray-400"
               onClick={() => handleSort("startLocation")}
             />
-          )}
+          )} */}
         </span>
       ),
       dataIndex: "tripId",
       key: "tripId",
       className: "font-workSans font-semibold",
       render: (text) => <a onClick={() => handleTripClick(text)}>{text}</a>,
-      filterDropdown: (
-        <div style={{ padding: 8 }}>
-          <Input
-            placeholder="Search Unix Id"
-            value={searchTripId}
-            suffix={
-              <SearchOutlined
-                style={{ color: searchTripId ? "blue" : "gray" }}
-              />
-            }
-            onChange={(e) => {
-              const newSearchValue = "tripId";
-              setSearchTripId(e.target.value);
-              if (!searchRef.current.includes(newSearchValue)) {
-                searchRef.current.push(newSearchValue);
-              }
-              handleFilterChange("tripId", e.target.value);
-            }}
-            style={{ width: "200px" }}
-          />
-          <div style={{ marginTop: 8 }}>
-            <Button
-              type="primary"
-              icon={<SearchOutlined />}
-              onClick={() => handleFilterChange("tripId", searchTripId)}
-              style={{ marginRight: 8 }}
-            >
-              Search
-            </Button>
-            <Button
-              icon={<ReloadOutlined />}
-              onClick={() => {
-                setSearchTripId(""); // Reset the search field
-                handleFilterChange("tripId", ""); // Reset filter
-              }}
-            >
-              Reset
-            </Button>
-          </div>
-        </div>
-      ),
-      filterIcon: () => (
-        <SearchOutlined style={{ color: searchTripId ? "blue" : "gray" }} />
-      ),
+      // filterDropdown: (
+      //   <div style={{ padding: 8 }}>
+      //     <Input
+      //       placeholder="Search Unix Id"
+      //       value={searchTripId}
+      //       suffix={
+      //         <SearchOutlined
+      //           style={{ color: searchTripId ? "blue" : "gray" }}
+      //         />
+      //       }
+      //       onChange={(e) => {
+      //         const newSearchValue = "tripId";
+      //         setSearchTripId(e.target.value);
+      //         if (!searchRef.current.includes(newSearchValue)) {
+      //           searchRef.current.push(newSearchValue);
+      //         }
+      //         handleFilterChange("tripId", e.target.value);
+      //       }}
+      //       style={{ width: "200px" }}
+      //     />
+      //     <div style={{ marginTop: 8 }}>
+      //       <Button
+      //         type="primary"
+      //         icon={<SearchOutlined />}
+      //         onClick={() => handleFilterChange("tripId", searchTripId)}
+      //         style={{ marginRight: 8 }}
+      //       >
+      //         Search
+      //       </Button>
+      //       <Button
+      //         icon={<ReloadOutlined />}
+      //         onClick={() => {
+      //           setSearchTripId(""); // Reset the search field
+      //           handleFilterChange("tripId", ""); // Reset filter
+      //         }}
+      //       >
+      //         Reset
+      //       </Button>
+      //     </div>
+      //   </div>
+      // ),
+      // filterIcon: () => (
+      //   <SearchOutlined style={{ color: searchTripId ? "blue" : "gray" }} />
+      // ),
     },
     {
       title: (
         <span className="flex items-center gap-2">
           Offered Price
-          {sortParams.find((param) => param.field === "offeredPrice") ? (
+          {/* {sortParams.find((param) => param.field === "offeredPrice") ? (
             sortParams.find((param) => param.field === "offeredPrice")!
               .order === "asc" ? (
               <FaSortUp
@@ -253,67 +253,67 @@ export default function CompanyPage({
               className="cursor-pointer text-gray-400"
               onClick={() => handleSort("offeredPrice")}
             />
-          )}
+          )} */}
         </span>
       ),
       dataIndex: "offeredPrice",
       key: "offeredPrice",
       className: "font-workSans",
       render: (text) => <span>${(text / 100).toFixed(2)}</span>,
-      filterDropdown: (
-        <div style={{ padding: 8 }}>
-          <Input
-            placeholder="Search offers"
-            value={searchOfferedPrice}
-            suffix={
-              <SearchOutlined
-                style={{ color: searchOfferedPrice ? "blue" : "gray" }}
-              />
-            }
-            onChange={(e) => {
-              const newSearchValue = "offeredPrice";
-              setSearchOfferedPrice(e.target.value);
-              if (!searchRef.current.includes(newSearchValue)) {
-                searchRef.current.push(newSearchValue);
-              }
-              handleFilterChange("offeredPrice", e.target.value);
-            }}
-            style={{ width: "200px" }}
-          />
-          <div style={{ marginTop: 8 }}>
-            <Button
-              type="primary"
-              icon={<SearchOutlined />}
-              onClick={() =>
-                handleFilterChange("offeredPrice", searchOfferedPrice)
-              }
-              style={{ marginRight: 8 }}
-            >
-              Search
-            </Button>
-            <Button
-              icon={<ReloadOutlined />}
-              onClick={() => {
-                setSearchOfferedPrice(""); // Reset the search field
-                handleFilterChange("offeredPrice", ""); // Reset filter
-              }}
-            >
-              Reset
-            </Button>
-          </div>
-        </div>
-      ),
-      filterIcon: () => (
-        <SearchOutlined
-          style={{ color: searchOfferedPrice ? "blue" : "gray" }}
-        />
-      ),
+      // filterDropdown: (
+      //   <div style={{ padding: 8 }}>
+      //     <Input
+      //       placeholder="Search offers"
+      //       value={searchOfferedPrice}
+      //       suffix={
+      //         <SearchOutlined
+      //           style={{ color: searchOfferedPrice ? "blue" : "gray" }}
+      //         />
+      //       }
+      //       onChange={(e) => {
+      //         const newSearchValue = "offeredPrice";
+      //         setSearchOfferedPrice(e.target.value);
+      //         if (!searchRef.current.includes(newSearchValue)) {
+      //           searchRef.current.push(newSearchValue);
+      //         }
+      //         handleFilterChange("offeredPrice", e.target.value);
+      //       }}
+      //       style={{ width: "200px" }}
+      //     />
+      //     <div style={{ marginTop: 8 }}>
+      //       <Button
+      //         type="primary"
+      //         icon={<SearchOutlined />}
+      //         onClick={() =>
+      //           handleFilterChange("offeredPrice", searchOfferedPrice)
+      //         }
+      //         style={{ marginRight: 8 }}
+      //       >
+      //         Search
+      //       </Button>
+      //       <Button
+      //         icon={<ReloadOutlined />}
+      //         onClick={() => {
+      //           setSearchOfferedPrice(""); // Reset the search field
+      //           handleFilterChange("offeredPrice", ""); // Reset filter
+      //         }}
+      //       >
+      //         Reset
+      //       </Button>
+      //     </div>
+      //   </div>
+      // ),
+      // filterIcon: () => (
+      //   <SearchOutlined
+      //     style={{ color: searchOfferedPrice ? "blue" : "gray" }}
+      //   />
+      // ),
     },
     {
       title: (
         <span className="flex items-center gap-2">
           Offered At
-          {sortParams.find((param) => param.field === "createdAt") ? (
+          {/* {sortParams.find((param) => param.field === "createdAt") ? (
             sortParams.find((param) => param.field === "createdAt")!.order ===
             "asc" ? (
               <FaSortUp
@@ -331,7 +331,7 @@ export default function CompanyPage({
               className="cursor-pointer text-gray-400"
               onClick={() => handleSort("createdAt")}
             />
-          )}
+          )} */}
         </span>
       ),
       dataIndex: "createdAt",
@@ -340,55 +340,55 @@ export default function CompanyPage({
       render: (createdAt: string) => (
         <span>{dayjs(createdAt).format("MM/DD/YYYY, hh:mm:ss A")}</span>
       ),
-      filterDropdown: (
-        <div style={{ padding: 8 }}>
-          <Input
-            placeholder="Search Created At"
-            value={searchCreatedAt}
-            suffix={
-              <SearchOutlined
-                style={{ color: searchCreatedAt ? "blue" : "gray" }}
-              />
-            }
-            onChange={(e) => {
-              const searchValue = "createdAt";
-              setSearchCreatedAt(e.target.value);
-              if (!searchRef.current.includes(searchValue)) {
-                searchRef.current.push(searchValue);
-              }
-              handleFilterChange("createdAt", e.target.value);
-            }}
-          />
-          <div style={{ marginTop: 8 }}>
-            <Button
-              type="primary"
-              icon={<SearchOutlined />}
-              onClick={() => handleFilterChange("createdAt", searchCreatedAt)}
-              style={{ marginRight: 8 }}
-            >
-              Search
-            </Button>
-            <Button
-              icon={<ReloadOutlined />}
-              onClick={() => {
-                setSearchCreatedAt(""); // Reset the search field
-                handleFilterChange("createdAt", ""); // Reset filter
-              }}
-            >
-              Reset
-            </Button>
-          </div>
-        </div>
-      ),
-      filterIcon: () => (
-        <SearchOutlined style={{ color: searchCreatedAt ? "blue" : "gray" }} />
-      ),
+      // filterDropdown: (
+      //   <div style={{ padding: 8 }}>
+      //     <Input
+      //       placeholder="Search Created At"
+      //       value={searchCreatedAt}
+      //       suffix={
+      //         <SearchOutlined
+      //           style={{ color: searchCreatedAt ? "blue" : "gray" }}
+      //         />
+      //       }
+      //       onChange={(e) => {
+      //         const searchValue = "createdAt";
+      //         setSearchCreatedAt(e.target.value);
+      //         if (!searchRef.current.includes(searchValue)) {
+      //           searchRef.current.push(searchValue);
+      //         }
+      //         handleFilterChange("createdAt", e.target.value);
+      //       }}
+      //     />
+      //     <div style={{ marginTop: 8 }}>
+      //       <Button
+      //         type="primary"
+      //         icon={<SearchOutlined />}
+      //         onClick={() => handleFilterChange("createdAt", searchCreatedAt)}
+      //         style={{ marginRight: 8 }}
+      //       >
+      //         Search
+      //       </Button>
+      //       <Button
+      //         icon={<ReloadOutlined />}
+      //         onClick={() => {
+      //           setSearchCreatedAt(""); // Reset the search field
+      //           handleFilterChange("createdAt", ""); // Reset filter
+      //         }}
+      //       >
+      //         Reset
+      //       </Button>
+      //     </div>
+      //   </div>
+      // ),
+      // filterIcon: () => (
+      //   <SearchOutlined style={{ color: searchCreatedAt ? "blue" : "gray" }} />
+      // ),
     },
     {
       title: (
         <span className="flex items-center gap-2">
           Offers Status
-          {sortParams.find((param) => param.field === "status") ? (
+          {/* {sortParams.find((param) => param.field === "status") ? (
             sortParams.find((param) => param.field === "status")!.order ===
             "asc" ? (
               <FaSortUp
@@ -406,7 +406,7 @@ export default function CompanyPage({
               className="cursor-pointer text-gray-400"
               onClick={() => handleSort("status")}
             />
-          )}
+          )} */}
         </span>
       ),
       dataIndex: "status",
@@ -448,15 +448,6 @@ export default function CompanyPage({
   const handlePaginationChange = (page: number, pageSize: number) => {
     setPagination({ current: page, pageSize, total: pagination.total });
   };
-  const rowSelection = {
-    onChange: (selectedRowKeys: React.Key[], selectedRows: Offer[]) => {
-      console.log(
-        `Selected row keys: ${selectedRowKeys}`,
-        "Selected rows: ",
-        selectedRows
-      );
-    },
-  };
 
   return (
     <div>
@@ -465,12 +456,12 @@ export default function CompanyPage({
       </div>
       <div className="flex items-center gap-4 mb-2 font-workSans text-sm cursor-pointer">
         <div className="flex items-center gap-1">
-          <div className="text-blue-700 font-medium">All</div>
+          <div className="font-medium text-teal-800">All</div>
           <div className="text-gray-700 hover:underline">
             ({pagination.total})
           </div>
         </div>
-        <div className="flex items-center gap-1">
+        {/* <div className="flex items-center gap-1">
           <div className="text-blue-700 font-medium">New</div>
           <div className="text-gray-700 hover:underline">(6)</div>
         </div>
@@ -481,7 +472,7 @@ export default function CompanyPage({
         <div className="flex items-center gap-1">
           <div className="text-blue-700 font-medium">Active</div>
           <div className="text-gray-700 hover:underline">(12)</div>
-        </div>
+        </div> */}
       </div>
       <div className="flex justify-between items-center  mb-4">
         <div>
@@ -495,10 +486,6 @@ export default function CompanyPage({
       </div>
 
       <Table
-        rowSelection={{
-          type: "checkbox",
-          ...rowSelection,
-        }}
         columns={columns}
         dataSource={offers}
         loading={loading}

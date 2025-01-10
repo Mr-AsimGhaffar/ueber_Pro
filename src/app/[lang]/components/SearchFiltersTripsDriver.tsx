@@ -64,7 +64,7 @@ const FilterBar: React.FC<SearchFiltersTripsDriverProps> = ({
     <div>
       <div className="flex items-center justify-between gap-4">
         {/* Search Input */}
-        <div>
+        {/* <div>
           <Input
             placeholder="Search trips"
             prefix={<SearchOutlined />}
@@ -72,7 +72,7 @@ const FilterBar: React.FC<SearchFiltersTripsDriverProps> = ({
             onChange={(e) => handleSearch(e.target.value)}
             className="w-80"
           />
-        </div>
+        </div> */}
 
         <div className="flex items-center gap-2">
           {selectedType !== "AVAILABLE" && (

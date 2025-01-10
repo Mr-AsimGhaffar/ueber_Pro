@@ -1,6 +1,17 @@
 "use client";
 import { Card, Spin } from "antd";
 import { useEffect, useState } from "react";
+import { BiTask, BiTrip } from "react-icons/bi";
+import { CgUnavailable } from "react-icons/cg";
+import {
+  FaCheckCircle,
+  FaExclamationCircle,
+  FaSpinner,
+  FaTimesCircle,
+  FaUndo,
+} from "react-icons/fa";
+import { GiCancel, GiCarWheel } from "react-icons/gi";
+import { MdOutlinePersonOff } from "react-icons/md";
 
 interface RecentStatsResponse {
   data: {
@@ -9,6 +20,29 @@ interface RecentStatsResponse {
     trips: { _count: number; status: string }[];
   };
 }
+
+type StatusKeys =
+  | "PENDING"
+  | "PAID"
+  | "CANCELLED"
+  | "OVERDUE"
+  | "REFUNDED"
+  | "AVAILABLE"
+  | "ON_LEAVE"
+  | "SUSPENDED"
+  | "OFF_DUTY"
+  | "ON_TRIP"
+  | "SCHEDULED"
+  | "ASSIGNED"
+  | "NOT_ASSIGNED"
+  | "ON_THE_WAY"
+  | "ARRIVED"
+  | "LOADING_IN_PROGRESS"
+  | "LOADING_COMPLETE"
+  | "ON_THE_WAY_DESTINATION"
+  | "ARRIVED_DESTINATION"
+  | "COMPLETED"
+  | "CANCELLEDTRIPS";
 
 export default function DashboardRecentStats() {
   const [recentStats, setRecentStats] = useState<
@@ -50,6 +84,35 @@ export default function DashboardRecentStats() {
       .join("");
   }
 
+  const statusIcons: Record<StatusKeys, JSX.Element> = {
+    // Invoice Icons
+    PENDING: <FaSpinner className="text-yellow-500 text-lg" />,
+    PAID: <FaCheckCircle className="text-green-500 text-lg" />,
+    CANCELLED: <FaTimesCircle className="text-red-500 text-lg" />,
+    OVERDUE: <FaExclamationCircle className="text-orange-500 text-lg" />,
+    REFUNDED: <FaUndo className="text-blue-500 text-lg" />,
+
+    // Driver Icons
+    AVAILABLE: <GiCarWheel className="text-green-500 text-lg" />,
+    ON_LEAVE: <CgUnavailable className="text-yellow-500 text-lg" />,
+    SUSPENDED: <GiCancel className="text-red-500 text-lg" />,
+    OFF_DUTY: <FaTimesCircle className="text-gray-500 text-lg" />,
+    ON_TRIP: <BiTrip className="text-blue-500 text-lg" />,
+
+    // Trip Icons
+    SCHEDULED: <BiTask className="text-gray-500 text-lg" />,
+    ASSIGNED: <FaCheckCircle className="text-green-500 text-lg" />,
+    NOT_ASSIGNED: <MdOutlinePersonOff className="text-red-500 text-lg" />,
+    ON_THE_WAY: <BiTrip className="text-blue-500 text-lg" />,
+    ARRIVED: <FaCheckCircle className="text-green-500 text-lg" />,
+    LOADING_IN_PROGRESS: <FaSpinner className="text-yellow-500 text-lg" />,
+    LOADING_COMPLETE: <FaCheckCircle className="text-green-500 text-lg" />,
+    ON_THE_WAY_DESTINATION: <BiTrip className="text-blue-500 text-lg" />,
+    ARRIVED_DESTINATION: <FaCheckCircle className="text-green-500 text-lg" />,
+    COMPLETED: <FaCheckCircle className="text-green-500 text-lg" />,
+    CANCELLEDTRIPS: <FaTimesCircle className="text-red-500 text-lg" />,
+  };
+
   return (
     <Card>
       <div className="mb-6">
@@ -62,7 +125,7 @@ export default function DashboardRecentStats() {
             key={tab.key}
             className={`px-4 py-2 text-base font-workSans border-b-2 transition-all duration-200 ${
               activeTab === tab.key
-                ? "border-indigo-500 text-indigo-600 font-workSans font-semibold"
+                ? "border-teal-700 text-teal-800 font-workSans font-semibold"
                 : "border-transparent text-gray-500"
             }`}
             onClick={() => setActiveTab(tab.key)}
@@ -80,12 +143,14 @@ export default function DashboardRecentStats() {
               key={index}
               className="p-4 border border-gray-200 rounded-lg mb-4 flex justify-between items-center"
             >
-              <div>
+              <div className="flex items-center gap-1">
+                {statusIcons[item.status as StatusKeys]}
                 <h3 className="font-semibold text-base text-gray-800 font-workSans text-green-500">
                   {formatString(item.status)}
+                  {":"}
                 </h3>
                 <p className="text-sm text-gray-800 font-workSans font-medium">
-                  Count: {item._count}
+                  {item._count}
                 </p>
               </div>
             </div>

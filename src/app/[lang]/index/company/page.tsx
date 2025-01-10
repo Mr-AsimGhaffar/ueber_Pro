@@ -636,7 +636,7 @@ export default function CompanyPage() {
       className: "font-workSans",
       render: (_, record) => (
         <Button type="link" onClick={() => handleEdit(record)}>
-          <FaEdit className="text-lg" />
+          <FaEdit className="text-lg text-teal-800" />
         </Button>
       ),
     },
@@ -745,7 +745,7 @@ export default function CompanyPage() {
       </div>
       <div className="flex items-center gap-4 mb-2 font-workSans text-sm cursor-pointer">
         <div className="flex items-center gap-1">
-          <div className="text-blue-700 font-medium">All</div>
+          <div className="font-medium text-teal-800">All</div>
           <div className="text-gray-700 hover:underline">
             ({pagination.total})
           </div>
@@ -784,7 +784,7 @@ export default function CompanyPage() {
               size="large"
               icon={<UserAddOutlined />}
               onClick={handleAddCompany}
-              className="font-sansInter bg-teal-800 hover:!bg-teal-700"
+              className="font-sansInter"
             >
               Add Company
             </Button>

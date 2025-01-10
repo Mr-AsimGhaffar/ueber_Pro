@@ -272,7 +272,7 @@ export default function TripForm({
         <Button
           type="primary"
           onClick={handleSubmit}
-          className="font-sansInter bg-teal-800 hover:!bg-teal-700"
+          className="font-sansInter"
         >
           {initialValues ? "Update Trip" : "Add Trip"}
         </Button>

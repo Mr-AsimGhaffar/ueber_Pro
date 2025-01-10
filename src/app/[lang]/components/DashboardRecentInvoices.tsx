@@ -147,44 +147,47 @@ export default function DashboardRecentInvoices({ locale }: PageContentProps) {
         </div>
       </div>
       <Row gutter={[16, 16]}>
-        {invoice.map((inv) => (
-          <Col key={inv.key}>
-            <Card
-              title="Status"
-              bordered={false}
-              loading={loading}
-              extra={renderStatusTag(inv.status)}
-            >
-              <p className="mb-2">
-                <span className="text-green-500 font-workSans text-base font-semibold">
-                  Amount:
-                </span>{" "}
-                <span className="font-workSans text-sm text-gray-500">
-                  ${parseFloat(inv.amount).toFixed(2)}
-                </span>
-              </p>
-              <p>
-                <span className="text-green-500 font-workSans text-base font-semibold">
-                  Due Date:
-                </span>{" "}
-                <span className="font-workSans text-sm text-gray-500">
-                  {dayjs(inv.dueDate).format("MM/DD/YYYY, hh:mm:ss A")}
-                </span>
-              </p>
-            </Card>
-          </Col>
-        ))}
+        <div className="h-96">
+          {invoice.map((inv) => (
+            <Col key={inv.key}>
+              <Card
+                title="Status"
+                bordered={false}
+                loading={loading}
+                extra={renderStatusTag(inv.status)}
+              >
+                <p className="mb-2">
+                  <span className="text-green-500 font-workSans text-base font-semibold">
+                    Amount:
+                  </span>{" "}
+                  <span className="font-workSans text-sm text-gray-500">
+                    ${parseFloat(inv.amount).toFixed(2)}
+                  </span>
+                </p>
+                <p>
+                  <span className="text-green-500 font-workSans text-base font-semibold">
+                    Due Date:
+                  </span>{" "}
+                  <span className="font-workSans text-sm text-gray-500">
+                    {dayjs(inv.dueDate).format("MM/DD/YYYY, hh:mm:ss A")}
+                  </span>
+                </p>
+              </Card>
+            </Col>
+          ))}
+          {/* Pagination controls */}
+          {/* <div className="pagination-container mt-4 flex justify-end">
+            <Pagination
+              current={pagination.current}
+              pageSize={pagination.pageSize}
+              total={pagination.total}
+              onChange={(page) =>
+                setPagination({ ...pagination, current: page })
+              }
+            />
+          </div> */}
+        </div>
       </Row>
-
-      {/* Pagination controls */}
-      <div className="pagination-container mt-4 flex justify-end">
-        <Pagination
-          current={pagination.current}
-          pageSize={pagination.pageSize}
-          total={pagination.total}
-          onChange={(page) => setPagination({ ...pagination, current: page })}
-        />
-      </div>
     </Card>
   );
 }

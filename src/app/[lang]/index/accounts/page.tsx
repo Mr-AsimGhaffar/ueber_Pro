@@ -393,7 +393,7 @@ export default function AccountPage() {
     {
       title: (
         <span className="flex items-center gap-2">
-          Created Date
+          Date
           {/* {sortParams.find((param) => param.field === "createdAt") ? (
             sortParams.find((param) => param.field === "createdAt")!.order ===
             "asc" ? (
@@ -709,7 +709,7 @@ export default function AccountPage() {
               size="large"
               icon={<UserAddOutlined />}
               onClick={handleAddAccount}
-              className="font-sansInter bg-teal-800 hover:!bg-teal-700"
+              className="font-sansInter"
             >
               Add Account
             </Button>

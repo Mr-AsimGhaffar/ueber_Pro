@@ -786,7 +786,7 @@ export default function UserPage() {
       className: "font-workSans",
       render: (_, record) => (
         <Button type="link" onClick={() => handleEdit(record)}>
-          <FaEdit className="text-lg" />
+          <FaEdit className="text-lg text-teal-800" />
         </Button>
       ),
     },
@@ -895,7 +895,7 @@ export default function UserPage() {
       </div>
       <div className="flex items-center gap-4 mb-2 font-workSans text-sm">
         <div className="flex items-center gap-1">
-          <div className="font-medium text-blue-700">All</div>
+          <div className="font-medium text-teal-800">All</div>
           <div className="text-gray-700">({pagination.total})</div>
         </div>
         {/* <div className="flex items-center gap-1">
@@ -923,7 +923,7 @@ export default function UserPage() {
               size="large"
               icon={<UserAddOutlined />}
               onClick={handleAddUser}
-              className="font-sansInter bg-teal-800 hover:!bg-teal-700"
+              className="font-sansInter"
             >
               Add User
             </Button>

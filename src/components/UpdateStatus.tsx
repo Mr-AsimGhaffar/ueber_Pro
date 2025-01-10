@@ -48,7 +48,10 @@ const UpdateStatus = ({
   );
   return (
     <Dropdown overlay={menu} trigger={["click"]}>
-      <Button className="text-blue-500 font-semibold" type="link">
+      <Button
+        className="text-teal-800 hover:!text-teal-700 font-semibold"
+        type="link"
+      >
         Update Offer Status
       </Button>
     </Dropdown>

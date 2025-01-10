@@ -492,7 +492,7 @@ export default function AccountPage() {
     {
       title: (
         <span className="flex items-center gap-2">
-          Created Date
+          Date
           {/* {sortParams.find((param) => param.field === "createdAt") ? (
             sortParams.find((param) => param.field === "createdAt")!.order ===
             "asc" ? (

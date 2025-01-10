@@ -298,7 +298,7 @@ export default function UserForm({
         <Button
           type="primary"
           onClick={handleSubmit}
-          className="font-sansInter bg-teal-800 hover:!bg-teal-700"
+          className="font-sansInter"
         >
           {initialValues ? "Update User" : "Add User"}
         </Button>

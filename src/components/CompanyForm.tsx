@@ -177,7 +177,7 @@ export default function CompanyForm({
         <Button
           type="primary"
           onClick={handleSubmit}
-          className="font-sansInter bg-teal-800 hover:!bg-teal-700"
+          className="font-sansInter"
         >
           {initialValues ? "Update Company" : "Add Company"}
         </Button>

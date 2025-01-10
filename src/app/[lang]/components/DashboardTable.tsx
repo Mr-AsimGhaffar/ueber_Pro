@@ -173,7 +173,7 @@ const DashboardTable = ({ locale }: PageContentProps) => {
       </div>
 
       {/* Separate Pagination */}
-      <div className="mt-4 flex justify-end">
+      <div className="flex justify-end mt-5">
         <Pagination
           className="font-workSans text-gray-500"
           current={pagination.current}
