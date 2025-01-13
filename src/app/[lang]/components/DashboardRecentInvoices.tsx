@@ -134,9 +134,11 @@ export default function DashboardRecentInvoices({ locale }: PageContentProps) {
   };
 
   return (
-    <Card>
+    <Card className="h-96">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-semibold font-workSans">Recent Invoices</h2>
+        <h2 className="text-xl font-semibold font-workSans opacity-80">
+          Recent Invoices
+        </h2>
         <div className="flex items-center gap-4">
           <a
             href={`/${locale}/index/invoices`}
@@ -147,7 +149,7 @@ export default function DashboardRecentInvoices({ locale }: PageContentProps) {
         </div>
       </div>
       <Row gutter={[16, 16]}>
-        <div className="h-96">
+        <div className="">
           {invoice.map((inv) => (
             <Col key={inv.key}>
               <Card

@@ -86,7 +86,7 @@ const DashboardVehicle = ({ locale }: PageContentProps) => {
     },
   ];
   return (
-    <Card>
+    <Card className="h-96">
       <div>
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-semibold font-workSans opacity-80">

@@ -114,9 +114,11 @@ export default function DashboardRecentStats() {
   };
 
   return (
-    <Card>
+    <Card className="h-96 overflow-auto custom-scrollbar">
       <div className="mb-6">
-        <h2 className="text-xl font-semibold font-workSans">Recent Stats</h2>
+        <h2 className="text-xl font-semibold font-workSans opacity-80">
+          Recent Stats
+        </h2>
       </div>
       {/* Tabs */}
       <div className="flex justify-between border-b border-gray-200 mb-4">
@@ -136,7 +138,7 @@ export default function DashboardRecentStats() {
       </div>
 
       {/* Content */}
-      <div className="h-96 overflow-auto custom-scrollbar">
+      <div className="">
         {dataToDisplay.length > 0 ? (
           dataToDisplay.map((item, index) => (
             <div

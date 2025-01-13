@@ -81,13 +81,27 @@ const DashboardTable = ({ locale }: PageContentProps) => {
   const handlePaginationChange = (page: number, pageSize: number) => {
     setPagination({ current: page, pageSize, total: pagination.total });
   };
+  const formatString = (str: any) => {
+    if (!str) return "";
+    return str
+      .split("_") // Split by underscore
+      .map(
+        (word: any) =>
+          word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+      ) // Capitalize first letter of each word
+      .join(" "); // Join the words back together with spaces
+  };
 
   const columns: ColumnsType<dashboardTrip> = [
     {
-      title: <span className="flex items-center gap-2">Status</span>,
+      title: (
+        <span className="flex items-center gap-2 text-gray-600 text-sm">
+          STATUS
+        </span>
+      ),
       dataIndex: "status",
       key: "status",
-      className: "font-workSans",
+      className: "font-workSans text-sm font-semibold",
       render: (status: string) => {
         const statusColors: { [key: string]: string } = {
           SCHEDULED: "blue",
@@ -104,16 +118,20 @@ const DashboardTable = ({ locale }: PageContentProps) => {
         };
         return (
           <Tag color={statusColors[status] || "default"}>
-            {status.replace("_", " ")}
+            {formatString(status)}
           </Tag>
         );
       },
     },
     {
-      title: <span className="flex items-center gap-2">Pricing Model</span>,
+      title: (
+        <span className="flex items-center gap-2 text-gray-600 text-sm">
+          PRICING MODEL
+        </span>
+      ),
       dataIndex: "pricingModel",
       key: "pricingModel",
-      className: "font-workSans",
+      className: "font-workSans text-sm font-semibold",
       render: (pricingModel: any) => {
         const pricingModelColors: { [key: string]: string } = {
           FIXED_PRICE: "green",
@@ -122,28 +140,40 @@ const DashboardTable = ({ locale }: PageContentProps) => {
         };
         return (
           <Tag color={pricingModelColors[pricingModel?.model] || "default"}>
-            {pricingModel?.model.replace("_", " ")}
+            {formatString(pricingModel?.model)}
           </Tag>
         );
       },
     },
     {
-      title: <span className="flex items-center gap-2">Start Location</span>,
+      title: (
+        <span className="flex items-center gap-2 text-gray-600 text-sm">
+          STARTING ROUTE
+        </span>
+      ),
       dataIndex: "startLocation",
       key: "startLocation",
-      className: "font-workSans",
+      className: "font-workSans text-gray-500 text-sm",
     },
     {
-      title: <span className="flex items-center gap-2">End Location</span>,
+      title: (
+        <span className="flex items-center gap-2 text-gray-600 text-sm">
+          ENDING ROUTE
+        </span>
+      ),
       dataIndex: "endLocation",
       key: "endLocation",
-      className: "font-workSans",
+      className: "font-workSans text-gray-500 text-sm",
     },
     {
-      title: <span className="flex items-center gap-2">Created At</span>,
+      title: (
+        <span className="flex items-center gap-2 text-gray-600 text-sm">
+          DATE
+        </span>
+      ),
       dataIndex: "createdAt",
       key: "createdAt",
-      className: "font-workSans",
+      className: "font-workSans text-gray-500 text-sm",
       render: (createdAt: string) => (
         <span>{dayjs(createdAt).format("MM/DD/YYYY, hh:mm:ss A")}</span>
       ),
@@ -152,7 +182,9 @@ const DashboardTable = ({ locale }: PageContentProps) => {
   return (
     <Card>
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-semibold  font-workSans">Recent Trips</h2>
+        <h2 className="text-xl font-semibold font-workSans opacity-80">
+          Recent Trips
+        </h2>
         <div className="flex items-center gap-4">
           <a
             href={`/${locale}/index/bookings`}
