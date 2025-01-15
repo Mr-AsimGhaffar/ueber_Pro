@@ -1,6 +1,6 @@
 "use client";
-import React, { useState } from "react";
-import { Button, Card, Dropdown, Menu } from "antd";
+import React, { useEffect, useState } from "react";
+import { Button, Card, Dropdown, Menu, message } from "antd";
 import {
   ComposedChart,
   Bar,
@@ -12,68 +12,80 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { IoIosArrowDown } from "react-icons/io";
-
-const data = [
-  { date: "1 Jan", shipment: 40, delivery: 20 },
-  { date: "2 Jan", shipment: 30, delivery: 25 },
-  { date: "3 Jan", shipment: 45, delivery: 35 },
-  { date: "4 Jan", shipment: 32, delivery: 25 },
-  { date: "5 Jan", shipment: 34, delivery: 20 },
-  { date: "6 Jan", shipment: 50, delivery: 35 },
-  { date: "7 Jan", shipment: 42, delivery: 33 },
-  { date: "8 Jan", shipment: 38, delivery: 28 },
-  { date: "9 Jan", shipment: 40, delivery: 25 },
-  { date: "10 Jan", shipment: 36, delivery: 22 },
-];
+import { StatsResponse } from "@/lib/definitions";
 
 const DashboardStatistics = () => {
-  const [showShipment, setShowShipment] = useState(true);
-  const [showDelivery, setShowDelivery] = useState(true);
-  const [selectedMonth, setSelectedMonth] = useState("January");
+  const [invoiceData, setInvoiceData] = useState<
+    { date: string; invoice: number }[]
+  >([]);
+  const [selectedYear, setSelectedYear] = useState("2025");
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    fetchInvoiceData(selectedYear);
+  }, [selectedYear]);
+
+  const fetchInvoiceData = async (year: string) => {
+    setLoading(true);
+    try {
+      const response = await fetch("/api/dashboard/getStats");
+      if (response.ok) {
+        const data: StatsResponse = await response.json();
+        const historicalData = data.data.invoiceHistoricalData;
+        const yearData = historicalData[year];
+
+        if (yearData) {
+          const formattedData = Object.keys(yearData).map((month) => ({
+            date: `${month} ${year}`,
+            invoice: yearData[month],
+          }));
+          setInvoiceData(formattedData);
+        } else {
+          message.error("No data available for the selected year.");
+        }
+      } else {
+        message.error("Failed to fetch invoice data.");
+      }
+    } catch (error) {
+      message.error("Error fetching invoice data.");
+    }
+    setLoading(false);
+  };
 
   const menu = (
-    <Menu onClick={(e) => setSelectedMonth(e.key)}>
-      {[
-        "January",
-        "February",
-        "March",
-        "April",
-        "May",
-        "June",
-        "July",
-        "August",
-        "September",
-        "October",
-        "November",
-        "December",
-      ].map((month) => (
+    <Menu onClick={(e) => setSelectedYear(e.key)}>
+      {["2022", "2023", "2024", "2025", "2026", "2027"].map((year) => (
         <Menu.Item
-          key={month}
+          key={year}
           className={
-            selectedMonth === month
+            selectedYear === year
               ? "!font-semibold !font-workSans border-none bg-teal-100 !text-teal-800 hover:!bg-teal-200"
               : "hover:!bg-teal-100 !font-workSans"
           }
         >
-          {month}
+          {year}
         </Menu.Item>
       ))}
     </Menu>
   );
 
+  const formatDollar = (value: number) => {
+    return `$${value.toLocaleString()}`; // Formats the number with commas and a dollar sign
+  };
+
   return (
-    <Card className="h-96">
+    <Card loading={loading} className="h-96">
       {/* Header Section */}
       <div className="flex justify-between items-center mb-6">
         <div>
           <h3 className="text-xl font-semibold font-workSans opacity-80">
-            Shipment Statistics
+            Invoice Statistics
           </h3>
         </div>
         <Dropdown overlay={menu} trigger={["click"]}>
           <Button className="px-4 bg-teal-100 text-teal-800 rounded-md font-semibold font-workSans border-none hover:!bg-teal-200">
             <div className="flex items-center justify-between gap-4">
-              <div>{selectedMonth}</div>
+              <div>{selectedYear}</div>
               <div className="w-px h-8 bg-teal-800"></div>
               <div>
                 <IoIosArrowDown />
@@ -84,67 +96,26 @@ const DashboardStatistics = () => {
       </div>
 
       {/* Chart Section */}
-      <ResponsiveContainer width="100%" height={240}>
+      <ResponsiveContainer width="100%" height={290}>
         <ComposedChart
-          data={data}
+          data={invoiceData}
           margin={{ top: 20, right: 30, left: 0, bottom: 0 }}
         >
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="date" tick={{ style: { fillOpacity: 0.6 } }} />
           <YAxis
             domain={[0, "dataMax + 10"]}
+            tickFormatter={formatDollar}
             tick={{ style: { fillOpacity: 0.6 } }}
           />
-          <Tooltip />
+          <Tooltip formatter={(value) => formatDollar(value as number)} />
 
-          {/* Shipment Bars */}
-          {showShipment && (
-            <Bar
-              dataKey="shipment"
-              fill="#FFA500"
-              name="Shipment"
-              barSize={20}
-            />
-          )}
-
-          {/* Delivery Line */}
-          {showDelivery && (
-            <Line
-              type="monotone"
-              dataKey="delivery"
-              stroke="#115e59"
-              strokeWidth={3}
-              dot={{ r: 5 }}
-              activeDot={{ r: 6 }}
-              name="Delivery"
-            />
-          )}
+          <Bar dataKey="invoice" fill="#FFA500" name="Invoice" barSize={20} />
         </ComposedChart>
       </ResponsiveContainer>
 
       {/* Toggle Buttons */}
-      <div className="flex justify-center space-x-4 mt-4">
-        <Button
-          className={`${
-            showShipment
-              ? "bg-teal-800 text-white font-sansInter font-semibold"
-              : "bg-gray-200 text-gray-800 font-sansInter font-semibold"
-          }`}
-          onClick={() => setShowShipment((prev) => !prev)}
-        >
-          Shipment
-        </Button>
-        <Button
-          className={`${
-            showDelivery
-              ? "bg-teal-800 text-white font-sansInter font-semibold"
-              : "bg-gray-200 text-gray-800 font-sansInter font-semibold"
-          }`}
-          onClick={() => setShowDelivery((prev) => !prev)}
-        >
-          Delivery
-        </Button>
-      </div>
+      {/* {loading && <div className="text-center text-teal-800">Loading...</div>} */}
     </Card>
   );
 };

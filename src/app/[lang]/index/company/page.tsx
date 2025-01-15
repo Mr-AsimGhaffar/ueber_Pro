@@ -13,6 +13,7 @@ import debounce from "lodash.debounce";
 import SearchFilters from "../../components/SearchFilters";
 import ExportTablePdf from "../../components/ExportTablePdf";
 import { FaEdit, FaSort, FaSortDown, FaSortUp } from "react-icons/fa";
+import { StatsResponse } from "@/lib/definitions";
 
 interface Company {
   key: string;
@@ -37,6 +38,7 @@ export default function CompanyPage() {
   const [searchAddress, setSearchAddress] = useState("");
   const [searchContact, setSearchContact] = useState("");
   const [searchCreatedBy, setSearchCreatedBy] = useState("");
+  const [stats, setStats] = useState<StatsResponse | null>(null);
   const searchRef = useRef<string[]>([]);
   const [filters, setFilters] = useState({
     name: "",
@@ -738,39 +740,55 @@ export default function CompanyPage() {
     setPagination({ current: page, pageSize, total: pagination.total });
   };
 
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const response = await fetch("/api/dashboard/getStats", {
+          method: "GET",
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setStats(data);
+        } else {
+          const errorData = await response.json();
+          message.error(errorData.message || "Failed to fetch stats.");
+        }
+      } catch (error) {
+        message.error("An error occurred while fetching stats.");
+        console.error("Fetch stats error:", error);
+      }
+    };
+    fetchStats();
+  }, []);
+
+  const thisMonthCount = stats?.data?.thisMonth.companies || 0;
+  const activeCount =
+    stats?.data?.companies.find((c) => c.status === "ACTIVE")?._count || 0;
+  const inactiveCount =
+    stats?.data?.companies.find((c) => c.status === "IN_ACTIVE")?._count || 0;
+
   return (
     <div>
       <div className="mb-6">
         <h1 className="text-3xl font-bold font-montserrat">Companies</h1>
       </div>
-      <div className="flex items-center gap-4 mb-2 font-workSans text-sm cursor-pointer">
+      <div className="flex items-center gap-4 mb-2 font-workSans text-sm">
         <div className="flex items-center gap-1">
           <div className="font-medium text-teal-800">All</div>
-          <div className="text-gray-700 hover:underline">
-            ({pagination.total})
-          </div>
-        </div>
-
-        {/* <div className="flex items-center gap-1">
-          <div className="text-blue-700 font-medium">New</div>
-          <div className="text-gray-700 hover:underline">(6)</div>
+          <div className="text-gray-700">({pagination.total})</div>
         </div>
         <div className="flex items-center gap-1">
-          <div className="text-blue-700 font-medium">Inactive</div>
-          <div className="text-gray-700 hover:underline">(8)</div>
+          <div className="text-teal-800 font-medium">New</div>
+          <div className="text-gray-700">({thisMonthCount})</div>
         </div>
         <div className="flex items-center gap-1">
-          <div className="text-blue-700 font-medium">Active</div>
-          <div className="text-gray-700 hover:underline">(12)</div>
+          <div className="text-teal-800 font-medium">Inactive</div>
+          <div className="text-gray-700">({inactiveCount})</div>
         </div>
         <div className="flex items-center gap-1">
-          <div className="text-blue-700 font-medium">Cars</div>
-          <div className="text-gray-700 hover:underline">(2)</div>
+          <div className="text-teal-800 font-medium">Active</div>
+          <div className="text-gray-700">({activeCount})</div>
         </div>
-        <div className="flex items-center gap-1">
-          <div className="text-blue-700 font-medium">Drivers</div>
-          <div className="text-gray-700 hover:underline">(4)</div>
-        </div> */}
       </div>
       <div className="flex justify-between items-center  mb-4">
         <div>

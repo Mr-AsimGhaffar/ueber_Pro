@@ -14,6 +14,7 @@ import ConfirmOffers from "@/components/ConfirmOffers";
 import { useSearchParams } from "next/navigation";
 import AssignDriver from "@/components/AssignDriver";
 import SelectTrip from "@/components/SelectTrip";
+import { StatsResponse } from "@/lib/definitions";
 
 interface Trip {
   key: string;
@@ -62,6 +63,7 @@ export default function CompanyPage() {
   const [searchCost, setSearchCost] = useState("");
   const [searchOffers, setSearchOffers] = useState("");
   const [DriverName, setDriverName] = useState<DriverName[]>([]);
+  const [stats, setStats] = useState<StatsResponse | null>(null);
   const searchRef = useRef<string[]>([]);
   const [selectedType, setSelectedType] = useState<
     "ASSIGNED_TO_MY_COMPANY" | "CREATED_BY_MY_COMPANY" | "AVAILABLE"
@@ -1242,6 +1244,55 @@ export default function CompanyPage() {
     fetchTrips({ ...filters }, type);
   };
 
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const response = await fetch("/api/dashboard/getStats", {
+          method: "GET",
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setStats(data);
+        } else {
+          const errorData = await response.json();
+          message.error(errorData.message || "Failed to fetch stats.");
+        }
+      } catch (error) {
+        message.error("An error occurred while fetching stats.");
+        console.error("Fetch stats error:", error);
+      }
+    };
+    fetchStats();
+  }, []);
+
+  const thisMonthCount = stats?.data?.thisMonth.trips || 0;
+  const completedCount =
+    stats?.data?.trips.find((c) => c.status === "COMPLETED")?._count || 0;
+  const cancelledCount =
+    stats?.data?.trips.find((c) => c.status === "CANCELLED")?._count || 0;
+  const notAssignedCount =
+    stats?.data?.trips.find((c) => c.status === "NOT_ASSIGNED")?._count || 0;
+  const assignedCount =
+    stats?.data?.trips.find((c) => c.status === "ASSIGNED")?._count || 0;
+  const scheduledCount =
+    stats?.data?.trips.find((c) => c.status === "SCHEDULED")?._count || 0;
+  const arrivedDestinationCount =
+    stats?.data?.trips.find((c) => c.status === "ARRIVED_DESTINATION")
+      ?._count || 0;
+  const onTheWayDestinationCount =
+    stats?.data?.trips.find((c) => c.status === "ON_THE_WAY_DESTINATION")
+      ?._count || 0;
+  const loadingCompleteCount =
+    stats?.data?.trips.find((c) => c.status === "LOADING_COMPLETE")?._count ||
+    0;
+  const loadingInProgressCount =
+    stats?.data?.trips.find((c) => c.status === "LOADING_IN_PROGRESS")
+      ?._count || 0;
+  const ArrivedCount =
+    stats?.data?.trips.find((c) => c.status === "ARRIVED")?._count || 0;
+  const OnTheWayCount =
+    stats?.data?.trips.find((c) => c.status === "ON_THE_WAY")?._count || 0;
+
   return (
     <div>
       <div className="mb-6">
@@ -1279,25 +1330,61 @@ export default function CompanyPage() {
           </Button>
         )}
       </div>
-      <div className="flex items-center gap-4 mb-2 font-workSans text-sm cursor-pointer">
+      <div className="flex items-center gap-4 mb-2 font-workSans text-sm">
         <div className="flex items-center gap-1">
           <div className="font-medium text-teal-800">All</div>
-          <div className="text-gray-700 hover:underline">
-            ({pagination.total})
-          </div>
+          <div className="text-gray-700">({pagination.total})</div>
+        </div>
+        <div className="flex items-center gap-1">
+          <div className="text-teal-800 font-medium">New</div>
+          <div className="text-gray-700">({thisMonthCount})</div>
+        </div>
+        <div className="flex items-center gap-1">
+          <div className="text-teal-800 font-medium">Completed</div>
+          <div className="text-gray-700">({completedCount})</div>
+        </div>
+        <div className="flex items-center gap-1">
+          <div className="text-teal-800 font-medium">Cancelled</div>
+          <div className="text-gray-700">({cancelledCount})</div>
+        </div>
+        <div className="flex items-center gap-1">
+          <div className="text-teal-800 font-medium">Not Assigned</div>
+          <div className="text-gray-700">({notAssignedCount})</div>
+        </div>
+        <div className="flex items-center gap-1">
+          <div className="text-teal-800 font-medium">Assigned</div>
+          <div className="text-gray-700">({assignedCount})</div>
+        </div>
+        <div className="flex items-center gap-1">
+          <div className="text-teal-800 font-medium">Scheduled</div>
+          <div className="text-gray-700">({scheduledCount})</div>
+        </div>
+        <div className="flex items-center gap-1">
+          <div className="text-teal-800 font-medium">Arrived Destination</div>
+          <div className="text-gray-700">({arrivedDestinationCount})</div>
         </div>
         {/* <div className="flex items-center gap-1">
-          <div className="text-blue-700 font-medium">New</div>
-          <div className="text-gray-700 hover:underline">(6)</div>
-        </div>
-        <div className="flex items-center gap-1">
-          <div className="text-blue-700 font-medium">Inactive</div>
-          <div className="text-gray-700 hover:underline">(8)</div>
-        </div>
-        <div className="flex items-center gap-1">
-          <div className="text-blue-700 font-medium">Active</div>
-          <div className="text-gray-700 hover:underline">(12)</div>
+          <div className="text-teal-800 font-medium">
+            On They Way Destination
+          </div>
+          <div className="text-gray-700">({onTheWayDestinationCount})</div>
         </div> */}
+        <div className="flex items-center gap-1">
+          <div className="text-teal-800 font-medium">Loading Complete</div>
+          <div className="text-gray-700">({loadingCompleteCount})</div>
+        </div>
+        {/* <div className="flex items-center gap-1">
+          <div className="text-teal-800 font-medium">Loading In Progress</div>
+          <div className="text-gray-700">({loadingInProgressCount})</div>
+        </div> */}
+        <div className="flex items-center gap-1">
+          <div className="text-teal-800 font-medium">Arrived</div>
+          <div className="text-gray-700">({ArrivedCount})</div>
+        </div>
+        <div className="flex items-center gap-1">
+          <div className="text-teal-800 font-medium">On The Way</div>
+          <div className="text-gray-700">({OnTheWayCount})</div>
+        </div>
       </div>
       <div className="flex justify-between items-center  mb-4">
         <div>

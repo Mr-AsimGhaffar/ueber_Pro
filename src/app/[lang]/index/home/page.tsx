@@ -7,6 +7,7 @@ import DashboardRecentStats from "../../components/DashboardRecentStats";
 import DashboardRecentInvoices from "../../components/DashboardRecentInvoices";
 import DashboardVehicle from "../../components/DashboardVehicle";
 import DashboardStatistics from "../../components/DashboardStatistics";
+import DashboardCarStatistics from "../../components/DashboardCarStatistics";
 
 interface Props {
   params: {
@@ -48,9 +49,12 @@ function PageContent({ locale }: PageContentProps) {
           <DashboardStatistics />
         </div>
       </div>
-      <div className="grid grid-cols-2 gap-6">
+      <div className="grid grid-cols-3 gap-6">
         <div>
           <DashboardRecentInvoices locale={locale} />
+        </div>
+        <div>
+          <DashboardCarStatistics />
         </div>
         <div>
           <DashboardRecentStats />

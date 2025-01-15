@@ -47,7 +47,7 @@ const FilterBar: React.FC<SearchFiltersUsersProps> = ({ onFilterChange }) => {
   // };
 
   const menuItemsStatus = [
-    { key: "AVAILABLE", label: "AVAILABLE" },
+    { key: "AVAILABLE", label: "Available" },
     { key: "ON_LEAVE", label: "On Leave" },
     { key: "SUSPENDED", label: "Suspended" },
     { key: "OFF_DUTY", label: "Off Duty" },

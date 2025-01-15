@@ -134,7 +134,7 @@ export default function DashboardRecentInvoices({ locale }: PageContentProps) {
   };
 
   return (
-    <Card className="h-96">
+    <Card loading={loading} className="h-96">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-xl font-semibold font-workSans opacity-80">
           Recent Invoices
@@ -155,7 +155,6 @@ export default function DashboardRecentInvoices({ locale }: PageContentProps) {
               <Card
                 title="Status"
                 bordered={false}
-                loading={loading}
                 extra={renderStatusTag(inv.status)}
               >
                 <p className="mb-2">

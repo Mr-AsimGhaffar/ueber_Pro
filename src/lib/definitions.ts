@@ -178,7 +178,7 @@ export interface StatsResponse {
     invoices: any[]; // If the invoices structure is known, define it here.
     drivers: {
       _count: number;
-      status: "AVAILABLE";
+      status: "AVAILABLE" | "ON_TRIP" | "ON_LEAVE" | "OFF_DUTY" | "SUSPENDED";
     }[];
     trips: {
       _count: number;
@@ -187,7 +187,64 @@ export interface StatsResponse {
         | "CANCELLED"
         | "NOT_ASSIGNED"
         | "ASSIGNED"
-        | "SCHEDULED";
+        | "SCHEDULED"
+        | "ON_THE_WAY"
+        | "ARRIVED"
+        | "LOADING_IN_PROGRESS"
+        | "LOADING_COMPLETE"
+        | "ON_THE_WAY_DESTINATION"
+        | "ARRIVED_DESTINATION";
+    }[];
+    bookings: {
+      currentMonthBookings: number;
+      previousMonthBookings: number;
+      percentageChange: number;
+    };
+    totalCarsStats: {
+      currentMonthCars: number;
+      previousMonthCars: number;
+      carsChangePercentage: number;
+    };
+    invoiceDivisionData: {
+      tripRevenue: {
+        current: string;
+        previous: string;
+        changePercentage: string;
+      };
+      rentalRevenue: {
+        current: string;
+        previous: string;
+        changePercentage: string;
+      };
+    };
+    cars: { status: string; percentage: number }[];
+    invoiceHistoricalData: {
+      [year: string]: {
+        [month: string]: number;
+      };
+    };
+    topBookedCars: {
+      id: number;
+      category: {
+        id: number;
+        name: string;
+        createdAt: string;
+        updatedAt: string;
+      };
+      brand: {
+        id: number;
+        name: string;
+        logoId: string | null;
+        createdAt: string;
+        updatedAt: string;
+      };
+      model: {
+        id: number;
+        name: string;
+        createdAt: string;
+        updatedAt: string;
+      };
+      count: number;
     }[];
   };
 }

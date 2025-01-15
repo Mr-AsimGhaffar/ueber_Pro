@@ -13,6 +13,7 @@ import debounce from "lodash.debounce";
 import ExportTablePdf from "../../components/ExportTablePdf";
 import SearchFiltersUsers from "../../components/SearchFiltersUsers";
 import { FaEdit, FaSort, FaSortDown, FaSortUp } from "react-icons/fa";
+import { StatsResponse } from "@/lib/definitions";
 
 interface User {
   key: string;
@@ -41,6 +42,7 @@ export default function UserPage() {
   const [searchDob, setSearchDob] = useState("");
   const [searchContact, setSearchContact] = useState("");
   const [searchCreatedBy, setSearchCreatedBy] = useState("");
+  const [stats, setStats] = useState<StatsResponse | null>(null);
   const searchRef = useRef<string[]>([]);
   const [filters, setFilters] = useState({
     firstName: "",
@@ -888,6 +890,29 @@ export default function UserPage() {
     setPagination({ current: page, pageSize, total: pagination.total });
   };
 
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const response = await fetch("/api/dashboard/getStats", {
+          method: "GET",
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setStats(data);
+        } else {
+          const errorData = await response.json();
+          message.error(errorData.message || "Failed to fetch stats.");
+        }
+      } catch (error) {
+        message.error("An error occurred while fetching stats.");
+        console.error("Fetch stats error:", error);
+      }
+    };
+    fetchStats();
+  }, []);
+
+  const thisMonthCount = stats?.data?.thisMonth.users || 0;
+
   return (
     <div>
       <div className="mb-6">
@@ -898,11 +923,11 @@ export default function UserPage() {
           <div className="font-medium text-teal-800">All</div>
           <div className="text-gray-700">({pagination.total})</div>
         </div>
-        {/* <div className="flex items-center gap-1">
-          <div className="text-blue-700 font-medium">New</div>
-          <div className="text-gray-700">(6)</div>
-        </div>
         <div className="flex items-center gap-1">
+          <div className="text-teal-800 font-medium">New</div>
+          <div className="text-gray-700">({thisMonthCount})</div>
+        </div>
+        {/* <div className="flex items-center gap-1">
           <div className="text-blue-700 font-medium">Inactive</div>
           <div className="text-gray-700 hover:underline">(8)</div>
         </div>

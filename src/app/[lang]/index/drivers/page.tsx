@@ -14,6 +14,7 @@ import debounce from "lodash.debounce";
 import ExportTablePdf from "../../components/ExportTablePdf";
 import SearchFiltersDriver from "../../components/SearchFiltersDriver";
 import { FaEdit, FaSort, FaSortDown, FaSortUp } from "react-icons/fa";
+import { StatsResponse } from "@/lib/definitions";
 
 interface Driver {
   user: object;
@@ -46,6 +47,7 @@ export default function DriverPage() {
   const [searchLicenseExpiryDate, setSearchLicenseExpiryDate] = useState("");
   const [searchNic, setNic] = useState("");
   const [searchStatus, setSearchStatus] = useState<string[]>([]);
+  const [stats, setStats] = useState<StatsResponse | null>(null);
   const searchRef = useRef<string[]>([]);
   const [filters, setFilters] = useState({
     firstName: "",
@@ -902,6 +904,39 @@ export default function DriverPage() {
     setPagination({ current: page, pageSize, total: pagination.total });
   };
 
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const response = await fetch("/api/dashboard/getStats", {
+          method: "GET",
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setStats(data);
+        } else {
+          const errorData = await response.json();
+          message.error(errorData.message || "Failed to fetch stats.");
+        }
+      } catch (error) {
+        message.error("An error occurred while fetching stats.");
+        console.error("Fetch stats error:", error);
+      }
+    };
+    fetchStats();
+  }, []);
+
+  const thisMonthCount = stats?.data?.thisMonth.drivers || 0;
+  const availableCount =
+    stats?.data?.drivers.find((c) => c.status === "AVAILABLE")?._count || 0;
+  const onTripCount =
+    stats?.data?.drivers.find((c) => c.status === "ON_TRIP")?._count || 0;
+  const onLeaveCount =
+    stats?.data?.drivers.find((c) => c.status === "ON_LEAVE")?._count || 0;
+  const offDutyCount =
+    stats?.data?.drivers.find((c) => c.status === "OFF_DUTY")?._count || 0;
+  const suspendedCount =
+    stats?.data?.drivers.find((c) => c.status === "SUSPENDED")?._count || 0;
+
   return (
     <div>
       <div className="mb-6">
@@ -912,18 +947,30 @@ export default function DriverPage() {
           <div className="font-medium text-teal-800">All</div>
           <div className="text-gray-700">({pagination.total})</div>
         </div>
-        {/* <div className="flex items-center gap-1">
-          <div className="text-blue-700 font-medium">New</div>
-          <div className="text-gray-700">(6)</div>
+        <div className="flex items-center gap-1">
+          <div className="text-teal-800 font-medium">New</div>
+          <div className="text-gray-700">({thisMonthCount})</div>
         </div>
         <div className="flex items-center gap-1">
-          <div className="text-blue-700 font-medium">Inactive</div>
-          <div className="text-gray-700">(8)</div>
+          <div className="text-teal-800 font-medium">Available</div>
+          <div className="text-gray-700">({availableCount})</div>
         </div>
         <div className="flex items-center gap-1">
-          <div className="text-blue-700 font-medium">Active</div>
-          <div className="text-gray-700">(12)</div>
-        </div> */}
+          <div className="text-teal-800 font-medium">On Trip</div>
+          <div className="text-gray-700">({onTripCount})</div>
+        </div>
+        <div className="flex items-center gap-1">
+          <div className="text-teal-800 font-medium">On Leave</div>
+          <div className="text-gray-700">({onLeaveCount})</div>
+        </div>
+        <div className="flex items-center gap-1">
+          <div className="text-teal-800 font-medium">Off Duty</div>
+          <div className="text-gray-700">({offDutyCount})</div>
+        </div>
+        <div className="flex items-center gap-1">
+          <div className="text-teal-800 font-medium">Suspended</div>
+          <div className="text-gray-700">({suspendedCount})</div>
+        </div>
       </div>
       <div className="flex justify-between items-center mb-4">
         <div>

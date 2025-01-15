@@ -449,14 +449,14 @@ export default function ListingsPage() {
                   </span>
                 </div>
                 <hr />
-                <div className="grid grid-cols-3 gap-2 mt-2 mb-2 font-workSans">
-                  <div className="flex items-center text-sm text-gray-500 font-semibold">
+                <div className="grid grid-cols-3 gap-2 mt-2 mb-2 font-workSans text-sm text-gray-500 font-semibold">
+                  <div className="flex items-center">
                     <span className="flex items-center gap-1">
                       <BsFillFuelPumpFill />
                       {car?.carFuelType?.name}
                     </span>
                   </div>
-                  <div className="flex items-center text-sm text-gray-500 font-semibold">
+                  <div className="flex items-center">
                     <span className="flex items-center gap-1">
                       <MdEventAvailable />
                       {car?.status
@@ -467,19 +467,19 @@ export default function ListingsPage() {
                         car?.status?.slice(1).toLowerCase().replace("_", " ")}
                     </span>
                   </div>
-                  <div className="flex items-center text-sm text-gray-500 font-semibold">
+                  <div className="flex items-center">
                     <span className="flex items-center gap-1">
                       <CiCalendar />
                       {car?.year}
                     </span>
                   </div>
-                  <div className="flex items-center text-sm text-gray-500 font-semibold">
+                  <div className="flex items-center">
                     <span className="flex items-center gap-1">
                       <MdCarRental />
                       {formatMileage(car?.mileage)}
                     </span>
                   </div>
-                  <div className="flex items-center text-sm text-gray-500 font-semibold">
+                  <div className="flex items-center">
                     <span className="flex items-center gap-1">
                       <MdCarRental />
                       {car?.transmission
@@ -490,7 +490,7 @@ export default function ListingsPage() {
                         : "No Transmission"}
                     </span>
                   </div>
-                  <div className="flex items-center text-sm text-gray-500 font-semibold">
+                  <div className="flex items-center">
                     <span className="flex items-center gap-1">
                       <MdCarRental />
                       {car?.capacity || "No Capacity"}
