@@ -115,7 +115,7 @@ function StatCard({ title, value, percentage, icon, loading }: StatCardProps) {
 
   const formattedValue =
     title === "Revenue With Trip" || title === "Revenue With Booking"
-      ? formatCurrency(value)
+      ? formatCurrency(value / 100)
       : value.toString();
 
   const formattedPercentage =
