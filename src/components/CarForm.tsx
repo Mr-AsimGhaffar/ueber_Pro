@@ -169,7 +169,7 @@ export default function CarForm({
     <Form
       form={form}
       layout="vertical"
-      initialValues={initialValues}
+      // initialValues={initialValues}
       onFinish={handleSubmit}
       preserve={true}
     >
@@ -278,23 +278,23 @@ export default function CarForm({
         >
           <Input placeholder="Enter Car Fuel Type" />
         </Form.Item>
-        {!initialValues && (
-          <Form.Item
-            name="color"
-            label="Color"
-            rules={[{ required: true, message: "Please select a color" }]}
-          >
-            <ColorPicker
-              value={form.getFieldValue("color") || "#000000"} // Directly use the color value from form state
-              onChange={(color: Color) => {
-                const hexValue = color.toHexString(); // Get the hex value of the selected color
-                form.setFieldValue("color", hexValue); // Set the hex color to the form field
-              }}
-              showText
-              className="w-[100%]"
-            />
-          </Form.Item>
-        )}
+        <Form.Item
+          name="color"
+          label="Color"
+          rules={[{ required: true, message: "Please select a color" }]}
+        >
+          <ColorPicker
+            value={form.getFieldValue("color") || "#000000"} // Directly use the color value from form state
+            onChange={(color: Color) => {
+              const hexValue = color.toHexString(); // Get the hex value of the selected color
+              console.log("Selected Color:", hexValue);
+              form.setFieldValue("color", hexValue); // Set the hex color to the form field
+            }}
+            showText
+            className="w-[100%]"
+          />
+        </Form.Item>
+
         <Form.Item
           name="companyId"
           label="Company Name"
