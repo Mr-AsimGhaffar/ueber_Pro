@@ -162,7 +162,10 @@ export default function DashboardRecentInvoices({ locale }: PageContentProps) {
                     Amount:
                   </span>{" "}
                   <span className="font-workSans text-sm text-gray-500">
-                    ${parseFloat(inv.amount).toFixed(2)}
+                    {new Intl.NumberFormat("en-US", {
+                      style: "currency",
+                      currency: "USD",
+                    }).format(parseFloat(inv.amount) / 100)}
                   </span>
                 </p>
                 <p>

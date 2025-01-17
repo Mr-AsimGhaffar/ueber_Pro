@@ -71,7 +71,7 @@ const DashboardStatistics = () => {
   );
 
   const formatDollar = (value: number) => {
-    return `$${value.toLocaleString()}`; // Formats the number with commas and a dollar sign
+    return `$${(value / 100).toLocaleString()}`; // Formats the number with commas and a dollar sign
   };
 
   return (
