@@ -38,7 +38,11 @@ export default function LoginPage({
         Cookies.set("id", user.id, { expires: 1 });
 
         message.success("Successfully logged in!");
-        router.push(redirectUrl);
+        const redirectTo =
+          user.role.name === "CUSTOMER"
+            ? `/${lang}/index/listings`
+            : redirectUrl;
+        router.push(redirectTo);
       } else {
         const data = await response.json();
         message.error(data.message || "Invalid credentials");
@@ -46,7 +50,7 @@ export default function LoginPage({
     } catch (error) {
       message.error("An error occurred during login");
     } finally {
-      setLoading(false); // Stop loading
+      setLoading(false);
     }
   };
 

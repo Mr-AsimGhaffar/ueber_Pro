@@ -134,7 +134,7 @@ export default function DashboardRecentInvoices({ locale }: PageContentProps) {
   };
 
   return (
-    <Card loading={loading} className="h-96">
+    <Card loading={loading} className="h-96 overflow-auto custom-scrollbar">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-xl font-semibold font-workSans opacity-80">
           Recent Invoices
@@ -177,7 +177,7 @@ export default function DashboardRecentInvoices({ locale }: PageContentProps) {
             </Col>
           ))}
           {/* Pagination controls */}
-          {/* <div className="pagination-container mt-4 flex justify-end">
+          <div className="pagination-container mt-4 flex justify-end">
             <Pagination
               current={pagination.current}
               pageSize={pagination.pageSize}
@@ -186,7 +186,7 @@ export default function DashboardRecentInvoices({ locale }: PageContentProps) {
                 setPagination({ ...pagination, current: page })
               }
             />
-          </div> */}
+          </div>
         </div>
       </Row>
     </Card>

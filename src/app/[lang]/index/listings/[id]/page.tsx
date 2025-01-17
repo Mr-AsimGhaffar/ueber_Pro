@@ -74,8 +74,12 @@ export default function CarDetailPage({
           `/${lang}/auth/login?redirect=${encodeURIComponent(currentPath)}`
         );
       });
+    } else if (selectedCar?.id) {
+      router.push(
+        `/${lang}/index/carBooking/bookingLocation?id=${selectedCar.id}`
+      );
     } else {
-      router.push(`/${lang}/index/carBooking/bookingLocation`);
+      message.error("No car selected for booking.");
     }
   };
   return (
@@ -165,7 +169,10 @@ export default function CarDetailPage({
                     </span>
                     <span className="flex items-center gap-1">
                       <GiGearStickPattern className="text-cyan-700" />
-                      {selectedCar?.transmission}
+                      {selectedCar?.transmission
+                        ? selectedCar.transmission.charAt(0).toUpperCase() +
+                          selectedCar.transmission.slice(1).toLowerCase()
+                        : "No Transmission"}
                     </span>
                     <span className="flex items-center gap-1">
                       <MdOutlineReduceCapacity className="text-cyan-700" />

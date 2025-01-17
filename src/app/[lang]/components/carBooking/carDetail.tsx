@@ -1,7 +1,12 @@
 "use client";
 
 import { Car } from "@/lib/definitions";
+import { Card } from "antd";
 import Image from "next/image";
+import { BsFillFuelPumpFill } from "react-icons/bs";
+import { CiCalendar } from "react-icons/ci";
+import { GiGearStickPattern } from "react-icons/gi";
+import { MdCarRental } from "react-icons/md";
 
 interface CarDetailsProps {
   car: Car;
@@ -63,23 +68,49 @@ export function CarDetailsSection({
         .join(" ") // Join the array with a space
     : null;
   return (
-    <div className={`bg-white rounded-lg p-6 ${className || ""}`}>
+    <Card>
       <h2 className="text-xl font-semibold mb-4 font-workSans">Car Details</h2>
       <div className="flex gap-4">
         <Image
           src="https://dreamsrent.dreamstechnologies.com/html/template/assets/img/cars/slider-01.jpg"
-          alt={car.model.name}
+          alt={car?.model?.name}
           width={200}
           height={150}
           className="rounded-lg"
         />
         <div>
           <h3 className="text-lg font-semibold font-workSans">
-            {car.brand.name} {car.model.name}
+            {car?.brand?.name} {car?.model?.name}
           </h3>
+
           <p className="text-gray-600 font-workSans">
-            {car.description || "No Description"}
+            {car?.description || "No Description"}
           </p>
+          <div className="mt-2 flex flex-col font-workSans text-gray-600 text-xs gap-2">
+            <div className="flex items-center gap-4">
+              <p className="flex items-center gap-1">
+                <BsFillFuelPumpFill className="text-cyan-700" />
+                {car?.carFuelType?.name}
+              </p>
+              <p className="flex items-center gap-1">
+                <CiCalendar className="text-cyan-700" />
+                {car?.year}
+              </p>
+            </div>
+            <div className="flex items-center gap-4">
+              <p className="flex items-center gap-1">
+                <GiGearStickPattern className="text-cyan-700" />
+                {car?.transmission
+                  ? car.transmission.charAt(0).toUpperCase() +
+                    car.transmission.slice(1).toLowerCase()
+                  : "No Transmission"}
+              </p>
+              <p className="flex items-center gap-1">
+                <MdCarRental className="text-cyan-700" />
+                {car?.mileage || "No Mileage"}
+              </p>
+            </div>
+          </div>
         </div>
       </div>
       <div className="mt-4 space-y-2">
@@ -120,6 +151,6 @@ export function CarDetailsSection({
           </>
         )}
       </div>
-    </div>
+    </Card>
   );
 }

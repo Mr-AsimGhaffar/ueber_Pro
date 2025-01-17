@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   Radio,
   Button,
@@ -24,6 +24,7 @@ export default function LocationPage({
   params: { lang: string };
 }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { cars } = useCar();
   const [selectedCar, setSelectedCar] = useState<Car | null>(null);
   const [rentalType, setRentalType] = useState("SELF_DRIVE");
@@ -44,11 +45,17 @@ export default function LocationPage({
   }, [returnToSameLocation, pickupLocation]);
 
   useEffect(() => {
-    // Access the 'data' property of cars
-    if (cars?.data && cars.data.length > 0) {
-      setSelectedCar(cars.data[0]); // Select the first car as the default
+    const id = searchParams?.get("id"); // Get the car id from query parameters
+    if (id && cars?.data?.length) {
+      const numericId = Number(id);
+      const car = cars.data.find((c: Car) => c.id === numericId); // Find the car in the available cars
+      if (car) {
+        setSelectedCar(car);
+      } else {
+        message.error("Car not found");
+      }
     }
-  }, [cars]);
+  }, [searchParams, cars]);
 
   const handleCreateBooking = async () => {
     if (!selectedCar || !pickupLocation || !startDate || !endDate) {
@@ -63,6 +70,7 @@ export default function LocationPage({
       startDate,
       endDate,
     };
+    setLoading(true);
     try {
       const response = await fetch("/api/carBooking/createRentalAgreement", {
         method: "POST",
@@ -88,6 +96,8 @@ export default function LocationPage({
     } catch (error) {
       console.error("Error creating booking:", error);
       message.error("An error occurred while creating the booking");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -328,8 +338,9 @@ export default function LocationPage({
                 type="primary"
                 className="font-sansInter bg-teal-800 hover:!bg-teal-700"
                 onClick={handleCreateBooking}
+                disabled={loading}
               >
-                Confirm Booking
+                {loading ? <Spin size="small" /> : "Confirm Booking"}
               </Button>
             </div>
           </div>

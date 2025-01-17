@@ -63,11 +63,18 @@ const ConfirmBooking = ({ params: { lang } }: { params: { lang: string } }) => {
   }, [searchParams]);
 
   useEffect(() => {
-    // Access the 'data' property of cars
-    if (cars?.data && cars.data.length > 0) {
-      setSelectedCar(cars.data[0]); // Select the first car as the default
+    if (cars?.data && confirmBooking?.carId) {
+      const matchingCar = cars.data.find(
+        (car: Car) => car.id === confirmBooking.carId
+      );
+      if (matchingCar) {
+        setSelectedCar(matchingCar);
+      } else {
+        message.error("Car details not found.");
+      }
     }
-  }, [cars]);
+  }, [cars, confirmBooking]);
+
   const handleBackToCarBooking = () => {
     router.push(`/${lang}/index/carBooking/rentalAgreement`);
   };

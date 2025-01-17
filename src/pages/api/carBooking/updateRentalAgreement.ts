@@ -5,7 +5,15 @@ export default async function handler(
   res: NextApiResponse
 ) {
   if (req.method === "PUT") {
-    const { id, status, rentalType, createdAt } = req.body;
+    const {
+      id,
+      status,
+      rentalType,
+      pickupLocation,
+      dropOffLocation,
+      startDate,
+      endDate,
+    } = req.body;
     try {
       const accessToken = req.cookies.accessToken;
 
@@ -16,7 +24,10 @@ export default async function handler(
         id,
         status,
         rentalType,
-        createdAt,
+        pickupLocation,
+        dropOffLocation,
+        startDate,
+        endDate,
       };
 
       // Send credentials to external API

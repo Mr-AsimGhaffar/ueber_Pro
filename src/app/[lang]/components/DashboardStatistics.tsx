@@ -18,7 +18,7 @@ const DashboardStatistics = () => {
   const [invoiceData, setInvoiceData] = useState<
     { date: string; invoice: number }[]
   >([]);
-  const [selectedYear, setSelectedYear] = useState("2025");
+  const [selectedYear, setSelectedYear] = useState("2024");
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -40,6 +40,7 @@ const DashboardStatistics = () => {
             invoice: yearData[month],
           }));
           setInvoiceData(formattedData);
+          console.log(yearData);
         } else {
           message.error("No data available for the selected year.");
         }
@@ -96,13 +97,18 @@ const DashboardStatistics = () => {
       </div>
 
       {/* Chart Section */}
-      <ResponsiveContainer width="100%" height={290}>
-        <ComposedChart
-          data={invoiceData}
-          margin={{ top: 20, right: 30, left: 0, bottom: 0 }}
-        >
+      <ResponsiveContainer width="100%" height={290} className="px-8">
+        <ComposedChart data={invoiceData} margin={{ top: 20, right: 2 }}>
           <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="date" tick={{ style: { fillOpacity: 0.6 } }} />
+          <XAxis
+            dataKey="date"
+            tick={{
+              style: { fillOpacity: 0.6 },
+            }}
+            tickFormatter={(value) =>
+              new Date(value).toLocaleString("en-US", { month: "short" })
+            }
+          />
           <YAxis
             domain={[0, "dataMax + 10"]}
             tickFormatter={formatDollar}

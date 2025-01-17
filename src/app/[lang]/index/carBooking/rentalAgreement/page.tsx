@@ -21,6 +21,7 @@ import type { ColumnsType } from "antd/es/table";
 import debounce from "lodash.debounce";
 import { FaEdit, FaSort, FaSortDown, FaSortUp } from "react-icons/fa";
 import { useUser } from "@/hooks/context/AuthContext";
+import dayjs from "dayjs";
 
 interface RentalAgreement {
   id: number;
@@ -28,6 +29,8 @@ interface RentalAgreement {
   status: string;
   basePrice: number;
   createdAt: string;
+  startDate: string;
+  endDate: string;
 }
 
 export default function AccountPage() {
@@ -51,6 +54,8 @@ export default function AccountPage() {
     createdAt: "",
     pickupLocation: "",
     dropOffLocation: "",
+    startDate: "",
+    endDate: "",
     search: "",
   });
   const [pagination, setPagination] = useState({
@@ -82,6 +87,12 @@ export default function AccountPage() {
         ...(currentFilters.dropOffLocation && {
           dropOffLocation: currentFilters.dropOffLocation,
         }),
+        ...(currentFilters.startDate && {
+          startDate: currentFilters.startDate,
+        }),
+        ...(currentFilters.endDate && {
+          endDate: currentFilters.endDate,
+        }),
       };
       const sort = sortParams
         .map((param) => `${param.field}:${param.order}`)
@@ -90,7 +101,7 @@ export default function AccountPage() {
         sort,
         filters: JSON.stringify(filtersObject),
         searchFields:
-          "basePrice,rentalType,createdAt,pickupLocation,dropOffLocation",
+          "basePrice,rentalType,createdAt,pickupLocation,dropOffLocation,startDate,endDate",
       }).toString();
       const response = await fetch(
         `/api/carBooking/getRentalAgreement?${query}`,
@@ -366,6 +377,9 @@ export default function AccountPage() {
       dataIndex: "createdAt",
       key: "createdAt",
       className: "font-workSans",
+      render: (createdAt: string) => (
+        <span>{dayjs(createdAt).format("MM/DD/YYYY, hh:mm:ss A")}</span>
+      ),
       // filterDropdown: (
       //   <div style={{ padding: 8 }}>
       //     <Input
@@ -567,6 +581,24 @@ export default function AccountPage() {
       // ),
     },
     {
+      title: <span className="flex items-center gap-2">Start Date</span>,
+      dataIndex: "startDate",
+      key: "startDate",
+      className: "font-workSans",
+      render: (startDate: string) => (
+        <span>{dayjs(startDate).format("MM/DD/YYYY, hh:mm:ss A")}</span>
+      ),
+    },
+    {
+      title: <span className="flex items-center gap-2">Return Date</span>,
+      dataIndex: "endDate",
+      key: "endDate",
+      className: "font-workSans",
+      render: (endDate: string) => (
+        <span>{dayjs(endDate).format("MM/DD/YYYY, hh:mm:ss A")}</span>
+      ),
+    },
+    {
       title: (
         <span className="flex items-center gap-2">
           Status
@@ -632,6 +664,8 @@ export default function AccountPage() {
     if (user?.role?.name === "CUSTOMER") {
       // Allow updates only to rentalType and createdAt
       delete updatedValues.status;
+      delete updatedValues.pickupLocation;
+      delete updatedValues.dropOffLocation;
     } else if (
       user?.role?.name === "SUPER_ADMIN" ||
       user?.role?.name === "ADMIN"
@@ -668,20 +702,14 @@ export default function AccountPage() {
   const handlePaginationChange = (page: number, pageSize: number) => {
     setPagination({ current: page, pageSize, total: pagination.total });
   };
-  // const rowSelection = {
-  //   onChange: (
-  //     selectedRowKeys: React.Key[],
-  //     selectedRows: RentalAgreement[]
-  //   ) => {
-  //     console.log(
-  //       `Selected row keys: ${selectedRowKeys}`,
-  //       "Selected rows: ",
-  //       selectedRows
-  //     );
-  //   },
-  // };
 
   const openModal = (agreement: any) => {
+    if (agreement.startDate) {
+      agreement.startDate = dayjs(agreement.startDate);
+    }
+    if (agreement.endDate) {
+      agreement.endDate = dayjs(agreement.endDate);
+    }
     setSelectedRentalAgreement(agreement);
     form.setFieldsValue(agreement);
     setIsModalOpen(true);
@@ -729,10 +757,6 @@ export default function AccountPage() {
       <div className="flex justify-between items-center  mb-4"></div>
 
       <Table
-        // rowSelection={{
-        //   type: "checkbox",
-        //   ...rowSelection,
-        // }}
         columns={columns}
         dataSource={rentalAgreement}
         loading={loading}
@@ -762,20 +786,23 @@ export default function AccountPage() {
           initialValues={selectedRentalAgreement || {}}
         >
           {user?.role?.name !== "CUSTOMER" && (
-            <Form.Item
-              name="status"
-              label="Status"
-              rules={[{ required: true, message: "Please select a status" }]}
-            >
-              <Select placeholder="Select Status">
-                <Select.Option value="PENDING">Pending</Select.Option>
-                <Select.Option value="CONFIRMED">Confirmed</Select.Option>
-                <Select.Option value="IN_PROGRESS">In progress</Select.Option>
-                <Select.Option value="COMPLETED">Completed</Select.Option>
-                <Select.Option value="CANCELLED">Cancelled</Select.Option>
-                <Select.Option value="DISPUTED">Disputed</Select.Option>
-              </Select>
-            </Form.Item>
+            <>
+              {" "}
+              <Form.Item
+                name="status"
+                label="Status"
+                rules={[{ required: true, message: "Please select a status" }]}
+              >
+                <Select placeholder="Select Status">
+                  <Select.Option value="PENDING">Pending</Select.Option>
+                  <Select.Option value="CONFIRMED">Confirmed</Select.Option>
+                  <Select.Option value="IN_PROGRESS">In progress</Select.Option>
+                  <Select.Option value="COMPLETED">Completed</Select.Option>
+                  <Select.Option value="CANCELLED">Cancelled</Select.Option>
+                  <Select.Option value="DISPUTED">Disputed</Select.Option>
+                </Select>
+              </Form.Item>
+            </>
           )}
 
           {user?.role?.name === "CUSTOMER" && (
@@ -788,19 +815,56 @@ export default function AccountPage() {
                 ]}
               >
                 <Select placeholder="Select Rental Type">
-                  <Select.Option value="SHORT_TERM">Short-term</Select.Option>
-                  <Select.Option value="LONG_TERM">Long-term</Select.Option>
+                  <Select.Option value="WITH_DRIVER">With Driver</Select.Option>
+                  <Select.Option value="SELF_DRIVE">Self Driver</Select.Option>
                 </Select>
               </Form.Item>
               <Form.Item
-                name="createdAt"
-                label="Created At"
+                name="pickupLocation"
+                label="Pickup Location"
                 rules={[
-                  { required: true, message: "Please select a creation date" },
+                  { required: true, message: "Please enter a pickup location" },
                 ]}
               >
-                <DatePicker placeholder="Select Creation Date" />
+                <Input placeholder="Enter Pickup Location" />
               </Form.Item>
+              <Form.Item
+                name="dropOffLocation"
+                label="Return Location"
+                rules={[
+                  { required: true, message: "Please enter a return location" },
+                ]}
+              >
+                <Input placeholder="Enter Return Location" />
+              </Form.Item>
+              <div className="flex items-center justify-between">
+                <Form.Item
+                  name="startDate"
+                  label="Start Date"
+                  rules={[
+                    { required: true, message: "Please select a start date" },
+                  ]}
+                >
+                  <DatePicker
+                    value={selectedRentalAgreement?.startDate || null}
+                    showTime
+                    placeholder="Select Start Date"
+                  />
+                </Form.Item>
+                <Form.Item
+                  name="endDate"
+                  label="Return Date"
+                  rules={[
+                    { required: true, message: "Please select a return date" },
+                  ]}
+                >
+                  <DatePicker
+                    value={selectedRentalAgreement?.endDate || null}
+                    showTime
+                    placeholder="Select Return Date"
+                  />
+                </Form.Item>
+              </div>
             </>
           )}
         </Form>

@@ -1,8 +1,16 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Form, Input, Upload, Button, Switch, Select } from "antd";
-import { LockOutlined, UploadOutlined } from "@ant-design/icons";
-import type { UploadFile } from "antd/es/upload/interface";
-import { Car, RentalPricing } from "@/lib/definitions";
+import {
+  Form,
+  Input,
+  Upload,
+  Button,
+  Select,
+  ColorPicker,
+  message,
+} from "antd";
+import { UploadOutlined } from "@ant-design/icons";
+import { RentalPricing } from "@/lib/definitions";
+import { Color } from "antd/es/color-picker";
 
 interface CarFormProps {
   onSubmit: (values: any) => void;
@@ -81,6 +89,7 @@ export default function CarForm({
   // Set the form's fields to initialValues when editing
   useEffect(() => {
     if (initialValues) {
+      const color = initialValues.color?.hex || "#000000";
       form.setFieldsValue({
         ...initialValues,
         profilePictureId: initialValues?.profilePictureId || "",
@@ -88,6 +97,7 @@ export default function CarForm({
         dailyRate: initialValues?.RentalPricing?.dailyRate / 100 || "",
         weeklyRate: initialValues?.RentalPricing?.weeklyRate / 100 || "",
         monthlyRate: initialValues?.RentalPricing?.monthlyRate / 100 || "",
+        color: color,
       });
     } else {
       form.resetFields(); // Reset the form when initialValues is null (add new company)
@@ -115,11 +125,46 @@ export default function CarForm({
         values.profilePictureId =
           values.profilePictureId.file.response?.url || ""; // Adjust based on your file upload API response
       }
+      if (!values.color) {
+        throw new Error("Color is required");
+      }
       onSubmit(values);
     } catch (error) {
       console.error("Validation failed:", error);
     }
   };
+  // const uploadProps = {
+  //   name: "file",
+  //   action: "/api/upload/uploadFiles",
+  //   accept: ".jpg,.png,.pdf",
+  //   headers: {
+  //     Authorization: `Bearer ${
+  //       document.cookie
+  //         .split("; ")
+  //         .find((row) => row.startsWith("accessToken="))
+  //         ?.split("=")[1]
+  //     }`,
+  //   },
+  //   onChange(info: any) {
+  //     if (info.file.status === "done") {
+  //       const fileUrl = info.file.response?.data?.url;
+  //       message.success(`${info.file.name} file uploaded successfully`);
+  //     } else if (info.file.status === "error") {
+  //       message.error(`${info.file.name} file upload failed.`);
+  //     }
+  //   },
+  // };
+  // const beforeUpload = (file: any) => {
+  //   const isAllowedFormat = [
+  //     "image/jpeg",
+  //     "image/png",
+  //     "application/pdf",
+  //   ].includes(file.type);
+  //   if (!isAllowedFormat) {
+  //     message.error("You can only upload JPG, PNG, or PDF files!");
+  //   }
+  //   return isAllowedFormat;
+  // };
   return (
     <Form
       form={form}
@@ -233,7 +278,23 @@ export default function CarForm({
         >
           <Input placeholder="Enter Car Fuel Type" />
         </Form.Item>
-
+        {!initialValues && (
+          <Form.Item
+            name="color"
+            label="Color"
+            rules={[{ required: true, message: "Please select a color" }]}
+          >
+            <ColorPicker
+              value={form.getFieldValue("color") || "#000000"} // Directly use the color value from form state
+              onChange={(color: Color) => {
+                const hexValue = color.toHexString(); // Get the hex value of the selected color
+                form.setFieldValue("color", hexValue); // Set the hex color to the form field
+              }}
+              showText
+              className="w-[100%]"
+            />
+          </Form.Item>
+        )}
         <Form.Item
           name="companyId"
           label="Company Name"
@@ -321,24 +382,29 @@ export default function CarForm({
             </Form.Item>
           </div>
         </div>
-
-        {/* Uncomment and extend validation for company logo upload */}
-        {/* <Form.Item
-      name="companyLogo"
-      label="Logo"
-      valuePropName="fileList"
-      getValueFromEvent={(e) => (Array.isArray(e) ? e : e?.fileList)}
-      rules={[{ required: true, message: "Please upload company logo" }]}
-    >
-      <Upload
-        name="logo"
-        listType="picture"
-        // action="/api/upload" // Adjust to your file upload API
-        maxCount={1}
-      >
-        <Button icon={<UploadOutlined />}>Upload Company Logo</Button>
-      </Upload>
-    </Form.Item> */}
+        {/* <div>
+          {!initialValues && (
+            <>
+              <h3 className="font-medium mb-4">Upload Document</h3>
+              <Form.Item
+                name="profilePictureId"
+                label="Car Document"
+                valuePropName="fileList"
+                getValueFromEvent={(e: any) =>
+                  Array.isArray(e) ? e : e?.fileList
+                }
+              >
+                <Upload
+                  {...uploadProps}
+                  name="profilePictureId"
+                  beforeUpload={beforeUpload}
+                >
+                  <Button icon={<UploadOutlined />}>Click to Upload</Button>
+                </Upload>
+              </Form.Item>
+            </>
+          )}
+        </div> */}
       </div>
 
       {/* Form Actions */}

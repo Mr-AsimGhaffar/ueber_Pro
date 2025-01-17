@@ -33,56 +33,8 @@ export default function Sidebar({ locale }: Props) {
           <div>
             {isLoggedIn ? (
               <div>
-                <SidebarLink href={`/${locale}/index/home`}>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth={1.5}
-                    stroke="currentColor"
-                    className="size-6"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"
-                    />
-                  </svg>
-                </SidebarLink>
-                <SidebarLink href={`/${locale}/index/company`}>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth={1.5}
-                    stroke="currentColor"
-                    className="size-6"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M4 21h16M7 21V7a1 1 0 011-1h8a1 1 0 011 1v14M10 21V12h4v9M8 3h8M6 16h2v2H6v-2m0-5h2v2H6v-2m10 5h2v2h-2v-2m0-5h2v2h-2v-2"
-                    />
-                  </svg>
-                </SidebarLink>
-                <SidebarLink href={`/${locale}/index/users`}>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth={1.5}
-                    stroke="currentColor"
-                    className="size-6"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M5.5 18a5.5 5.5 0 0111 0M4.75 18a7.25 7.25 0 0114.5 0M9 8.5A3.5 3.5 0 1115 8.5A3.5 3.5 0 019 8.5zM7.5 11.5a3.25 3.25 0 117.25-3.25 3.25 3.25 0 017.25 3.25"
-                    />
-                  </svg>
-                </SidebarLink>
-                {user?.company?.type !== "CARS" && (
-                  <SidebarLink href={`/${locale}/index/drivers`}>
+                {user?.role?.name !== "CUSTOMER" && (
+                  <SidebarLink href={`/${locale}/index/home`}>
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       fill="none"
@@ -94,15 +46,71 @@ export default function Sidebar({ locale }: Props) {
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
-                        d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"
+                        d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"
                       />
                     </svg>
                   </SidebarLink>
                 )}
+                {user?.role?.name !== "CUSTOMER" && (
+                  <SidebarLink href={`/${locale}/index/company`}>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth={1.5}
+                      stroke="currentColor"
+                      className="size-6"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M4 21h16M7 21V7a1 1 0 011-1h8a1 1 0 011 1v14M10 21V12h4v9M8 3h8M6 16h2v2H6v-2m0-5h2v2H6v-2m10 5h2v2h-2v-2m0-5h2v2h-2v-2"
+                      />
+                    </svg>
+                  </SidebarLink>
+                )}
+                {user?.role?.name !== "CUSTOMER" && (
+                  <SidebarLink href={`/${locale}/index/users`}>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth={1.5}
+                      stroke="currentColor"
+                      className="size-6"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M5.5 18a5.5 5.5 0 0111 0M4.75 18a7.25 7.25 0 0114.5 0M9 8.5A3.5 3.5 0 1115 8.5A3.5 3.5 0 019 8.5zM7.5 11.5a3.25 3.25 0 117.25-3.25 3.25 3.25 0 017.25 3.25"
+                      />
+                    </svg>
+                  </SidebarLink>
+                )}
+                {user?.company?.type !== "CARS" &&
+                  user?.role?.name !== "CUSTOMER" && (
+                    <SidebarLink href={`/${locale}/index/drivers`}>
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth={1.5}
+                        stroke="currentColor"
+                        className="size-6"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"
+                        />
+                      </svg>
+                    </SidebarLink>
+                  )}
 
                 {!(
                   user?.company?.type === "DRIVERS" ||
-                  user?.company?.type === "CARS"
+                  user?.company?.type === "CARS" ||
+                  user?.role?.name === "CUSTOMER"
                 ) && (
                   <SidebarLink href={`/${locale}/index/bookings`}>
                     <svg
@@ -253,43 +261,47 @@ export default function Sidebar({ locale }: Props) {
                     />
                   </svg>
                 </SidebarLink>
-                <SidebarLink href={`/${locale}/index/accounts`}>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth="1.5"
-                    stroke="currentColor"
-                    className="size-6"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M3 10l9-7 9 7M4 10h16v10H4V10zM8 21h8"
-                    />
-                  </svg>
-                </SidebarLink>
-                <SidebarLink href={`/${locale}/index/invoices`}>
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth="1.5"
-                    stroke="currentColor"
-                    className="size-6"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M7 3h10a2 2 0 012 2v14a2 2 0 01-2 2H7a2 2 0 01-2-2V5a2 2 0 012-2z"
-                    />
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M9 7h6M9 11h6M9 15h4"
-                    />
-                  </svg>
-                </SidebarLink>
+                {user?.role?.name !== "CUSTOMER" && (
+                  <SidebarLink href={`/${locale}/index/accounts`}>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth="1.5"
+                      stroke="currentColor"
+                      className="size-6"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M3 10l9-7 9 7M4 10h16v10H4V10zM8 21h8"
+                      />
+                    </svg>
+                  </SidebarLink>
+                )}
+                {user?.role?.name !== "CUSTOMER" && (
+                  <SidebarLink href={`/${locale}/index/invoices`}>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth="1.5"
+                      stroke="currentColor"
+                      className="size-6"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M7 3h10a2 2 0 012 2v14a2 2 0 01-2 2H7a2 2 0 01-2-2V5a2 2 0 012-2z"
+                      />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M9 7h6M9 11h6M9 15h4"
+                      />
+                    </svg>
+                  </SidebarLink>
+                )}
                 <SidebarLink href={`/${locale}/index/settings`}>
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -386,59 +398,8 @@ export default function Sidebar({ locale }: Props) {
         <div>
           {isLoggedIn ? (
             <div>
-              <SidebarLink href={`/${locale}/index/home`}>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={1.5}
-                  stroke="currentColor"
-                  className="size-6"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"
-                  />
-                </svg>
-                <div className="mx-4">Dashboard</div>
-              </SidebarLink>
-              <SidebarLink href={`/${locale}/index/company`}>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={1.5}
-                  stroke="currentColor"
-                  className="size-6"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M4 21h16M7 21V7a1 1 0 011-1h8a1 1 0 011 1v14M10 21V12h4v9M8 3h8M6 16h2v2H6v-2m0-5h2v2H6v-2m10 5h2v2h-2v-2m0-5h2v2h-2v-2"
-                  />
-                </svg>
-                <div className="mx-4">Company</div>
-              </SidebarLink>
-              <SidebarLink href={`/${locale}/index/users`}>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={1.5}
-                  stroke="currentColor"
-                  className="size-6"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M5.5 18a5.5 5.5 0 0111 0M4.75 18a7.25 7.25 0 0114.5 0M9 8.5A3.5 3.5 0 1115 8.5A3.5 3.5 0 019 8.5zM7.5 11.5a3.25 3.25 0 117.25-3.25 3.25 3.25 0 017.25 3.25"
-                  />
-                </svg>
-                <div className="mx-4">Users</div>
-              </SidebarLink>
-              {user?.company?.type !== "CARS" && (
-                <SidebarLink href={`/${locale}/index/drivers`}>
+              {user?.role?.name !== "CUSTOMER" && (
+                <SidebarLink href={`/${locale}/index/home`}>
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
@@ -450,12 +411,70 @@ export default function Sidebar({ locale }: Props) {
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
-                      d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"
+                      d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"
                     />
                   </svg>
-                  <div className="mx-4">Drivers</div>
+                  <div className="mx-4">Dashboard</div>
                 </SidebarLink>
               )}
+              {user?.role?.name !== "CUSTOMER" && (
+                <SidebarLink href={`/${locale}/index/company`}>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={1.5}
+                    stroke="currentColor"
+                    className="size-6"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M4 21h16M7 21V7a1 1 0 011-1h8a1 1 0 011 1v14M10 21V12h4v9M8 3h8M6 16h2v2H6v-2m0-5h2v2H6v-2m10 5h2v2h-2v-2m0-5h2v2h-2v-2"
+                    />
+                  </svg>
+                  <div className="mx-4">Company</div>
+                </SidebarLink>
+              )}
+              {user?.role?.name !== "CUSTOMER" && (
+                <SidebarLink href={`/${locale}/index/users`}>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={1.5}
+                    stroke="currentColor"
+                    className="size-6"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M5.5 18a5.5 5.5 0 0111 0M4.75 18a7.25 7.25 0 0114.5 0M9 8.5A3.5 3.5 0 1115 8.5A3.5 3.5 0 019 8.5zM7.5 11.5a3.25 3.25 0 117.25-3.25 3.25 3.25 0 017.25 3.25"
+                    />
+                  </svg>
+                  <div className="mx-4">Users</div>
+                </SidebarLink>
+              )}
+              {user?.company?.type !== "CARS" &&
+                user?.role?.name !== "CUSTOMER" && (
+                  <SidebarLink href={`/${locale}/index/drivers`}>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth={1.5}
+                      stroke="currentColor"
+                      className="size-6"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"
+                      />
+                    </svg>
+                    <div className="mx-4">Drivers</div>
+                  </SidebarLink>
+                )}
               {user?.company?.type === "DRIVERS" && (
                 <SidebarLink href={`/${locale}/index/driverTrips`}>
                   <svg
@@ -496,7 +515,8 @@ export default function Sidebar({ locale }: Props) {
               )}
               {!(
                 user?.company?.type === "DRIVERS" ||
-                user?.company?.type === "CARS"
+                user?.company?.type === "CARS" ||
+                user?.role?.name === "CUSTOMER"
               ) && (
                 <SidebarLink href={`/${locale}/index/bookings`}>
                   <svg
@@ -614,45 +634,49 @@ export default function Sidebar({ locale }: Props) {
                 </svg>
                 <div className="mx-4">Car Bookings</div>
               </SidebarLink>
-              <SidebarLink href={`/${locale}/index/accounts`}>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth="1.5"
-                  stroke="currentColor"
-                  className="size-6"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M3 10l9-7 9 7M4 10h16v10H4V10zM8 21h8"
-                  />
-                </svg>
-                <div className="mx-4">Accounts</div>
-              </SidebarLink>
-              <SidebarLink href={`/${locale}/index/invoices`}>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth="1.5"
-                  stroke="currentColor"
-                  className="size-6"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M7 3h10a2 2 0 012 2v14a2 2 0 01-2 2H7a2 2 0 01-2-2V5a2 2 0 012-2z"
-                  />
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M9 7h6M9 11h6M9 15h4"
-                  />
-                </svg>
-                <div className="mx-4">Invoices</div>
-              </SidebarLink>
+              {user?.role?.name !== "CUSTOMER" && (
+                <SidebarLink href={`/${locale}/index/accounts`}>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth="1.5"
+                    stroke="currentColor"
+                    className="size-6"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M3 10l9-7 9 7M4 10h16v10H4V10zM8 21h8"
+                    />
+                  </svg>
+                  <div className="mx-4">Accounts</div>
+                </SidebarLink>
+              )}
+              {user?.role?.name !== "CUSTOMER" && (
+                <SidebarLink href={`/${locale}/index/invoices`}>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth="1.5"
+                    stroke="currentColor"
+                    className="size-6"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M7 3h10a2 2 0 012 2v14a2 2 0 01-2 2H7a2 2 0 01-2-2V5a2 2 0 012-2z"
+                    />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M9 7h6M9 11h6M9 15h4"
+                    />
+                  </svg>
+                  <div className="mx-4">Invoices</div>
+                </SidebarLink>
+              )}
               <SidebarLink href={`/${locale}/index/settings`}>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -670,24 +694,6 @@ export default function Sidebar({ locale }: Props) {
                 </svg>
                 <div className="mx-4">Settings</div>
               </SidebarLink>
-
-              {/* <SidebarLink href={`/${locale}/index/messages`}>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={1.5}
-              stroke="currentColor"
-              className="size-6"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-5l-5 5v-5Z"
-              />
-            </svg>
-            <div className="mx-4">Messages</div>
-          </SidebarLink> */}
               {user?.role?.name === "SUPER_ADMIN" && (
                 <SidebarLink href={`/${locale}/index/activities`}>
                   <svg
@@ -707,27 +713,6 @@ export default function Sidebar({ locale }: Props) {
                   <div className="mx-4">Activites</div>
                 </SidebarLink>
               )}
-              {/* {user?.role?.name !== "ADMIN" && (
-            <>
-              <SidebarLink href={`/${locale}/index/reports`}>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={1.5}
-                  stroke="currentColor"
-                  className="size-6"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25M9 16.5v.75m3-3v3M15 12v5.25m-4.5-15H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"
-                  />
-                </svg>
-                <div className="mx-4">Reports</div>
-              </SidebarLink>
-            </>
-          )} */}
             </div>
           ) : (
             <SidebarLink href={`/${locale}/index/listings`}>
