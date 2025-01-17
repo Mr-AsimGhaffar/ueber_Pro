@@ -110,13 +110,13 @@ const DashboardVehicle = ({ locale }: PageContentProps) => {
                   style={{ width: `${car.percentage}%` }}
                 >
                   <div>
-                    <span className="text-base text-gray-600 font-workSans font-medium">
+                    <p className="text-base text-gray-600 font-workSans font-medium truncate">
                       {car.status === "IN_USE"
                         ? "On the way"
                         : car.status === "AVAILABLE"
                         ? "Available"
                         : "Maintenance"}
-                    </span>
+                    </p>
                   </div>
                   <div className="border-l-2 border-gray-300 h-3 mt-1 mb-2"></div>
                 </div>
