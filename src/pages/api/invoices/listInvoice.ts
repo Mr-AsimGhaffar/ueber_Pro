@@ -1,4 +1,5 @@
 import { NextApiRequest, NextApiResponse } from "next";
+import { fetchWithAuth } from "../refreshToken/refreshAccessToken";
 
 export default async function handler(
   req: NextApiRequest,
@@ -6,11 +7,9 @@ export default async function handler(
 ) {
   if (req.method === "GET") {
     try {
-      const accessToken = req.cookies.accessToken;
+      const accessToken = req.cookies.accessToken || "";
+      const refreshToken = req.cookies.refreshToken || "";
 
-      if (!accessToken) {
-        throw new Error("Token not found. Please log in.");
-      }
       const {
         page = 1,
         limit = 10,
@@ -21,33 +20,20 @@ export default async function handler(
         searchFields = "",
       } = req.query;
 
-      // Send credentials to external API
-      const response = await fetch(
+      const response = await fetchWithAuth(
         `${process.env.NEXT_PUBLIC_API_BASE_URL}/invoices?page=${page}&limit=${limit}&filters=${filters}&sort=${sort}&type=${type}&search=${search}&searchFields=${searchFields}`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
+        { method: "GET" },
+        { accessToken, refreshToken }
       );
 
-      if (response.ok) {
-        const companiesResponse = await response.json();
+      const companiesResponse = await response.json();
 
-        return res.status(200).json({
-          ...companiesResponse,
-          message: "Successfully fetched accounts",
-        });
-      } else {
-        const errorData = await response.json();
-        return res
-          .status(response.status)
-          .json({ message: errorData.message || "Failed to fetched accounts" });
-      }
+      return res.status(200).json({
+        ...companiesResponse,
+        message: "Successfully fetched accounts",
+      });
     } catch (error) {
-      console.error("Error authenticating:", error);
+      console.error("Error:", error);
       return res.status(500).json({ message: "Internal Server Error" });
     }
   } else {

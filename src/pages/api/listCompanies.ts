@@ -1,5 +1,5 @@
-import { fetchWithTokenRefresh } from "@/lib/data";
 import { NextApiRequest, NextApiResponse } from "next";
+import { fetchWithAuth } from "./refreshToken/refreshAccessToken";
 
 export default async function handler(
   req: NextApiRequest,
@@ -7,11 +7,8 @@ export default async function handler(
 ) {
   if (req.method === "GET") {
     try {
-      const accessToken = req.cookies.accessToken;
-
-      if (!accessToken) {
-        throw new Error("Token not found. Please log in.");
-      }
+      const accessToken = req.cookies.accessToken || "";
+      const refreshToken = req.cookies.refreshToken || "";
       const {
         page = 1,
         limit = 10,
@@ -22,15 +19,12 @@ export default async function handler(
       } = req.query;
 
       // Send credentials to external API
-      const response = await fetch(
+      const response = await fetchWithAuth(
         `${process.env.NEXT_PUBLIC_API_BASE_URL}/companies?page=${page}&limit=${limit}&filters=${filters}&sort=${sort}&search=${search}&searchFields=${searchFields}`,
         {
           method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
+        },
+        { accessToken, refreshToken }
       );
 
       if (response.ok) {

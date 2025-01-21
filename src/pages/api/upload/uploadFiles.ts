@@ -28,9 +28,6 @@ export default async function handler(
       // Parse the form data
       const [fields, files] = await form.parse(req);
 
-      console.log("Form fields:", fields);
-      console.log("Form files:", files);
-
       const fileEntry = files.profilePictureId;
 
       if (!fileEntry) {

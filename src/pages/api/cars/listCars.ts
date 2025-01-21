@@ -1,4 +1,5 @@
 import { NextApiRequest, NextApiResponse } from "next";
+import { fetchWithAuth } from "../refreshToken/refreshAccessToken";
 
 export default async function handler(
   req: NextApiRequest,
@@ -7,24 +8,20 @@ export default async function handler(
   if (req.method === "GET") {
     try {
       const { filters, page, limit, search, searchFields = "" } = req.query;
-      const accessToken = req.cookies.accessToken;
+      const accessToken = req.cookies.accessToken || "";
+      const refreshToken = req.cookies.refreshToken || "";
       // If the user is not authenticated, fetch from the public API
       const endpoint = accessToken
         ? `${process.env.NEXT_PUBLIC_API_BASE_URL}/cars/?page=${page}&limit=${limit}&filters=${filters}&search=${search}&searchFields=${searchFields}`
         : `${process.env.NEXT_PUBLIC_API_BASE_URL}/cars/public?page=${page}&limit=${limit}&filters=${filters}&search=${search}&searchFields=${searchFields}`;
 
-      const headers: Record<string, string> = {
-        "Content-Type": "application/json",
-      };
-
-      if (accessToken) {
-        headers["Authorization"] = `Bearer ${accessToken}`;
-      }
-
-      const response = await fetch(endpoint, {
-        method: "GET",
-        headers,
-      });
+      const response = await fetchWithAuth(
+        endpoint,
+        {
+          method: "GET",
+        },
+        { accessToken, refreshToken }
+      );
 
       if (response.ok) {
         const carResponse = await response.json();

@@ -40,7 +40,6 @@ const DashboardStatistics = () => {
             invoice: yearData[month],
           }));
           setInvoiceData(formattedData);
-          console.log(yearData);
         } else {
           message.error("No data available for the selected year.");
         }

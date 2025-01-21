@@ -1,117 +1,23 @@
 import { User, Cars, Report, TeamMember, Activity } from "@/lib/definitions";
+import { fetchWithAuth } from "@/pages/api/refreshToken/refreshAccessToken";
 import { cookies } from "next/headers";
-import Cookies from "js-cookie";
-import { redirect } from "next/navigation";
-
-const refreshAccessToken = async (refreshToken: string): Promise<string> => {
-  try {
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/refresh-token`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ refreshToken }),
-      }
-    );
-
-    if (!response.ok) {
-      throw new Error("Refresh token expired. Please log in again.");
-    }
-
-    const data = await response.json();
-    const newAccessToken = data.data.token.token;
-    console.log("newAccessToken ", newAccessToken);
-    Cookies.set("accessToken", newAccessToken, { expires: 1 }); // Save new access token in cookies
-    return newAccessToken;
-  } catch (error) {
-    console.error("Error refreshing access token:", error);
-    Cookies.remove("accessToken");
-    Cookies.remove("refreshToken");
-    return Promise.reject("Session expired. Please log in again.");
-  }
-};
-
-const getAccessToken = async (): Promise<string | null> => {
-  let accessToken = cookies().get("accessToken")?.value;
-
-  // If the access token is expired, attempt to refresh it using the refresh token
-  if (!accessToken) {
-    const refreshToken = Cookies.get("refreshToken");
-    if (!refreshToken) {
-      return null;
-    }
-    accessToken = await refreshAccessToken(refreshToken); // Refresh the access token
-  }
-
-  return accessToken;
-};
-
-// Wrapper function for the fetch API
-export const fetchWithTokenRefresh = async (
-  url: string,
-  options: RequestInit = {}
-): Promise<Response> => {
-  try {
-    let accessToken = await getAccessToken();
-
-    if (!accessToken) {
-      const refreshToken = Cookies.get("refreshToken");
-      if (!refreshToken) {
-        console.warn("User not logged in. Redirecting to login.");
-        Cookies.remove("accessToken");
-        Cookies.remove("refreshToken");
-        throw new Error("11Session expired. Redirecting to login.");
-      }
-      accessToken = await refreshAccessToken(refreshToken);
-      console.log("1:fetchWithTokenRefresh", accessToken);
-      if (accessToken) return fetchWithTokenRefresh(url, options);
-      throw new Error("Session expired. Redirecting to login.");
-    }
-
-    options.headers = {
-      ...options.headers,
-      Authorization: `Bearer ${accessToken}`,
-    };
-
-    const response = await fetch(url, options);
-    if (!response.ok) {
-      if (response.status === 401) {
-        const refreshToken = Cookies.get("refreshToken");
-        if (!refreshToken) {
-          Cookies.remove("accessToken");
-          Cookies.remove("refreshToken");
-          redirect(`/auth/login`);
-        }
-        accessToken = await refreshAccessToken(refreshToken);
-        console.log("fetchWithTokenRefresh", accessToken);
-        if (accessToken) return fetchWithTokenRefresh(url, options);
-      }
-      throw new Error(`Failed to fetch. Status: ${response.status}`);
-    }
-    return response;
-  } catch (error) {
-    console.error("@@@@@@@@@@Fetch failed:", error);
-
-    redirect(`/auth/login`); // Redirect to login page
-  }
-};
 
 export async function getUser(): Promise<User | null> {
   try {
     const id = cookies().get("id")?.value;
+    const accessToken = cookies().get("accessToken")?.value;
+    const refreshToken = cookies().get("refreshToken")?.value;
 
-    if (!id) {
+    if (!id || !accessToken || !refreshToken) {
       return null;
     }
 
-    const response = await fetchWithTokenRefresh(
+    const response = await fetchWithAuth(
       `${process.env.NEXT_PUBLIC_API_BASE_URL}/users/${id}`,
       {
         method: "GET",
-        // body: JSON.stringify({ clientType: "web" }),
-      }
+      },
+      { accessToken, refreshToken }
     );
 
     if (!response.ok) {
@@ -133,6 +39,12 @@ export async function getCars(
   filters: Record<string, string[]> = {}
 ): Promise<Cars | null> {
   try {
+    const accessToken = cookies().get("accessToken")?.value;
+    const refreshToken = cookies().get("refreshToken")?.value;
+
+    if (!accessToken || !refreshToken) {
+      throw new Error("Unauthorized. Please log in again.");
+    }
     const queryParams = new URLSearchParams();
 
     Object.entries(filters).forEach(([key, values]) => {
@@ -141,20 +53,15 @@ export async function getCars(
       }
     });
 
-    const response = await fetchWithTokenRefresh(
+    const response = await fetchWithAuth(
       `${process.env.NEXT_PUBLIC_API_BASE_URL}/cars/?${queryParams.toString()}`,
       {
         method: "GET",
-      }
+      },
+      { accessToken, refreshToken }
     );
-    if (response.status === 401) {
-      // Handle unauthenticated state, e.g., redirect to login
-      // Example: redirectToLoginPage();
-      return null;
-    }
-
     if (!response.ok) {
-      return null;
+      throw new Error("Failed to fetch car data");
     }
 
     const cars = await response.json();
@@ -166,36 +73,28 @@ export async function getCars(
 }
 
 export async function getActivities(): Promise<Activity | null> {
-  const id = cookies().get("id")?.value;
-
-  if (!id) {
-    return null;
-  }
-
-  const accessToken = cookies().get("accessToken")?.value;
-  if (!accessToken) {
-    throw new Error("Unauthorized. Please log in again.");
-  }
-
   try {
-    // Decode the JWT token to check the user's role
-    const decodedToken: any = JSON.parse(atob(accessToken.split(".")[1])); // Decode JWT token
-    if (decodedToken.role === "CUSTOMER") {
-      // If the user is a CUSTOMER, return null or an empty object, allowing the app to continue
-      return null; // or return an empty array if you expect an array of activities
+    const id = cookies().get("id")?.value;
+    const accessToken = cookies().get("accessToken")?.value;
+    const refreshToken = cookies().get("refreshToken")?.value;
+
+    if (!id || !accessToken || !refreshToken) {
+      return null;
     }
 
-    const response = await fetchWithTokenRefresh(
+    // Decode the JWT token to check the user's role
+    const decodedToken: any = JSON.parse(atob(accessToken.split(".")[1]));
+    if (decodedToken.role === "CUSTOMER") {
+      return null;
+    }
+
+    const response = await fetchWithAuth(
       `${process.env.NEXT_PUBLIC_API_BASE_URL}/activities/`,
-      {
-        method: "GET",
-      }
+      { method: "GET" },
+      { accessToken, refreshToken }
     );
 
     if (!response.ok) {
-      if (response.status === 401) {
-        throw new Error("Unauthorized. Please log in again.");
-      }
       throw new Error("Failed to fetch activities data");
     }
 

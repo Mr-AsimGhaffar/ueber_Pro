@@ -1,4 +1,5 @@
 import { NextApiRequest, NextApiResponse } from "next";
+import { fetchWithAuth } from "../refreshToken/refreshAccessToken";
 
 export default async function handler(
   req: NextApiRequest,
@@ -8,26 +9,21 @@ export default async function handler(
     const { tripId } = req.body;
 
     try {
-      const accessToken = req.cookies.accessToken;
-
-      if (!accessToken) {
-        throw new Error("Token not found. Please log in.");
-      }
+      const accessToken = req.cookies.accessToken || "";
+      const refreshToken = req.cookies.refreshToken || "";
       const requestBody: any = {
         tripId,
       };
 
       // Send credentials to external API
-      const response = await fetch(
+      const response = await fetchWithAuth(
         `${process.env.NEXT_PUBLIC_API_BASE_URL}/trips/select-trip/`,
         {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${accessToken}`,
-          },
+
           body: JSON.stringify(requestBody),
-        }
+        },
+        { accessToken, refreshToken }
       );
 
       if (response.ok) {
